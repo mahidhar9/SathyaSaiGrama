@@ -209,9 +209,13 @@ const ViewDetails = ({navigation, route}) => {
         setL2DeniedDataFetched(false);
         setL2ApproveDataFetched(false);
       }
-      PasscodeData();
-      // Alert.alert('Visitor Approved');
-      // navigation.navigate('L2Approved');
+      if (user.Registration_Type === 'Pre-Approval') {
+        PasscodeData();
+      } else if (user.Registration_Type === 'Spot Registration') {
+        Alert.alert('Visitor Approved');
+        navigation.navigate('L2Approved');
+        setapprovingLoading(false);
+      }
     } else {
       Alert.alert('Error in approving: ', response.code);
     }
@@ -412,75 +416,107 @@ const ViewDetails = ({navigation, route}) => {
           ) : null} */}
           {user?.L2_Approval_Status === 'PENDING APPROVAL' ? (
             <View style={[styles.container, {marginTop: 20}]}>
-               {(approvingLoading || deniedLoading) ? (<View>{approvingLoading ? (
-            <View style={heightStyles.ApproveActivityIndicatorContainer}>
-              <Text style={[heightStyles.ActivityIndicatorText, {color:'white'}]}>Approving</Text>
-              <ActivityIndicator
-                size="large"
-                color="#006400"
-                style={heightStyles.ActivityIndicator}
-              />
+              {approvingLoading || deniedLoading ? (
+                <View>
+                  {approvingLoading ? (
+                    <View
+                      style={heightStyles.ApproveActivityIndicatorContainer}>
+                      <Text
+                        style={[
+                          heightStyles.ActivityIndicatorText,
+                          {color: 'white'},
+                        ]}>
+                        Approving
+                      </Text>
+                      <ActivityIndicator
+                        size="large"
+                        color="#006400"
+                        style={heightStyles.ActivityIndicator}
+                      />
+                    </View>
+                  ) : null}
+                  {deniedLoading ? (
+                    <View style={heightStyles.RejectActivityIndicatorContainer}>
+                      <Text style={heightStyles.ActivityIndicatorText}>
+                        Rejecting
+                      </Text>
+                      <ActivityIndicator
+                        size="large"
+                        color="red"
+                        style={heightStyles.ActivityIndicator}
+                      />
+                    </View>
+                  ) : null}
+                </View>
+              ) : (
+                <>
+                  <View style={[styles.left, {width: '50%'}]}>
+                    <TouchableOpacity
+                      style={styles.btnAccept}
+                      onPress={onApprove}>
+                      <Text style={styles.btntxt}>Approve</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <View style={styles.right}>
+                    <TouchableOpacity
+                      style={styles.btnReject}
+                      onPress={onReject}>
+                      <Text style={styles.btntxt}>Reject</Text>
+                    </TouchableOpacity>
+                  </View>
+                </>
+              )}
             </View>
-          ) :  null}
-        {deniedLoading ? (
-            <View style={heightStyles.RejectActivityIndicatorContainer}>
-              <Text style={heightStyles.ActivityIndicatorText} >Rejecting</Text>
-              <ActivityIndicator
-                size="large"
-                color="red"
-                style={heightStyles.ActivityIndicator}
-              />
-            </View>
-          ) : null} 
-          </View>) :
-             <><View style={[styles.left, {width: '50%'}]}>
-                <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
-                  <Text style={styles.btntxt}>Approve</Text>
-                </TouchableOpacity>
-              </View>
-              <View style={styles.right}>
-                <TouchableOpacity style={styles.btnReject} onPress={onReject}>
-                  <Text style={styles.btntxt}>Reject</Text>
-                </TouchableOpacity>
-              </View></> 
-            
-          }</View>
           ) : user?.L2_Approval_Status === 'APPROVED' ? (
             <View>
-            {deniedLoading ? (
-              <View style={heightStyles.RejectActivityIndicatorContainer}>
-                <Text style={heightStyles.ActivityIndicatorText} >Rejecting</Text>
-                <ActivityIndicator
-                  size="large"
-                  color="red"
-                  style={heightStyles.ActivityIndicator}
-                />
-              </View>
-            ) : <View style={{width: '100%', padding: 10, marginLeft: '30%'}}>
-            <TouchableOpacity style={[styles.btnReject]} onPress={onReject}>
-              <Text style={[styles.btntxt]}>Reject</Text>
-            </TouchableOpacity>
-          </View>}
-          </View>
-            
+              {deniedLoading ? (
+                <View style={heightStyles.RejectActivityIndicatorContainer}>
+                  <Text style={heightStyles.ActivityIndicatorText}>
+                    Rejecting
+                  </Text>
+                  <ActivityIndicator
+                    size="large"
+                    color="red"
+                    style={heightStyles.ActivityIndicator}
+                  />
+                </View>
+              ) : (
+                <View style={{width: '100%', padding: 10, marginLeft: '30%'}}>
+                  <TouchableOpacity
+                    style={[styles.btnReject]}
+                    onPress={onReject}>
+                    <Text style={[styles.btntxt]}>Reject</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
           ) : user?.L2_Approval_Status === 'DENIED' ? (
-<View>
-            {approvingLoading ? (
-              <View style={heightStyles.ApproveActivityIndicatorContainer}>
-                <Text style={[heightStyles.ActivityIndicatorText, {color:'white'}]}>Approving</Text>
-                <ActivityIndicator
-                  size="large"
-                  color="#006400"
-                  style={heightStyles.ActivityIndicator}
-                />
-              </View>
-            ) : <View style={{width: '100%', padding: 10, marginLeft: '15%'}}>
-            <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
-              <Text style={styles.btntxt}>Approve</Text>
-            </TouchableOpacity>
-          </View>}
-          </View>
-
+            <View>
+              {approvingLoading ? (
+                <View style={heightStyles.ApproveActivityIndicatorContainer}>
+                  <Text
+                    style={[
+                      heightStyles.ActivityIndicatorText,
+                      {color: 'white'},
+                    ]}>
+                    Approving
+                  </Text>
+                  <ActivityIndicator
+                    size="large"
+                    color="#006400"
+                    style={heightStyles.ActivityIndicator}
+                  />
+                </View>
+              ) : (
+                <View style={{width: '100%', padding: 10, marginLeft: '15%'}}>
+                  <TouchableOpacity
+                    style={styles.btnAccept}
+                    onPress={onApprove}>
+                    <Text style={styles.btntxt}>Approve</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
           ) : null}
 
           <View style={[styles.container, {marginTop: 20}]}>
