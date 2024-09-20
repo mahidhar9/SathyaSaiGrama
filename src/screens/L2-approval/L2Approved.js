@@ -76,9 +76,9 @@ const L2Approved = ({ navigation }) => {
   };
 
 
-  // useFocusEffect(useCallback(() => {
-  //   onRefresh();
-  // }, [L2Approved]));
+  useFocusEffect(useCallback(() => {
+    onRefresh();
+  }, [L2Approved]));
 
   return (
     <><View style={{ flex: 1, paddingTop: 10, backgroundColor: '#FFF' }}>
