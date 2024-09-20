@@ -456,14 +456,14 @@ const Login = ({navigation}) => {
               </View>
             </KeyboardAvoidingView>
           </ScrollView>
-          <Dialog.Container visible={DialogVisible}>
-            <Dialog.Title>Unable to find user</Dialog.Title>
-            <Dialog.Description>
+          <Dialog.Container visible={DialogVisible} contentStyle={{borderRadius:10}}>
+            <Dialog.Title style={styles.dialogTitle}>Unable to find user</Dialog.Title>
+            <Dialog.Description style={{color:'#2F3036'}}>
               Please check your email or password and try again. Otherwise
               please register.
             </Dialog.Description>
-            <Dialog.Button label="Register" onPress={onPressRegister} />
-            <Dialog.Button label="Cancel" onPress={onPressOk} />
+            <Dialog.Button style={{color:'#B21E2B'}} label="Register" onPress={onPressRegister} />
+            <Dialog.Button style={{color:'black'}} label="Cancel" onPress={onPressOk} />
           </Dialog.Container>
         </>
       )}
@@ -583,5 +583,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     alignSelf: 'stretch',
     marginStart: 6,
+  },
+
+  dialogTitle: {
+color: 'black',
+
   },
 });
