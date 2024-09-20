@@ -79,7 +79,6 @@ const App = () => {
       Alert.alert(error);
     }
   };
-
   //UseEffect to call Appwrite and device token functions
   useEffect(() => {
     const fetchToken = async () => {
