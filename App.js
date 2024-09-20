@@ -50,6 +50,7 @@ const App = () => {
     setL1ID,
     setUserEmail,
     setDeviceToken,
+    setProfileImage
   } = useContext(UserContext);
   const [loading, setLoading] = useState(true);
 
@@ -102,6 +103,7 @@ const App = () => {
         setUserType(existedUser.role);
         setL1ID(existedUser.userId);
         setUserEmail(existedUser.email);
+        setProfileImage(existedUser.profilePhoto);
         console.log('Existed user in App.js:', existedUser);
       }
     };
