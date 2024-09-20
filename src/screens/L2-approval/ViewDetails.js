@@ -714,7 +714,7 @@ console.log(deletePayload)
           </View>
           <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
-              <Text style={styles.label}>Number of Boys</Text>
+              <Text style={styles.label}>Number of Girls</Text>
             </View>
             <View style={styles.right}>
               <Text style={styles.value}>{user.Number_of_Girls}</Text>
