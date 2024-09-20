@@ -4,7 +4,6 @@ import UserContext from './UserContext';
 function ContextProvider({children}) {
   const [userEmail, setUserEmail] = useState();
   const [L1ID, setL1ID] = useState();
-  const [L1Name, setL1Name] = useState();
   const [pendingFlag, setPendingFlag] = useState(false);
   const [approveFlag, setApproveFlag] = useState(false);
   const [deniedFlag, setDeniedFlag] = useState(false);
@@ -82,8 +81,6 @@ function ContextProvider({children}) {
         testResident,
         profileImage,
         setProfileImage,
-        L1Name, 
-        setL1Name
       }}>
       {children}
     </UserContext.Provider>

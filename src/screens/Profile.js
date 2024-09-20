@@ -51,7 +51,6 @@ const Profile = ({ navigation }) => {
     accessToken,
     profileImage,
     setProfileImage,
-    L1Name
   } = useContext(UserContext);
   const { user, setUser } = useContext(AuthContext);
 
@@ -626,11 +625,11 @@ const Profile = ({ navigation }) => {
             </View>
 
 
-            <Text style={styles.name}>{L1Name}</Text>
+            {/* <Text style={styles.name}>{loggedUser.name}</Text>
             <View style={styles.imgdel}>
               <Text style={styles.emailVisible}>{userEmail}</Text>
 
-            </View>
+            </View> */}
           </View><View style={styles.indicatorBox}>
             <ActivityIndicator style={styles.activityIndicator} size="large" color="#0000ff" />
 
@@ -710,7 +709,7 @@ const Profile = ({ navigation }) => {
             </View>
 
 
-            <Text style={styles.name}>{L1Name}</Text>
+            <Text style={styles.name}>{loggedUser.name}</Text>
             <View style={styles.imgdel}>
               <Text style={styles.emailVisible}>{userEmail}</Text>
               <TouchableOpacity

@@ -47,7 +47,6 @@ const Login = ({ navigation }) => {
     resident,
     setProfileImage,
     employee,
-    setL1Name,
     testResident,
   } = useContext(UserContext);
   const [currentUser, setCurrentUser] = useState(null);
@@ -278,7 +277,6 @@ const Login = ({ navigation }) => {
         if (user.emailVerified) {
           setL1ID(res.data[0].ID);
           setUserEmail(userCred.email.toLowerCase().trim());
-          setL1Name(res.data[0].Name_field)
 
           const reqUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${res.data[0].ID}/Profile_Photo/download`;
           const profileImgUrl = await getProfileImage(reqUrl);
@@ -287,7 +285,7 @@ const Login = ({ navigation }) => {
             setCurrentUser({
               id: res.data[0].ID,
               email: userCred.email.toLowerCase().trim(),
-              L1name: res.data[0].Name_field,
+              name: res.data[0].Name_field,
               profilePhoto: profileImgUrl
             });
           } else {
@@ -295,7 +293,7 @@ const Login = ({ navigation }) => {
             setCurrentUser({
               id: res.data[0].ID,
               email: userCred.email.toLowerCase().trim(),
-              L1name: res.data[0].Name_field,
+              name: res.data[0].Name_field,
               profilePhoto: null
             });
           }
