@@ -77,9 +77,9 @@ const Pending = ({ navigation }) => {
 
   };
 
-  // useFocusEffect(useCallback(() => {
-  //   onRefresh();
-  // }, [Pending]));
+  useFocusEffect(useCallback(() => {
+    onRefresh();
+  }, [Pending]));
 
   return (
     <View style={{ flex: 1 }}>
