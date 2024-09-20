@@ -54,6 +54,7 @@ const Login = ({navigation}) => {
   const [showPassword, setShowPassword] = useState(false);
   const [focusedInput, setFocusedInput] = useState(null);
   const [DialogVisible, setDialogVisible] = useState(false);
+  
 
   const onPressOk = () => {
     setDialogVisible(false);
@@ -339,7 +340,7 @@ const Login = ({navigation}) => {
                         value={value}
                         selectionColor="#B21E2B"
                         onFocus={() => setFocusedInput('email')}
-                        onChangeText={onChange}
+                        onChangeText={(value) => onChange(value.trim())}
                         autoCapitalize="none"
                         style={{color: 'black'}}
                       />
@@ -370,7 +371,7 @@ const Login = ({navigation}) => {
                         selectionColor="#B21E2B"
                         onFocus={() => setFocusedInput('password')}
                         secureTextEntry={!showPassword}
-                        onChangeText={onChange}
+                        onChangeText={(value) => onChange(value.trim())}
                       />
                     )}
                     rules={{
