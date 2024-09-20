@@ -554,8 +554,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   image: {
-    width: 19,
-    height: 19,
+    width: 16,
+    height: 16,
     fontWeight: "bold",
     tintColor: '#B21E2B', // Changes the color of the image
     marginTop: 3,

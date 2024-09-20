@@ -50,6 +50,7 @@ const App = () => {
     setL1ID,
     setUserEmail,
     setDeviceToken,
+    setProfileImage,
   } = useContext(UserContext);
   const [loading, setLoading] = useState(true);
 
@@ -78,7 +79,6 @@ const App = () => {
       Alert.alert(error);
     }
   };
-
   //UseEffect to call Appwrite and device token functions
   useEffect(() => {
     const fetchToken = async () => {
@@ -102,7 +102,8 @@ const App = () => {
         setUserType(existedUser.role);
         setL1ID(existedUser.userId);
         setUserEmail(existedUser.email);
-        console.log('Existed user in App.js:', existedUser);
+        setProfileImage(existedUser.profilePhoto);
+        console.log('Existed user name in App.js:', existedUser.name);
       }
     };
 

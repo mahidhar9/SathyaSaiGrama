@@ -12,10 +12,10 @@ import {
   ImageBackground,
   Dimensions,
 } from 'react-native';
-import React, {useState, useContext, useEffect} from 'react';
-import {useForm, Controller} from 'react-hook-form';
-import {auth} from '../auth/firebaseConfig';
-import {signInWithEmailAndPassword, sendEmailVerification} from 'firebase/auth';
+import React, { useState, useContext, useEffect } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { auth } from '../auth/firebaseConfig';
+import { signInWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import {
   getDataWithInt,
   getDataWithString,
@@ -23,16 +23,17 @@ import {
 } from '../components/ApiRequest';
 import UserContext from '../../context/UserContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME} from '@env';
+import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME } from '@env';
 import Dialog from 'react-native-dialog';
+import { encode } from 'base64-arraybuffer';
 
-const Login = ({navigation}) => {
+const Login = ({ navigation }) => {
   const screenWidth = Dimensions.get('window').width;
   const [loading, setLoading] = useState(false);
   const {
     control,
     handleSubmit,
-    formState: {errors},
+    formState: { errors },
   } = useForm();
   const {
     userType,
@@ -44,9 +45,8 @@ const Login = ({navigation}) => {
     setLoggedUser,
     deviceToken,
     resident,
-
+    setProfileImage,
     employee,
-
     testResident,
   } = useContext(UserContext);
   const [currentUser, setCurrentUser] = useState(null);
@@ -148,6 +148,7 @@ const Login = ({navigation}) => {
             email: currentUser.email,
             deptIds: departmentIds,
             name: currentUser.L1name,
+            profilePhoto: currentUser.profilePhoto,
           }),
         );
         console.log('login data saved into local storage');
@@ -215,6 +216,37 @@ const Login = ({navigation}) => {
     }
   };
 
+  const getProfileImage = async (url) => {
+    console.log("url in getProfileImage", url)
+    const cacheBuster = new Date().getTime();
+    const requestUrl = `${url}?cb=${cacheBuster}`;
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Authorization: `Zoho-oauthtoken ${accessToken}`,
+          'Cache-Control': 'no-cache',  // Prevent caching
+          Pragma: 'no-cache',           // Prevent caching in older HTTP/1.0 proxies
+          Expires: '0',
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, ${errorText}`);
+      }
+
+      const buffer = await response.arrayBuffer();
+      const base64Image = encode(buffer); // Use the encode function from base64-arraybuffer
+      const dataUrl = `data:image/jpeg;base64,${base64Image}`;
+
+      return dataUrl;
+    } catch (error) {
+      console.error('Error fetching image:', error);
+    }
+  };
+
+
   const handleLoginForm = async userCred => {
     setLoading(true);
     const res = await getDataWithString(
@@ -245,11 +277,26 @@ const Login = ({navigation}) => {
         if (user.emailVerified) {
           setL1ID(res.data[0].ID);
           setUserEmail(userCred.email.toLowerCase().trim());
-          setCurrentUser({
-            id: res.data[0].ID,
-            email: userCred.email.toLowerCase().trim(),
-            L1name: res.data[0].Name_field,
-          });
+
+          const reqUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${res.data[0].ID}/Profile_Photo/download`;
+          const profileImgUrl = await getProfileImage(reqUrl);
+          if (profileImgUrl.length > 300) {
+            setProfileImage(profileImgUrl)
+            setCurrentUser({
+              id: res.data[0].ID,
+              email: userCred.email.toLowerCase().trim(),
+              name: res.data[0].Name_field,
+              profilePhoto: profileImgUrl
+            });
+          } else {
+            setProfileImage(null)
+            setCurrentUser({
+              id: res.data[0].ID,
+              email: userCred.email.toLowerCase().trim(),
+              name: res.data[0].Name_field,
+              profilePhoto: null
+            });
+          }
           const response = await findDeviceToken(res.data[0].ID);
           console.log('response is: ', response);
           let myDeviceToken;
@@ -276,7 +323,7 @@ const Login = ({navigation}) => {
         } else {
           // Email is not verified, display message and send verification email (if needed)
           await sendEmailVerification(auth.currentUser);
-          navigation.navigate('VerificationNotice', {id: res.data[0].ID});
+          navigation.navigate('VerificationNotice', { id: res.data[0].ID });
         }
       } catch (error) {
         setLoading(false);
@@ -333,7 +380,7 @@ const Login = ({navigation}) => {
                   <Controller
                     name="email"
                     control={control}
-                    render={({field: {onChange, value}}) => (
+                    render={({ field: { onChange, value } }) => (
                       <TextInput
                         placeholder="Email Address"
                         value={value}
@@ -341,10 +388,10 @@ const Login = ({navigation}) => {
                         onFocus={() => setFocusedInput('email')}
                         onChangeText={value => onChange(value.trim())}
                         autoCapitalize="none"
-                        style={{color: 'black'}}
+                        style={{ color: 'black' }}
                       />
                     )}
-                    rules={{required: true, pattern: /^\S+@\S+$/i}}
+                    rules={{ required: true, pattern: /^\S+@\S+$/i }}
                   />
                 </View>
                 {errors.email?.type === 'required' && (
@@ -362,7 +409,7 @@ const Login = ({navigation}) => {
                   <Controller
                     name="password"
                     control={control}
-                    render={({field: {onChange, value}}) => (
+                    render={({ field: { onChange, value } }) => (
                       <TextInput
                         placeholder="Password"
                         style={styles.inputBox}
@@ -385,7 +432,7 @@ const Login = ({navigation}) => {
                       }}>
                       <Image
                         source={require('../assets/eyestrike.png')}
-                        style={{width: 16, height: 16}}
+                        style={{ width: 16, height: 16 }}
                       />
                     </TouchableOpacity>
                   ) : (
@@ -393,7 +440,7 @@ const Login = ({navigation}) => {
                       onPress={() => setShowPassword(!showPassword)}>
                       <Image
                         source={require('../assets/eye.png')}
-                        style={{width: 16, height: 16}}
+                        style={{ width: 16, height: 16 }}
                       />
                     </TouchableOpacity>
                   )}

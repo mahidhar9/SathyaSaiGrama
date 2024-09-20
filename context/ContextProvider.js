@@ -25,6 +25,9 @@ function ContextProvider({children}) {
   //let accessToken = ""
   const [accessToken, setAccessToken] = useState(''); // Use state for accessToken
 
+  //profile photo
+  const [profileImage, setProfileImage] = useState(null);
+
   const [editData, setEditData] = useState({});
 
   const getAccessToken = () => accessToken;
@@ -76,6 +79,8 @@ function ContextProvider({children}) {
         employee,
 
         testResident,
+        profileImage,
+        setProfileImage,
       }}>
       {children}
     </UserContext.Provider>

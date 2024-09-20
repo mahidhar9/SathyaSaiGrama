@@ -9,6 +9,10 @@ import {
   TextInput,
   ActivityIndicator,
   TouchableWithoutFeedback,
+  KeyboardAvoidingView,
+  ScrollView,
+  Animated,
+  Dimensions,
 } from 'react-native';
 import React, { useContext, useEffect, useState } from 'react';
 import { auth } from '../auth/firebaseConfig';
@@ -34,6 +38,8 @@ import RNRestart from 'react-native-restart';
 import Dialog from 'react-native-dialog';
 import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME } from '@env';
 import Toast from 'react-native-toast-message';
+import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
+import { PERMISSIONS, request } from 'react-native-permissions';
 
 const Profile = ({ navigation }) => {
   const {
@@ -43,6 +49,8 @@ const Profile = ({ navigation }) => {
     deviceToken,
     loggedUser,
     accessToken,
+    profileImage,
+    setProfileImage,
   } = useContext(UserContext);
   const { user, setUser } = useContext(AuthContext);
 
@@ -55,14 +63,15 @@ const Profile = ({ navigation }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  
-  const [isLogOutIndicator,setIsLogOutIndicator]= useState(false);
+
+  const [isLogOutIndicator, setIsLogOutIndicator] = useState(false);
 
   let OndeleteStyles;
   if (deleteLoading) {
     OndeleteStyles = deleteLoadingStyles;
   } else if (!deleteLoading) {
-    OndeleteStyles = styles; }
+    OndeleteStyles = styles;
+  }
 
 
   const handleModal = () => {
@@ -186,38 +195,18 @@ const Profile = ({ navigation }) => {
 
         await AsyncStorage.removeItem('existedUser');
         RNRestart.Restart();
-       
+
       })
       .catch(error => {
         console.log('error :', error);
         Alert.alert('Not able to logout!');
       });
   };
-  
- 
+
+
   const changeProfile = () => {
     setProfileImageModalVisible(!profileImageModalVisible);
   };
-
-  // const onCamera = () => {
-  //   ImagePicker.openCamera({
-  //     width: 300,
-  //     height: 400,
-  //     cropping: true,
-  //   }).then(image => {
-  //     console.log(image);
-  //   });
-  // };
-
-  // const onGallery = () => {
-  //   ImagePicker.openPicker({
-  //     width: 300,
-  //     height: 400,
-  //     cropping: true,
-  //   }).then(image => {
-  //     console.log(image);
-  //   });
-  // };
 
   const toMyprofile = async () => {
     setLoading(true);
@@ -228,7 +217,7 @@ const Profile = ({ navigation }) => {
       'Email',
       userEmail,
       getAccessToken(),
-      
+
     );
     const resFromVehicleInfo = await getDataWithInt(
       'All_Vehicle_Information',
@@ -376,88 +365,250 @@ const Profile = ({ navigation }) => {
     }
   };
 
-  useEffect(()=>
-  {
+  useEffect(() => {
     setIsLogOutIndicator(false)
-  },[Profile])
+  }, [Profile])
 
   useEffect(() => {
 
-    if(toastVisible){
+    if (toastVisible) {
 
-        Toast.show({
-          type: 'success',
-          position: 'bottom',
-          text1: 'Account Deleted',
-          text2: 'Your account has been deleted successfully',
-          visibilityTime: 4000,
-          autoHide: true,
-        
-          bottomOffset: 20,
-          
+      Toast.show({
+        type: 'success',
+        position: 'bottom',
+        text1: 'Account Deleted',
+        text2: 'Your account has been deleted successfully',
+        visibilityTime: 4000,
+        autoHide: true,
+
+        bottomOffset: 20,
+
+      });
+      onLogout();
+    }
+  }, [toastVisible]);
+
+  const [frofileModalVisible, setFrofileModalVisible] = useState(false);
+
+  const slideAnim = useState(new Animated.Value(Dimensions.get('window').height))[0];
+
+  const openProfileModal = () => {
+    setFrofileModalVisible(true);
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const closeProfileModal = () => {
+    Animated.timing(slideAnim, {
+      toValue: Dimensions.get('window').height,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => setFrofileModalVisible(false));
+  };
+
+  const requestCameraPermission = async () => {
+    if (Platform.OS === 'android') {
+      const result = await request(PERMISSIONS.ANDROID.CAMERA);
+      return result === 'granted';
+    } else {
+      // iOS permission handled automatically
+      return true;
+    }
+  };
+
+  /////Uploading profile photo to zoho
+
+  const uploadProfileImage = async (imgUrl) => {
+
+    const formData = new FormData();
+    formData.append('file', {
+      uri: imgUrl,
+      type: 'image/jpeg', // adjust the MIME type if necessary
+      name: 'profile.jpg',
+    });
+
+    const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${L1ID}/Profile_Photo/upload`;
+    console.log(url);
+    const response = await fetch(
+      url,
+      {
+        method: 'POST',
+        body: formData,
+        headers: {
+          Authorization: `Zoho-oauthtoken ${accessToken}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      },
+      console.log('posting to zoho....'),
+    );
+    if (response.ok) {
+      console.log('Image uploaded successfully to Zoho.');
+      let existedUser = await AsyncStorage.getItem('existedUser');
+      existedUser = JSON.parse(existedUser);
+      existedUser.profilePhoto = imgUrl;
+      await AsyncStorage.setItem('existedUser', JSON.stringify(existedUser));
+      setProfileImage(imgUrl);
+
+    } else {
+      console.log(
+        'Failed to upload image to Zoho:',
+        response.status,
+        response.statusText,
+      );
+    }
+  }
+
+  const takePhoto = async () => {
+    const hasPermission = await requestCameraPermission();
+    if (!hasPermission) {
+      Alert.alert('Camera permission denied');
+      return;
+    }
+    const options = {
+      mediaType: 'photo',
+      maxWidth: 300,
+      maxHeight: 300,
+      quality: 1,
+    };
+
+    launchCamera(options, response => {
+      if (response.didCancel) {
+        console.log('Photo capture canceled');
+        closeProfileModal();
+      } else if (response.errorCode) {
+        Alert.alert('Error capturing photo:', response.errorMessage);
+      } else if (response.assets && response.assets.length > 0) {
+        const imageUri = response.assets[0].uri;
+        uploadProfileImage(imageUri);
+        closeProfileModal();
+      } else {
+        Alert.alert('Error: No photo captured.');
+      }
+    });
+  };
+
+  const selectImage = async () => {
+    const options = {
+      mediaType: 'photo',
+      maxWidth: 300,
+      maxHeight: 300,
+      quality: 1,
+    };
+    launchImageLibrary(options, response => {
+      if (response.didCancel) {
+        console.log('Image selection canceled');
+        closeProfileModal();
+      } else if (response.error) {
+        Alert.alert('Error selecting image:', response.error);
+      } else {
+        const imageUri = response.assets[0].uri;
+        uploadProfileImage(imageUri);
+        closeProfileModal();
+      }
+    });
+  };
+
+  const updateField = {
+    Profile_Photo: ""
+  };
+
+  const updateData = {
+    criteria: `ID==${L1ID}`,
+    data: updateField,
+  };
+
+
+  const deleteProfileImage = async (url) => {
+    const reqUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${L1ID}`;
+    try {
+      const response = await fetch(reqUrl, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Zoho-oauthtoken ${accessToken}`,  // Add authentication if needed    
+        },
+        body: JSON.stringify(updateData)
       });
 
-      
-    onLogout();
-    
-    
-    } }, [toastVisible]);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, ${errorText}`);
+      }
+
+      console.log('Resource deleted successfully!');
+      setProfileImage(null)
+      closeProfileModal();
+      let existedUser = await AsyncStorage.getItem('existedUser');
+      existedUser = JSON.parse(existedUser);
+      existedUser.profilePhoto = null
+      await AsyncStorage.setItem('existedUser', JSON.stringify(existedUser));
+    } catch (error) {
+      console.error('Error deleting resource:', error);
+    }
+  };
+
+
   return (
     <SafeAreaView style={styles.container}>
-  
-
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#B21E2B" />
         </View>
-      ) : (   (isLogOutIndicator ? (
+      ) : ((isLogOutIndicator ? (
         <><View style={styles.account}>
-            <Text style={styles.accountTitle}>Account</Text>
-          </View><View style={styles.topSection}>
-              <View>
-                <Image
-                  source={require('../assets/sathya.png')}
-                  style={styles.propic} />
-                {/* <TouchableOpacity style={styles.edit} onPress={changeProfile}>
-      <Image
-        source={require('../assets/Edit.png')}
-        style={{
-          width: 17,
-          height: 14.432,
-          marginEnd: 5,
-          flexShrink: 0,
-          marginLeft: 70,
-          textAlign: 'right',
-        }}
-      />
-    </TouchableOpacity> */}
-              </View>
-
-
-              <Text style={styles.name}></Text>
-              <View style={styles.imgdel}>
-                <Text style={styles.emailVisible}>{userEmail}</Text>
-                
-              </View>
-            </View><View style={styles.indicatorBox}>
-              <ActivityIndicator style={styles.activityIndicator} size="large" color="#0000ff" />
-
-              <Text style={styles.text}>Logging Out...</Text>
-            </View></>
-                
-              
-
-        ) :  
+          <Text style={styles.accountTitle}>Account</Text>
+        </View><View style={styles.topSection}>
         <View>
-          <View style={styles.account}>
-            <Text style={styles.accountTitle}>Account</Text>
-          </View>
-          <View style={styles.topSection}>
-            <View>
-              <Image
-                source={require('../assets/sathya.png')}
-                style={styles.propic}
-              />
+              <TouchableOpacity>
+                {
+                  profileImage != null ?
+                    <Image source={{ uri: profileImage }} style={styles.propic} /> :
+                    <Image source={require('../assets/profileImg.png')} style={styles.propic} />
+                }
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={openProfileModal} style={styles.editContainer}>
+                <Image source={require('../assets/edit.png')} style={styles.editIcon} />
+              </TouchableOpacity>
+
+              {/* profile picture selector modal */}
+              <Modal transparent={true} visible={frofileModalVisible} animationType="none" onRequestClose={closeProfileModal}>
+                <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+                  <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+
+                    {/* Close Modal when clicking outside */}
+                    <TouchableWithoutFeedback onPress={closeProfileModal}>
+                      <View style={styles.overlay}>
+                        <Animated.View style={[styles.modalContent, { transform: [{ translateY: slideAnim }] }]}>
+                          <View style={{ width: "100%" }}>
+                            <Text style={styles.uploadHead}>Profile  Photo</Text>
+                            <View style={styles.profileUpload}>
+                              <TouchableOpacity onPress={takePhoto} style={styles.iconButton}>
+                                <Image source={require('../assets/cameraImg.png')} style={styles.uploadImg} />
+                                <Text >Camera</Text>
+                              </TouchableOpacity>
+                              <TouchableOpacity onPress={selectImage} style={styles.iconButton}>
+                                <Image source={require('../assets/galleryImg.png')} style={styles.uploadImg} />
+                                <Text>Gallery</Text>
+                              </TouchableOpacity>
+                              {
+                                profileImage && (
+                                  <TouchableOpacity onPress={deleteProfileImage} style={styles.iconButton}>
+                                    <Image source={require('../assets/delete.png')} style={styles.uploadImg} />
+                                    <Text>Delete</Text>
+                                  </TouchableOpacity>
+                                )
+                              }
+                            </View>
+                          </View>
+                        </Animated.View>
+                      </View>
+                    </TouchableWithoutFeedback>
+                  </ScrollView>
+                </KeyboardAvoidingView>
+              </Modal>
               {/* <TouchableOpacity style={styles.edit} onPress={changeProfile}>
                 <Image
                   source={require('../assets/Edit.png')}
@@ -472,9 +623,93 @@ const Profile = ({ navigation }) => {
                 />
               </TouchableOpacity> */}
             </View>
-           
-           
-            <Text style={styles.name}>{ }</Text>
+
+
+            {/* <Text style={styles.name}>{loggedUser.name}</Text>
+            <View style={styles.imgdel}>
+              <Text style={styles.emailVisible}>{userEmail}</Text>
+
+            </View> */}
+          </View><View style={styles.indicatorBox}>
+            <ActivityIndicator style={styles.activityIndicator} size="large" color="#0000ff" />
+
+            <Text style={styles.text}>Logging Out...</Text>
+          </View></>
+
+
+
+      ) :
+        <View>
+          <View style={styles.account}>
+            <Text style={styles.accountTitle}>Account</Text>
+          </View>
+          <View style={styles.topSection}>
+            <View>
+              <TouchableOpacity>
+                {
+                  profileImage != null ?
+                    <Image source={{ uri: profileImage }} style={styles.propic} /> :
+                    <Image source={require('../assets/profileImg.png')} style={styles.propic} />
+                }
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={openProfileModal} style={styles.editContainer}>
+                <Image source={require('../assets/edit.png')} style={styles.editIcon} />
+              </TouchableOpacity>
+
+              {/* profile picture selector modal */}
+              <Modal transparent={true} visible={frofileModalVisible} animationType="none" onRequestClose={closeProfileModal}>
+                <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+                  <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+
+                    {/* Close Modal when clicking outside */}
+                    <TouchableWithoutFeedback onPress={closeProfileModal}>
+                      <View style={styles.overlay}>
+                        <Animated.View style={[styles.modalContent, { transform: [{ translateY: slideAnim }] }]}>
+                          <View style={{ width: "100%" }}>
+                            <Text style={styles.uploadHead}>Profile  Photo</Text>
+                            <View style={styles.profileUpload}>
+                              <TouchableOpacity onPress={takePhoto} style={styles.iconButton}>
+                                <Image source={require('../assets/cameraImg.png')} style={styles.uploadImg} />
+                                <Text >Camera</Text>
+                              </TouchableOpacity>
+                              <TouchableOpacity onPress={selectImage} style={styles.iconButton}>
+                                <Image source={require('../assets/galleryImg.png')} style={styles.uploadImg} />
+                                <Text>Gallery</Text>
+                              </TouchableOpacity>
+                              {
+                                profileImage && (
+                                  <TouchableOpacity onPress={deleteProfileImage} style={styles.iconButton}>
+                                    <Image source={require('../assets/delete.png')} style={styles.uploadImg} />
+                                    <Text>Delete</Text>
+                                  </TouchableOpacity>
+                                )
+                              }
+                            </View>
+                          </View>
+                        </Animated.View>
+                      </View>
+                    </TouchableWithoutFeedback>
+                  </ScrollView>
+                </KeyboardAvoidingView>
+              </Modal>
+              {/* <TouchableOpacity style={styles.edit} onPress={changeProfile}>
+                <Image
+                  source={require('../assets/Edit.png')}
+                  style={{
+                    width: 17,
+                    height: 14.432,
+                    marginEnd: 5,
+                    flexShrink: 0,
+                    marginLeft: 70,
+                    textAlign: 'right',
+                  }}
+                />
+              </TouchableOpacity> */}
+            </View>
+
+
+            <Text style={styles.name}>{loggedUser.name}</Text>
             <View style={styles.imgdel}>
               <Text style={styles.emailVisible}>{userEmail}</Text>
               <TouchableOpacity
@@ -488,7 +723,7 @@ const Profile = ({ navigation }) => {
             </View>
           </View>
 
-                
+
 
 
 
@@ -539,8 +774,8 @@ const Profile = ({ navigation }) => {
               </View>
             </TouchableOpacity>
           </View>
-      
-      
+
+
 
           {/* <Modal
             animationType="slide"
@@ -587,7 +822,7 @@ const Profile = ({ navigation }) => {
               </View>
             </View>
           </Modal> */}
- 
+
           <Modal
             animationType="fade"
             transparent={true}
@@ -596,119 +831,119 @@ const Profile = ({ navigation }) => {
             <TouchableWithoutFeedback onPress={handleModal}>
               <View style={styles.centeredView}>
                 <View style={OndeleteStyles.modalView}>
-                { deleteLoading ? (<View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator size="large" color="#B21E2B" /><Text>Deleting profile...</Text></View>)  : <>
-                  <Text style={styles.shareLink}>
-                    Enter your credentials to delete your account permanently
-                  </Text>
+                  {deleteLoading ? (<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator size="large" color="#B21E2B" /><Text>Deleting profile...</Text></View>) : <>
+                    <Text style={styles.shareLink}>
+                      Enter your credentials to delete your account permanently
+                    </Text>
 
-                  <Controller
-                    name="email"
-                    control={control}
-                    render={({ field: { onChange, value } }) => (
-                      <TextInput
-                        placeholder="Email Address"
-                        value={value}
-                        style={[
-                          styles.email,
-                          focusedInput === 'email' && styles.inputFocused,
-                        ]}
-                        selectionColor="#B21E2B"
-                        onFocus={() => setFocusedInput('email')}
-                        onChangeText={onChange}
-                        autoCapitalize="none"
-                      />
-                    )}
-                    rules={{ required: true, pattern: /^\S+@\S+$/i }}
-                  />
-                  {errors.email?.type === 'required' && (
-                    <Text style={styles.textError}>Email is required</Text>
-                  )}
-                  {errors.email?.type === 'pattern' && (
-                    <Text style={styles.textError}>Enter valid email</Text>
-                  )}
-
-                  <View
-                    style={[
-                      styles.passBorder,
-                      focusedInput === 'password' && styles.inputFocused,
-                    ]}>
                     <Controller
-                      name="password"
+                      name="email"
                       control={control}
                       render={({ field: { onChange, value } }) => (
                         <TextInput
-                          placeholder="Password"
-                          style={styles.inputBox}
+                          placeholder="Email Address"
                           value={value}
+                          style={[
+                            styles.email,
+                            focusedInput === 'email' && styles.inputFocused,
+                          ]}
                           selectionColor="#B21E2B"
-                          onFocus={() => setFocusedInput('password')}
-                          secureTextEntry={!showPassword}
+                          onFocus={() => setFocusedInput('email')}
                           onChangeText={onChange}
+                          autoCapitalize="none"
                         />
                       )}
-                      rules={{
-                        required: true,
-                        minLength: 8,
-                        pattern:
-                          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-                      }}
+                      rules={{ required: true, pattern: /^\S+@\S+$/i }}
                     />
-                    {showPassword === false ? (
-                      <TouchableOpacity
-                        onPress={() => {
-                          setShowPassword(!showPassword);
-                        }}>
-                        <Image
-                          source={require('../assets/eyestrike.png')}
-                          style={{ width: 16, height: 16 }}
-                        />
-                      </TouchableOpacity>
-                    ) : (
-                      <TouchableOpacity
-                        onPress={() => setShowPassword(!showPassword)}>
-                        <Image
-                          source={require('../assets/eye.png')}
-                          style={{ width: 16, height: 16 }}
-                        />
-                      </TouchableOpacity>
+                    {errors.email?.type === 'required' && (
+                      <Text style={styles.textError}>Email is required</Text>
                     )}
-                  </View>
+                    {errors.email?.type === 'pattern' && (
+                      <Text style={styles.textError}>Enter valid email</Text>
+                    )}
 
-                  {errors.password?.type === 'required' && (
-                    <Text style={styles.textError}>Password is required</Text>
-                  )}
-                  {errors.password?.type === 'minLength' && (
-                    <Text style={styles.textError}>
-                      Password must be 8 characters long
-                    </Text>
-                  )}
-                  {errors.password?.type === 'pattern' && (
-                    <Text style={styles.textError}>
-                      Password must contain at least a uppercase,lowercase,
-                      number and a special character
-                    </Text>
-                  )}
+                    <View
+                      style={[
+                        styles.passBorder,
+                        focusedInput === 'password' && styles.inputFocused,
+                      ]}>
+                      <Controller
+                        name="password"
+                        control={control}
+                        render={({ field: { onChange, value } }) => (
+                          <TextInput
+                            placeholder="Password"
+                            style={styles.inputBox}
+                            value={value}
+                            selectionColor="#B21E2B"
+                            onFocus={() => setFocusedInput('password')}
+                            secureTextEntry={!showPassword}
+                            onChangeText={onChange}
+                          />
+                        )}
+                        rules={{
+                          required: true,
+                          minLength: 8,
+                          pattern:
+                            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                        }}
+                      />
+                      {showPassword === false ? (
+                        <TouchableOpacity
+                          onPress={() => {
+                            setShowPassword(!showPassword);
+                          }}>
+                          <Image
+                            source={require('../assets/eyestrike.png')}
+                            style={{ width: 16, height: 16 }}
+                          />
+                        </TouchableOpacity>
+                      ) : (
+                        <TouchableOpacity
+                          onPress={() => setShowPassword(!showPassword)}>
+                          <Image
+                            source={require('../assets/eye.png')}
+                            style={{ width: 16, height: 16 }}
+                          />
+                        </TouchableOpacity>
+                      )}
+                    </View>
 
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                    }}>
-                    <TouchableOpacity
-                      style={[styles.HomeButton, { backgroundColor: '#B21E2B' }]}
-                      onPress={handleSubmit(onDelete)}>
-                      <Text style={[styles.wewe, styles.wewe1]}>Delete</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[styles.HomeButton, { backgroundColor: '#FFBE65' }]}
-                      onPress={() => setModalVisible(!modalVisible)}>
-                      <Text style={[styles.wewe, styles.wewe2]}>Cancel</Text>
-                    </TouchableOpacity>
-                  </View>
-                </>}
+                    {errors.password?.type === 'required' && (
+                      <Text style={styles.textError}>Password is required</Text>
+                    )}
+                    {errors.password?.type === 'minLength' && (
+                      <Text style={styles.textError}>
+                        Password must be 8 characters long
+                      </Text>
+                    )}
+                    {errors.password?.type === 'pattern' && (
+                      <Text style={styles.textError}>
+                        Password must contain at least a uppercase,lowercase,
+                        number and a special character
+                      </Text>
+                    )}
+
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                      }}>
+                      <TouchableOpacity
+                        style={[styles.HomeButton, { backgroundColor: '#B21E2B' }]}
+                        onPress={handleSubmit(onDelete)}>
+                        <Text style={[styles.wewe, styles.wewe1]}>Delete</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.HomeButton, { backgroundColor: '#FFBE65' }]}
+                        onPress={() => setModalVisible(!modalVisible)}>
+                        <Text style={[styles.wewe, styles.wewe2]}>Cancel</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </>}
                 </View>
               </View>
             </TouchableWithoutFeedback>
-          </Modal> 
+          </Modal>
 
           <Modal
             animationType="fade"
@@ -747,11 +982,11 @@ const Profile = ({ navigation }) => {
         </View>
       ))}
 
-<Toast />
+      <Toast />
 
 
     </SafeAreaView>
-    
+
   );
 };
 
@@ -762,6 +997,58 @@ export default Profile;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profleEditIcon: {
+
+  },
+  profileUpload: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 20
+  },
+  uploadImg: {
+    width: 35,
+    height: 35,
+    tintColor: '#B21E2B',
+    textAlign: 'center',
+  },
+  iconButton: {
+    alignItems: 'center',
+  },
+  uploadHead: {
+    textAlign: 'center',
+    fontSize: 20,
+    color: 'black',
+    fontWeight: '500',
+    marginBottom: 17
+  },
+  editContainer: {
+    top: -30,
+    left: 50,
+    backgroundColor: "#B21E2B",
+    height: 30,
+    width: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 50,
+  },
+  editIcon: {
+    width: 12,
+    height: 12,
+    tintColor: "white",
   },
   edit: {
     flexDirection: 'row',
@@ -1018,13 +1305,13 @@ const styles = StyleSheet.create({
 
     fontWeight: 'bold',
 
-  },indicatorBox: {
-    margin:30,
+  }, indicatorBox: {
+    margin: 30,
     justifyContent: 'center',
-    alignItems: 'center', 
-    width: 250, 
-    alignSelf:'center',
-    padding: 30, 
+    alignItems: 'center',
+    width: 250,
+    alignSelf: 'center',
+    padding: 30,
     backgroundColor: '#fff',
     borderRadius: 10,
     alignItems: 'center',
@@ -1035,20 +1322,20 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   activityIndicator: {
-    marginBottom: 20, 
+    marginBottom: 20,
   },
   text: {
-    fontSize: 18, 
+    fontSize: 18,
     color: '#333',
   },
 
- 
+
 });
 
-const deleteLoadingStyles = StyleSheet.create({ 
+const deleteLoadingStyles = StyleSheet.create({
   modalView: {
     margin: 20,
-    height:180 ,
+    height: 180,
     width: 300,
     backgroundColor: 'white',
     borderRadius: 20,
