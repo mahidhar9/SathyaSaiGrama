@@ -50,7 +50,8 @@ const Profile = ({ navigation }) => {
     loggedUser,
     accessToken,
     profileImage,
-    setProfileImage
+    setProfileImage,
+    L1Name
   } = useContext(UserContext);
   const { user, setUser } = useContext(AuthContext);
 
@@ -63,6 +64,8 @@ const Profile = ({ navigation }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const [isLogOutIndicator, setIsLogOutIndicator] = useState(false);
 
   let OndeleteStyles;
   if (deleteLoading) {
@@ -166,8 +169,8 @@ const Profile = ({ navigation }) => {
     console.log(userCred);
     await handleDeleteAccount(userCred.email, userCred.password);
   };
-
   const onLogout = () => {
+    setIsLogOutIndicator(true);
     signOut(auth)
       .then(async response => {
         console.log('response :', response);
@@ -193,12 +196,14 @@ const Profile = ({ navigation }) => {
 
         await AsyncStorage.removeItem('existedUser');
         RNRestart.Restart();
+
       })
       .catch(error => {
         console.log('error :', error);
         Alert.alert('Not able to logout!');
       });
   };
+
 
   const changeProfile = () => {
     setProfileImageModalVisible(!profileImageModalVisible);
@@ -213,6 +218,7 @@ const Profile = ({ navigation }) => {
       'Email',
       userEmail,
       getAccessToken(),
+
     );
     const resFromVehicleInfo = await getDataWithInt(
       'All_Vehicle_Information',
@@ -361,6 +367,10 @@ const Profile = ({ navigation }) => {
   };
 
   useEffect(() => {
+    setIsLogOutIndicator(false)
+  }, [Profile])
+
+  useEffect(() => {
 
     if (toastVisible) {
 
@@ -376,8 +386,6 @@ const Profile = ({ navigation }) => {
 
       });
       onLogout();
-
-
     }
   }, [toastVisible]);
 
@@ -518,18 +526,18 @@ const Profile = ({ navigation }) => {
     const reqUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${L1ID}`;
     try {
       const response = await fetch(reqUrl, {
-        method: 'PATCH', 
+        method: 'PATCH',
         headers: {
           Authorization: `Zoho-oauthtoken ${accessToken}`,  // Add authentication if needed    
         },
         body: JSON.stringify(updateData)
       });
-  
+
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`HTTP error! status: ${response.status}, ${errorText}`);
       }
-  
+
       console.log('Resource deleted successfully!');
       setProfileImage(null)
       closeProfileModal();
@@ -541,7 +549,7 @@ const Profile = ({ navigation }) => {
       console.error('Error deleting resource:', error);
     }
   };
-  
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -549,7 +557,89 @@ const Profile = ({ navigation }) => {
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#B21E2B" />
         </View>
-      ) : (
+      ) : ((isLogOutIndicator ? (
+        <><View style={styles.account}>
+          <Text style={styles.accountTitle}>Account</Text>
+        </View><View style={styles.topSection}>
+        <View>
+              <TouchableOpacity>
+                {
+                  profileImage != null ?
+                    <Image source={{ uri: profileImage }} style={styles.propic} /> :
+                    <Image source={require('../assets/profileImg.png')} style={styles.propic} />
+                }
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={openProfileModal} style={styles.editContainer}>
+                <Image source={require('../assets/edit.png')} style={styles.editIcon} />
+              </TouchableOpacity>
+
+              {/* profile picture selector modal */}
+              <Modal transparent={true} visible={frofileModalVisible} animationType="none" onRequestClose={closeProfileModal}>
+                <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+                  <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+
+                    {/* Close Modal when clicking outside */}
+                    <TouchableWithoutFeedback onPress={closeProfileModal}>
+                      <View style={styles.overlay}>
+                        <Animated.View style={[styles.modalContent, { transform: [{ translateY: slideAnim }] }]}>
+                          <View style={{ width: "100%" }}>
+                            <Text style={styles.uploadHead}>Profile  Photo</Text>
+                            <View style={styles.profileUpload}>
+                              <TouchableOpacity onPress={takePhoto} style={styles.iconButton}>
+                                <Image source={require('../assets/cameraImg.png')} style={styles.uploadImg} />
+                                <Text >Camera</Text>
+                              </TouchableOpacity>
+                              <TouchableOpacity onPress={selectImage} style={styles.iconButton}>
+                                <Image source={require('../assets/galleryImg.png')} style={styles.uploadImg} />
+                                <Text>Gallery</Text>
+                              </TouchableOpacity>
+                              {
+                                profileImage && (
+                                  <TouchableOpacity onPress={deleteProfileImage} style={styles.iconButton}>
+                                    <Image source={require('../assets/delete.png')} style={styles.uploadImg} />
+                                    <Text>Delete</Text>
+                                  </TouchableOpacity>
+                                )
+                              }
+                            </View>
+                          </View>
+                        </Animated.View>
+                      </View>
+                    </TouchableWithoutFeedback>
+                  </ScrollView>
+                </KeyboardAvoidingView>
+              </Modal>
+              {/* <TouchableOpacity style={styles.edit} onPress={changeProfile}>
+                <Image
+                  source={require('../assets/Edit.png')}
+                  style={{
+                    width: 17,
+                    height: 14.432,
+                    marginEnd: 5,
+                    flexShrink: 0,
+                    marginLeft: 70,
+                    textAlign: 'right',
+                  }}
+                />
+              </TouchableOpacity> */}
+            </View>
+
+
+            <Text style={styles.name}>{L1Name}</Text>
+            <View style={styles.imgdel}>
+              <Text style={styles.emailVisible}>{userEmail}</Text>
+
+            </View>
+          </View><View style={styles.indicatorBox}>
+            <ActivityIndicator style={styles.activityIndicator} size="large" color="#0000ff" />
+
+            <Text style={styles.text}>Logging Out...</Text>
+          </View></>
+
+
+
+      ) :
         <View>
           <View style={styles.account}>
             <Text style={styles.accountTitle}>Account</Text>
@@ -618,7 +708,9 @@ const Profile = ({ navigation }) => {
                 />
               </TouchableOpacity> */}
             </View>
-            <Text style={styles.name}>User Name</Text>
+
+
+            <Text style={styles.name}>{L1Name}</Text>
             <View style={styles.imgdel}>
               <Text style={styles.emailVisible}>{userEmail}</Text>
               <TouchableOpacity
@@ -631,6 +723,10 @@ const Profile = ({ navigation }) => {
               </TouchableOpacity>
             </View>
           </View>
+
+
+
+
 
           <View style={styles.options}>
             <TouchableOpacity
@@ -679,6 +775,8 @@ const Profile = ({ navigation }) => {
               </View>
             </TouchableOpacity>
           </View>
+
+
 
           {/* <Modal
             animationType="slide"
@@ -880,15 +978,20 @@ const Profile = ({ navigation }) => {
               </View>
             </TouchableWithoutFeedback>
           </Modal>
+
+
         </View>
-      )}
+      ))}
 
       <Toast />
 
 
     </SafeAreaView>
+
   );
 };
+
+
 
 export default Profile;
 
@@ -1203,7 +1306,31 @@ const styles = StyleSheet.create({
 
     fontWeight: 'bold',
 
-  }
+  }, indicatorBox: {
+    margin: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 250,
+    alignSelf: 'center',
+    padding: 30,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  activityIndicator: {
+    marginBottom: 20,
+  },
+  text: {
+    fontSize: 18,
+    color: '#333',
+  },
+
+
 });
 
 const deleteLoadingStyles = StyleSheet.create({
@@ -1220,8 +1347,6 @@ const deleteLoadingStyles = StyleSheet.create({
       width: 0,
       height: 2,
     }
-  }
-
-
+  },
 
 });

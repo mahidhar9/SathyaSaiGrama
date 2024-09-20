@@ -269,6 +269,57 @@ const ViewDetails = ({navigation, route}) => {
     );
     console.log('Data is deleted: ', response);
 
+    const PasscodeDeleteUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Passcode_Report`;
+
+    const deletePayload = {
+      criteria:`Passcode==\"${user.Generated_Passcode}\"`,
+      result: {
+        "message": true,
+        "tasks": true
+      }
+    };
+
+console.log(deletePayload)
+
+
+   
+      try {
+        const deletePasscodeResponse = await fetch(PasscodeDeleteUrl, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Zoho-oauthtoken ${accessToken}`,
+           
+          },
+         body: JSON.stringify(deletePayload),
+        });
+        if (deletePasscodeResponse.ok) {
+          const responseData = await deletePasscodeResponse.json();
+          console.log('Passcode deleted successfully:', responseData);
+        } else {
+          const errorData = await deletePasscodeResponse.json();
+          console.error('Error deleting passcode:', errorData);
+          // Handle error based on errorData (e.g., display error message, retry, etc.)
+        }
+      } catch (error) {
+        console.error('Error in deleting passcode:', error);
+        // Handle unexpected errors (e.g., network issues, server errors)
+      }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     if (response.data) {
       if (status === 'PENDING APPROVAL') {
         setL2PendingDataFetched(false);
@@ -663,7 +714,7 @@ const ViewDetails = ({navigation, route}) => {
           </View>
           <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
-              <Text style={styles.label}>Number of Boys</Text>
+              <Text style={styles.label}>Number of Girls</Text>
             </View>
             <View style={styles.right}>
               <Text style={styles.value}>{user.Number_of_Girls}</Text>

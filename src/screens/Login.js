@@ -47,7 +47,7 @@ const Login = ({ navigation }) => {
     resident,
     setProfileImage,
     employee,
-
+    setL1Name,
     testResident,
   } = useContext(UserContext);
   const [currentUser, setCurrentUser] = useState(null);
@@ -278,6 +278,7 @@ const Login = ({ navigation }) => {
         if (user.emailVerified) {
           setL1ID(res.data[0].ID);
           setUserEmail(userCred.email.toLowerCase().trim());
+          setL1Name(res.data[0].Name_field)
 
           const reqUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${res.data[0].ID}/Profile_Photo/download`;
           const profileImgUrl = await getProfileImage(reqUrl);
@@ -387,7 +388,7 @@ const Login = ({ navigation }) => {
                         value={value}
                         selectionColor="#B21E2B"
                         onFocus={() => setFocusedInput('email')}
-                        onChangeText={onChange}
+                        onChangeText={value => onChange(value.trim())}
                         autoCapitalize="none"
                         style={{ color: 'black' }}
                       />
@@ -418,7 +419,7 @@ const Login = ({ navigation }) => {
                         selectionColor="#B21E2B"
                         onFocus={() => setFocusedInput('password')}
                         secureTextEntry={!showPassword}
-                        onChangeText={onChange}
+                        onChangeText={value => onChange(value.trim())}
                       />
                     )}
                     rules={{
@@ -504,14 +505,26 @@ const Login = ({ navigation }) => {
               </View>
             </KeyboardAvoidingView>
           </ScrollView>
-          <Dialog.Container visible={DialogVisible}>
-            <Dialog.Title>Unable to find user</Dialog.Title>
-            <Dialog.Description>
+          <Dialog.Container
+            visible={DialogVisible}
+            contentStyle={{borderRadius: 10}}>
+            <Dialog.Title style={styles.dialogTitle}>
+              Unable to find user
+            </Dialog.Title>
+            <Dialog.Description style={{color: '#2F3036'}}>
               Please check your email or password and try again. Otherwise
               please register.
             </Dialog.Description>
-            <Dialog.Button label="Register" onPress={onPressRegister} />
-            <Dialog.Button label="Cancel" onPress={onPressOk} />
+            <Dialog.Button
+              style={{color: '#B21E2B'}}
+              label="Register"
+              onPress={onPressRegister}
+            />
+            <Dialog.Button
+              style={{color: 'black'}}
+              label="Cancel"
+              onPress={onPressOk}
+            />
           </Dialog.Container>
         </>
       )}
@@ -631,5 +644,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     alignSelf: 'stretch',
     marginStart: 6,
+  },
+
+  dialogTitle: {
+    color: 'black',
   },
 });

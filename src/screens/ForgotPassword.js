@@ -7,6 +7,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
 import React, {useState} from 'react';
 import {useForm, Controller} from 'react-hook-form';
@@ -26,10 +27,11 @@ const ForgotPassword = ({navigation}) => {
     try {
       // Attempt to send password reset email
       await sendPasswordResetEmail(auth, email.toLowerCase().trim());
-      Alert.alert(
-        'Success',
-        'A password reset email has been sent (if the email exists). Please log back in after resetting your password.',
-      ),
+      // Alert.alert(
+      //   'Success',
+      //   'A password reset email has been sent (if the email exists). Please log back in after resetting your password.',
+      // ),
+      
         setemailSent(true); // Updated message
     } catch (error) {
       // Handle password reset errors
@@ -142,8 +144,38 @@ const ForgotPassword = ({navigation}) => {
         </View>
       ) : (
         <>
+      
+        <View style={{margin:30}}>
+        <Image
+        style={{width: '20%', marginTop: 150,alignSelf:'center'}}
+        resizeMode="contain"
+        source={require('../../src/assets/imagekey.png')}
+      />
+        <Text style={{width: 350,
+          height: 38,
+          color: '#1F2024',
+          alignSelf:'center',
+          fontFamily: 'Inter',
+          
+          textAlign:'center',
+          fontSize: 17,
+          fontWeight: '900',
+          letterSpacing: 0.09,}}>Password reset email sent Succesfully</Text>
+        <Text style={{ width: 220,
+          color: '#71727A',
+          alignSelf:'center',
+          textAlign:'center',
+          fontFamily: 'Inter',
+          fontSize: 14,
+          fontWeight: '400',
+          lineHeight: 20,}}> Please log back in after resetting your password.</Text>
+        </View>
+
+
+
+        
           <TouchableOpacity
-            style={[styles.register, styles.register1, {alignSelf: 'center'}]}
+            style={[styles.register, styles.register1, {alignSelf: 'center'},{marginTop:0}]}
             onPress={() => {
               openInbox();
             }}>
@@ -301,3 +333,5 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
 });
+
+//Ignore

@@ -71,9 +71,9 @@ const Approved = ({ navigation }) => {
     }
   };
 
-  // useFocusEffect(useCallback(() => {
-  //   onRefresh();
-  // }, [Approved]));
+  useFocusEffect(useCallback(() => {
+    onRefresh();
+  }, [Approved]));
 
 
   return (

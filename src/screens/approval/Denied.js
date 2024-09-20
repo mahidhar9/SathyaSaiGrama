@@ -71,9 +71,9 @@ const Denied = ({ navigation }) => {
     }
   };
 
-  // useFocusEffect(useCallback(() => {
-  //   onRefresh();
-  // }, [Denied]));
+  useFocusEffect(useCallback(() => {
+    onRefresh();
+  }, [Denied]));
 
 
   return (

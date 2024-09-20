@@ -198,8 +198,8 @@ const Register = ({navigation}) => {
                 rules={{required: true}}
               />
             </View>
-            {errors.email?.type === 'required' && (
-              <Text style={styles.textError}>Email is required</Text>
+            {errors.name?.type === 'required' && (
+              <Text style={styles.textError}>Name is required</Text>
             )}
 
             <Text style={styles.label}>Email</Text>
@@ -237,7 +237,7 @@ const Register = ({navigation}) => {
             <View
               style={[
                 styles.passBorder,
-                focusedInput === 'password' && styles.inputFocused,
+                focusedInput === 'password' && styles.inputFocused, 
               ]}>
               <Controller
                 name="password"
@@ -256,7 +256,7 @@ const Register = ({navigation}) => {
                     }}
                   />
                 )}
-                rules={{required: true, minLength: 6}}
+                rules={{required: true, minLength: 6,maxLength:20}}
               />
               {showPassword === false ? (
                 <TouchableOpacity
@@ -279,11 +279,16 @@ const Register = ({navigation}) => {
               )}
             </View>
             {errors.password?.type === 'required' && (
-              <Text style={styles.textError}>Password is required</Text>
+              <Text style={[styles.textError,styles.passErro]}>Password is required</Text>
             )}
             {errors.password?.type === 'minLength' && (
-              <Text style={styles.textError}>
-                Password must be 6 characters long
+              <Text style={[styles.textError,styles.passErro]}>
+                Password must be between 6 to 20 characters long
+              </Text>
+            )}
+            {errors.password?.type === 'maxLength' && (
+              <Text style={[styles.textError,styles.passErro]}>
+                Password must be between 6 to 20 characters long
               </Text>
             )}
 
@@ -335,12 +340,12 @@ const Register = ({navigation}) => {
               <Text style={styles.textError}>Password is required</Text>
             )}
             {errors.confirmPassword?.type === 'minLength' && (
-              <Text style={styles.textError}>
-                Password must be 6 characters long
+              <Text style={[styles.textError,styles.passErro]}>
+                Password must be between 6 to 20 characters long
               </Text>
             )}
             {errors.confirmPassword?.type === 'validate' && (
-              <Text style={styles.textError}>Passwords do not match</Text>
+              <Text style={[styles.textError,styles.passErro]}>Passwords do not match</Text>
             )}
 
             {/* <Controller
@@ -544,6 +549,11 @@ const styles = StyleSheet.create({
     color: 'red',
     fontSize: 12,
     marginBottom: 16,
+    marginLeft:5,
+  },
+  passErro:{
+    marginLeft:11,
+
   },
   checkbox: {
     width: 24,

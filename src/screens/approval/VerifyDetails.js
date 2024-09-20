@@ -328,6 +328,46 @@ const VerifyDetails = ({navigation, route}) => {
       user.ID,
     );
     console.log('response in reject', response);
+    let L2status = user.L2_Approval_Status;
+
+    if (L2status ==='APPROVED') {
+      const PasscodeDeleteUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Passcode_Report`;
+  
+      const deletePayload = {
+        criteria:`Passcode==\"${user.Generated_Passcode}\"`,
+        result: {
+          "message": true,
+          "tasks": true
+        }
+      };
+  
+  console.log(deletePayload)
+  
+  
+     
+        try {
+          const deletePasscodeResponse = await fetch(PasscodeDeleteUrl, {
+            method: 'DELETE',
+            headers: {
+              Authorization: `Zoho-oauthtoken ${accessToken}`,
+             
+            },
+           body: JSON.stringify(deletePayload),
+          });
+          if (deletePasscodeResponse.ok) {
+            const responseData = await deletePasscodeResponse.json();
+            console.log('Passcode deleted successfully:', responseData);
+          } else {
+            const errorData = await deletePasscodeResponse.json();
+            console.error('Error deleting passcode:', errorData);
+            // Handle error based on errorData (e.g., display error message, retry, etc.)
+          }
+        } catch (error) {
+          console.error('Error in deleting passcode:', error);
+          // Handle unexpected errors (e.g., network issues, server errors)
+        }
+      }
+      
 
     if (response.code === 3000) {
       if (status === 'PENDING APPROVAL') {
@@ -817,7 +857,7 @@ const VerifyDetails = ({navigation, route}) => {
           </View>
           <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
-              <Text style={styles.label}>Number of Boys</Text>
+              <Text style={styles.label}>Number of Girls</Text>
             </View>
             <View style={styles.right}>
               <Text style={styles.value}>{user.Number_of_Girls}</Text>
