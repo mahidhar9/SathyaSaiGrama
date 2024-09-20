@@ -339,7 +339,7 @@ const Login = ({navigation}) => {
                         value={value}
                         selectionColor="#B21E2B"
                         onFocus={() => setFocusedInput('email')}
-                        onChangeText={onChange}
+                        onChangeText={value => onChange(value.trim())}
                         autoCapitalize="none"
                         style={{color: 'black'}}
                       />
@@ -370,7 +370,7 @@ const Login = ({navigation}) => {
                         selectionColor="#B21E2B"
                         onFocus={() => setFocusedInput('password')}
                         secureTextEntry={!showPassword}
-                        onChangeText={onChange}
+                        onChangeText={value => onChange(value.trim())}
                       />
                     )}
                     rules={{
@@ -456,14 +456,26 @@ const Login = ({navigation}) => {
               </View>
             </KeyboardAvoidingView>
           </ScrollView>
-          <Dialog.Container visible={DialogVisible} contentStyle={{borderRadius:10}}>
-            <Dialog.Title style={styles.dialogTitle}>Unable to find user</Dialog.Title>
-            <Dialog.Description style={{color:'#2F3036'}}>
+          <Dialog.Container
+            visible={DialogVisible}
+            contentStyle={{borderRadius: 10}}>
+            <Dialog.Title style={styles.dialogTitle}>
+              Unable to find user
+            </Dialog.Title>
+            <Dialog.Description style={{color: '#2F3036'}}>
               Please check your email or password and try again. Otherwise
               please register.
             </Dialog.Description>
-            <Dialog.Button style={{color:'#B21E2B'}} label="Register" onPress={onPressRegister} />
-            <Dialog.Button style={{color:'black'}} label="Cancel" onPress={onPressOk} />
+            <Dialog.Button
+              style={{color: '#B21E2B'}}
+              label="Register"
+              onPress={onPressRegister}
+            />
+            <Dialog.Button
+              style={{color: 'black'}}
+              label="Cancel"
+              onPress={onPressOk}
+            />
           </Dialog.Container>
         </>
       )}
@@ -586,7 +598,6 @@ const styles = StyleSheet.create({
   },
 
   dialogTitle: {
-color: 'black',
-
+    color: 'black',
   },
 });
