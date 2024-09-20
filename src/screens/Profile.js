@@ -34,7 +34,6 @@ import RNRestart from 'react-native-restart';
 import Dialog from 'react-native-dialog';
 import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME } from '@env';
 import Toast from 'react-native-toast-message';
-import { black } from 'react-native-paper/lib/typescript/styles/themes/v2/colors';
 
 const Profile = ({ navigation }) => {
   const {
