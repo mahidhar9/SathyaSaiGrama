@@ -33,9 +33,18 @@ const Register = ({navigation}) => {
     formState: {errors},
   } = useForm();
   const [password, setPassword] = useState();
-  const {accessToken, resident, employee, testResident} =
-    useContext(UserContext);
-
+  const {
+    accessToken,
+    resident,
+    setResident,
+    employee,
+    setEmployee,
+    testResident,
+    setTestResident,
+  } = useContext(UserContext);
+  let residentLocalVar = resident;
+  let employeeLocalVar = employee;
+  let testResidentLocalVar = testResident;
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [focusedInput, setFocusedInput] = useState(null);
@@ -50,12 +59,16 @@ const Register = ({navigation}) => {
       '3318254000031368021',
       accessToken,
     );
-    if (res && res.data) {
+    if (res && res.data && res.data[0].Accommodation_Approval === 'APPROVED') {
       console.log('Test resident is true');
-      testResident.current = true;
+      // testResident.current = true;
+      testResidentLocalVar = true;
+      setTestResident(true);
     } else {
       console.log('Test Resident is false');
-      testResident.current = false;
+      // testResident.current = false;
+      testResidentLocalVar = false;
+      setTestResident(false);
     }
   };
 
@@ -66,11 +79,15 @@ const Register = ({navigation}) => {
       id,
       accessToken,
     );
-    if (res && res.data) {
+    if (res && res.data && res.data[0].Accommodation_Approval === 'APPROVED') {
       console.log('resident data found in Login:', res.data);
-      resident.current = true;
+      // resident.current = true;
+      residentLocalVar = true;
+      setResident(true);
     } else {
-      resident.current = false;
+      // resident.current = false;
+      residentLocalVar = false;
+      setResident(false);
     }
     console.log('response in fetchDataFromOffice in login: '.res);
   };
@@ -82,11 +99,15 @@ const Register = ({navigation}) => {
       id,
       accessToken,
     );
-    if (res && res.data) {
-      console.log('resident data found in Login:', res.data);
-      employee.current = true;
+    if (res && res.data && res.data[0].Department_Approval === 'APPROVED') {
+      console.log('employee data found in Login:', res.data);
+      // employee.current = true;
+      employeeLocalVar = true;
+      setEmployee(true);
     } else {
-      employee.current = false;
+      // employee.current = false;
+      employeeLocalVar = false;
+      setEmployee(false);
     }
     console.log('response in fetchDataFromOffice in login: '.res);
   };
@@ -101,58 +122,52 @@ const Register = ({navigation}) => {
       accessToken,
     );
     console.log('App user response returned in handleReg', res);
-    if (
-      res.data &&
-      res.data.length > 0 
-     
-    ) {
+    if (res.data && res.data.length > 0) {
       await isResident(res.data[0].ID);
-    await isEmployee(res.data[0].ID);
-    console.log(
-      'resident || employee boolean in Register',
-      resident.current,
-      employee.current,
-    );
-    await isTestResident(res.data[0].ID);
-    if(resident.current || employee.current){
-      //authentication
-      try {
-        await createUserWithEmailAndPassword(
-          auth,
-          userCred.email.toLowerCase().trim(),
-          userCred.password,
-        );
-        sendEmailVerification(auth.currentUser);
-        setLoading(false);
-        console.log('Id in register: ', res.data[0]);
-        navigation.navigate('VerificationNotice', {
-          id: res.data[0].ID,
-          email: email,
-        });
-      } catch (error) {
-        setLoading(false);
-        if (error.message === 'Network request failed')
-          Alert.alert(
-            'Network Error',
-            'Failed to fetch data. Please check your network connection and try again.',
+      await isEmployee(res.data[0].ID);
+      console.log(
+        'resident || employee boolean in Register',
+        residentLocalVar,
+        employeeLocalVar,
+      );
+      await isTestResident(res.data[0].ID);
+      if (residentLocalVar || employeeLocalVar) {
+        //authentication
+        try {
+          await createUserWithEmailAndPassword(
+            auth,
+            userCred.email.toLowerCase().trim(),
+            userCred.password,
           );
-        else if (error.code === 'auth/email-already-in-use') {
-          Alert.alert('That email address is already in use!');
-        } else if (error.code === 'auth/invalid-email') {
-          Alert.alert('That email address is invalid!');
-        } else {
-          Alert.alert('Error in creating account:', error.message);
+          sendEmailVerification(auth.currentUser);
+          setLoading(false);
+          console.log('Id in register: ', res.data[0]);
+          navigation.navigate('VerificationNotice', {
+            id: res.data[0].ID,
+            email: email,
+          });
+        } catch (error) {
+          setLoading(false);
+          if (error.message === 'Network request failed')
+            Alert.alert(
+              'Network Error',
+              'Failed to fetch data. Please check your network connection and try again.',
+            );
+          else if (error.code === 'auth/email-already-in-use') {
+            Alert.alert('That email address is already in use!');
+          } else if (error.code === 'auth/invalid-email') {
+            Alert.alert('That email address is invalid!');
+          } else {
+            Alert.alert('Error in creating account:', error.message);
+          }
+          console.log('Error in auth: ', error);
         }
-        console.log('Error in auth: ', error);
+      } else {
+        setLoading(false);
+        Alert.alert('Your data does not exist. Please contact Admin');
+        console.log('false');
       }
-    }else {
-      setLoading(false);
-      Alert.alert('Your data does not exist. Please contact Admin');
-      console.log('false');
-    }
-  }
-    
-     else {
+    } else {
       setLoading(false);
       Alert.alert('Your data does not exist. Please contact Admin');
       console.log('false');
@@ -237,7 +252,7 @@ const Register = ({navigation}) => {
             <View
               style={[
                 styles.passBorder,
-                focusedInput === 'password' && styles.inputFocused, 
+                focusedInput === 'password' && styles.inputFocused,
               ]}>
               <Controller
                 name="password"
@@ -256,7 +271,7 @@ const Register = ({navigation}) => {
                     }}
                   />
                 )}
-                rules={{required: true, minLength: 6,maxLength:20}}
+                rules={{required: true, minLength: 6, maxLength: 20}}
               />
               {showPassword === false ? (
                 <TouchableOpacity
@@ -279,15 +294,17 @@ const Register = ({navigation}) => {
               )}
             </View>
             {errors.password?.type === 'required' && (
-              <Text style={[styles.textError,styles.passErro]}>Password is required</Text>
+              <Text style={[styles.textError, styles.passErro]}>
+                Password is required
+              </Text>
             )}
             {errors.password?.type === 'minLength' && (
-              <Text style={[styles.textError,styles.passErro]}>
+              <Text style={[styles.textError, styles.passErro]}>
                 Password must be between 6 to 20 characters long
               </Text>
             )}
             {errors.password?.type === 'maxLength' && (
-              <Text style={[styles.textError,styles.passErro]}>
+              <Text style={[styles.textError, styles.passErro]}>
                 Password must be between 6 to 20 characters long
               </Text>
             )}
@@ -340,12 +357,14 @@ const Register = ({navigation}) => {
               <Text style={styles.textError}>Password is required</Text>
             )}
             {errors.confirmPassword?.type === 'minLength' && (
-              <Text style={[styles.textError,styles.passErro]}>
+              <Text style={[styles.textError, styles.passErro]}>
                 Password must be between 6 to 20 characters long
               </Text>
             )}
             {errors.confirmPassword?.type === 'validate' && (
-              <Text style={[styles.textError,styles.passErro]}>Passwords do not match</Text>
+              <Text style={[styles.textError, styles.passErro]}>
+                Passwords do not match
+              </Text>
             )}
 
             {/* <Controller
@@ -549,11 +568,10 @@ const styles = StyleSheet.create({
     color: 'red',
     fontSize: 12,
     marginBottom: 16,
-    marginLeft:5,
+    marginLeft: 5,
   },
-  passErro:{
-    marginLeft:11,
-
+  passErro: {
+    marginLeft: 11,
   },
   checkbox: {
     width: 24,

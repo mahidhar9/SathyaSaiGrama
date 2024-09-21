@@ -12,10 +12,10 @@ import {
   ImageBackground,
   Dimensions,
 } from 'react-native';
-import React, { useState, useContext, useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { auth } from '../auth/firebaseConfig';
-import { signInWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
+import React, {useState, useContext, useEffect} from 'react';
+import {useForm, Controller} from 'react-hook-form';
+import {auth} from '../auth/firebaseConfig';
+import {signInWithEmailAndPassword, sendEmailVerification} from 'firebase/auth';
 import {
   getDataWithInt,
   getDataWithString,
@@ -23,17 +23,17 @@ import {
 } from '../components/ApiRequest';
 import UserContext from '../../context/UserContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME } from '@env';
+import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME} from '@env';
 import Dialog from 'react-native-dialog';
-import { encode } from 'base64-arraybuffer';
+import {encode} from 'base64-arraybuffer';
 
-const Login = ({ navigation }) => {
+const Login = ({navigation}) => {
   const screenWidth = Dimensions.get('window').width;
   const [loading, setLoading] = useState(false);
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: {errors},
   } = useForm();
   const {
     userType,
@@ -45,10 +45,16 @@ const Login = ({ navigation }) => {
     setLoggedUser,
     deviceToken,
     resident,
+    setResident,
     setProfileImage,
     employee,
+    setEmployee,
     testResident,
+    setTestResident,
   } = useContext(UserContext);
+  let residentLocalVar = resident;
+  let employeeLocalVar = employee;
+  let testResidentLocalVar = testResident;
   const [currentUser, setCurrentUser] = useState(null);
   const [departmentIds, setDepartmentIds] = useState([]);
   const [showPassword, setShowPassword] = useState(false);
@@ -95,12 +101,16 @@ const Login = ({ navigation }) => {
       '3318254000031368021',
       accessToken,
     );
-    if (res && res.data) {
+    if (res && res.data && res.data[0].Accommodation_Approval === 'APPROVED') {
       console.log('Test resident is true');
-      testResident.current = true;
+      // testResident.current = true;
+      testResidentLocalVar = true;
+      setTestResident(true);
     } else {
       console.log('Test Resident is false');
-      testResident.current = false;
+      // testResident.current = false;
+      testResidentLocalVar = false;
+      setTestResident(false);
     }
   };
 
@@ -111,12 +121,16 @@ const Login = ({ navigation }) => {
       id,
       accessToken,
     );
-    if (res && res.data) {
+    if (res && res.data && res.data[0].Accommodation_Approval === 'APPROVED') {
       console.log('resident is true');
-      resident.current = true;
+      // resident.current = true;
+      residentLocalVar = true;
+      setResident(true);
     } else {
       console.log('resident is false');
-      resident.current = false;
+      // resident.current = false;
+      residentLocalVar = false;
+      setResident(false);
     }
   };
 
@@ -127,12 +141,16 @@ const Login = ({ navigation }) => {
       id,
       accessToken,
     );
-    if (res && res.data) {
+    if (res && res.data && res.data[0].Department_Approval === 'APPROVED') {
       console.log('employee is true');
-      employee.current = true;
+      // employee.current = true;
+      employeeLocalVar = true;
+      setEmployee(true);
     } else {
       console.log('employee is false');
-      employee.current = false;
+      // employee.current = false;
+      employeeLocalVar = false;
+      setEmployee(false);
     }
   };
 
@@ -147,7 +165,7 @@ const Login = ({ navigation }) => {
             role: userType,
             email: currentUser.email,
             deptIds: departmentIds,
-            name: currentUser.L1name,
+            name: currentUser.name,
             profilePhoto: currentUser.profilePhoto,
           }),
         );
@@ -156,6 +174,7 @@ const Login = ({ navigation }) => {
         existedUser = JSON.parse(existedUser);
         console.log('Existed user in Base route useEffect:', existedUser);
         setLoggedUser(existedUser);
+        setLoading(false);
         navigation.navigate('FooterTab');
       }
     };
@@ -216,8 +235,8 @@ const Login = ({ navigation }) => {
     }
   };
 
-  const getProfileImage = async (url) => {
-    console.log("url in getProfileImage", url)
+  const getProfileImage = async url => {
+    console.log('url in getProfileImage', url);
     const cacheBuster = new Date().getTime();
     const requestUrl = `${url}?cb=${cacheBuster}`;
     try {
@@ -225,8 +244,8 @@ const Login = ({ navigation }) => {
         method: 'GET',
         headers: {
           Authorization: `Zoho-oauthtoken ${accessToken}`,
-          'Cache-Control': 'no-cache',  // Prevent caching
-          Pragma: 'no-cache',           // Prevent caching in older HTTP/1.0 proxies
+          'Cache-Control': 'no-cache', // Prevent caching
+          Pragma: 'no-cache', // Prevent caching in older HTTP/1.0 proxies
           Expires: '0',
         },
       });
@@ -246,7 +265,6 @@ const Login = ({ navigation }) => {
     }
   };
 
-
   const handleLoginForm = async userCred => {
     setLoading(true);
     const res = await getDataWithString(
@@ -260,11 +278,11 @@ const Login = ({ navigation }) => {
     await isEmployee(res.data[0].ID);
     console.log(
       'resident || employee boolean',
-      resident.current,
-      employee.current,
+      residentLocalVar,
+      employeeLocalVar,
     );
     await isTestResident(res.data[0].ID);
-    if (res && res.data && (resident.current || employee.current)) {
+    if (res && res.data && (residentLocalVar || employeeLocalVar)) {
       try {
         fetchDataFromOffice(res.data[0].ID);
         const userCredential = await signInWithEmailAndPassword(
@@ -273,7 +291,7 @@ const Login = ({ navigation }) => {
           userCred.password,
         );
         const user = userCredential.user;
-        setLoading(false);
+
         if (user.emailVerified) {
           setL1ID(res.data[0].ID);
           setUserEmail(userCred.email.toLowerCase().trim());
@@ -281,20 +299,20 @@ const Login = ({ navigation }) => {
           const reqUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${res.data[0].ID}/Profile_Photo/download`;
           const profileImgUrl = await getProfileImage(reqUrl);
           if (profileImgUrl.length > 300) {
-            setProfileImage(profileImgUrl)
+            setProfileImage(profileImgUrl);
             setCurrentUser({
               id: res.data[0].ID,
               email: userCred.email.toLowerCase().trim(),
               name: res.data[0].Name_field,
-              profilePhoto: profileImgUrl
+              profilePhoto: profileImgUrl,
             });
           } else {
-            setProfileImage(null)
+            setProfileImage(null);
             setCurrentUser({
               id: res.data[0].ID,
               email: userCred.email.toLowerCase().trim(),
               name: res.data[0].Name_field,
-              profilePhoto: null
+              profilePhoto: null,
             });
           }
           const response = await findDeviceToken(res.data[0].ID);
@@ -323,7 +341,8 @@ const Login = ({ navigation }) => {
         } else {
           // Email is not verified, display message and send verification email (if needed)
           await sendEmailVerification(auth.currentUser);
-          navigation.navigate('VerificationNotice', { id: res.data[0].ID });
+          setLoading(false);
+          navigation.navigate('VerificationNotice', {id: res.data[0].ID});
         }
       } catch (error) {
         setLoading(false);
@@ -380,18 +399,20 @@ const Login = ({ navigation }) => {
                   <Controller
                     name="email"
                     control={control}
-                    render={({ field: { onChange, value } }) => (
+                    render={({field: {onChange, value}}) => (
                       <TextInput
                         placeholder="Email Address"
                         value={value}
                         selectionColor="#B21E2B"
                         onFocus={() => setFocusedInput('email')}
-                        onChangeText={value => onChange(value.trim())}
+                        onChangeText={value =>
+                          onChange(value.toLowerCase().trim())
+                        }
                         autoCapitalize="none"
-                        style={{ color: 'black' }}
+                        style={{color: 'black'}}
                       />
                     )}
-                    rules={{ required: true, pattern: /^\S+@\S+$/i }}
+                    rules={{required: true, pattern: /^\S+@\S+$/i}}
                   />
                 </View>
                 {errors.email?.type === 'required' && (
@@ -409,7 +430,7 @@ const Login = ({ navigation }) => {
                   <Controller
                     name="password"
                     control={control}
-                    render={({ field: { onChange, value } }) => (
+                    render={({field: {onChange, value}}) => (
                       <TextInput
                         placeholder="Password"
                         style={styles.inputBox}
@@ -432,7 +453,7 @@ const Login = ({ navigation }) => {
                       }}>
                       <Image
                         source={require('../assets/eyestrike.png')}
-                        style={{ width: 16, height: 16 }}
+                        style={{width: 16, height: 16}}
                       />
                     </TouchableOpacity>
                   ) : (
@@ -440,7 +461,7 @@ const Login = ({ navigation }) => {
                       onPress={() => setShowPassword(!showPassword)}>
                       <Image
                         source={require('../assets/eye.png')}
-                        style={{ width: 16, height: 16 }}
+                        style={{width: 16, height: 16}}
                       />
                     </TouchableOpacity>
                   )}
