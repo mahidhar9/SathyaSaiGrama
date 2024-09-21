@@ -123,6 +123,12 @@ const Edit = ({ route, navigation }) => {
   const handleEditPhone = () => {
     setIsEditable(true)
   }
+  const handleCancelPhone = () =>{
+    setPhoneErr(null);
+    setPhoneValidErr(null);
+    setFormattedValue(userdata?.Phone_Number)
+    setIsEditable(false)
+  }
 
   const validatePhoneNumber = () => {
     if (!formattedValue) {
@@ -414,42 +420,49 @@ const Edit = ({ route, navigation }) => {
                   </Text>
 
                   <View style={styles.editPhoneContainer}>
-                  <Controller
-                    name="phoneDisplay"
-                    control={control}
-                    defaultValue={userdata?.Phone_Number}
-                    render={({ field: { onChange, value } }) => (
-                      <TextInput
-                        style={styles.displayPhone}
-                        value={value}
-                        editable={false}
-                      />
-                    )}
-                    rules={{ required: true }}
-                  />
-                  <TouchableOpacity onPress={handleEditPhone} style={styles.editPhonebtn}>
-                    <Image source={require('../assets/edit.png')} style={styles.editPhoneIcon} />
-                  </TouchableOpacity>
+                    <Controller
+                      name="phoneDisplay"
+                      control={control}
+                      defaultValue={userdata?.Phone_Number}
+                      render={({ field: { onChange, value } }) => (
+                        <TextInput
+                          style={styles.displayPhone}
+                          value={value}
+                          editable={false}
+                        />
+                      )}
+                      rules={{ required: true }}
+                    />
+                    <TouchableOpacity onPress={handleEditPhone} style={styles.editPhonebtn}>
+                      <Image source={require('../assets/edit.png')} style={styles.editPhoneIcon} />
+                    </TouchableOpacity>
                   </View>
 
                   {
                     isEditable && (
                       <>
-                        <PhoneInput
-                          defaultCode="IN"
-                          layout="first"
-                          containerStyle={styles.phoneInputContainer}
-                          textContainerStyle={styles.textContainer}
-                          flagButtonStyle={styles.flagButton}
-                          codeTextStyle={styles.codeText}
-                          onChangeFormattedText={text => {
-                            setFormattedValue(text);
-                          }}
-                          countryPickerProps={{ withAlphaFilter: true }}
-                          disabled={false}
-                          withDarkTheme
-                          withShadow
-                        />
+                        <View style={styles.editPhoneContainer}>
+                          <PhoneInput
+                            defaultCode="IN"
+                            layout="first"
+                            placeholder=' '
+                            containerStyle={styles.phoneInputContainer}
+                            textContainerStyle={styles.textContainer}
+                            flagButtonStyle={styles.flagButton}
+                            codeTextStyle={styles.codeText}
+                            onChangeFormattedText={text => {
+                              setFormattedValue(text);
+                            }}
+                            countryPickerProps={{ withAlphaFilter: true }}
+                            disabled={false}
+                            withDarkTheme
+                            withShadow
+                          />
+
+                          <TouchableOpacity onPress={handleCancelPhone} style={styles.editPhonebtn}>
+                            <Image source={require('../assets/cancel.png')} style={[styles.editPhoneIcon, {tintColor: "#B21E2B"}]} />
+                          </TouchableOpacity>
+                        </View>
 
                         {phoneErr && <Text style={styles.textError}>{phoneErr}</Text>}
                         {phoneValidErr && (
@@ -462,8 +475,8 @@ const Edit = ({ route, navigation }) => {
 
 
                 </View>
-
-                <View style={styles.field}>
+                {/* Secondary phone number */}
+                {/* <View style={styles.field}>
                   <Text style={styles.label}>Secondary Phone</Text>
                   <Controller
                     name="secondary_phone"
@@ -476,7 +489,7 @@ const Edit = ({ route, navigation }) => {
                       />
                     )}
                   />
-                </View>
+                </View> */}
 
                 <View style={styles.field}>
                   <Text style={styles.label}>
@@ -801,7 +814,7 @@ const Edit = ({ route, navigation }) => {
 export default Edit;
 
 const styles = StyleSheet.create({
-  displayPhone:{
+  displayPhone: {
     fontFamily: 'Inter',
     width: "100%",
     fontStyle: 'normal',
@@ -812,20 +825,21 @@ const styles = StyleSheet.create({
     borderColor: '#C5C6CC',
     paddingHorizontal: 12,
   },
-  editPhoneContainer:{
+  editPhoneContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     gap: 0
   },
-  editPhonebtn:{
+  editPhonebtn: {
     width: 25,
     height: 25,
     left: "-50%",
     marginTop: 12
   },
   editPhoneIcon: {
-    width: 23,
-    height: 19,
+    width: 15,
+    height: 15,
+    marginTop: 5
     // top: -45,
 
   },
