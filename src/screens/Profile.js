@@ -541,6 +541,11 @@ const Profile = ({navigation}) => {
       console.error('Error deleting resource:', error);
     }
   };
+  const [logoutModalVisible, setLogoutModalVisible] = useState(false);
+
+  const handleLogoutModal = () => {
+    setLogoutModalVisible(!logoutModalVisible);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -549,121 +554,16 @@ const Profile = ({navigation}) => {
           <ActivityIndicator size="large" color="#B21E2B" />
         </View>
       ) : isLogOutIndicator ? (
-        <>
-          <View style={styles.account}>
-            <Text style={styles.accountTitle}>Account</Text>
-          </View>
-          <View style={styles.topSection}>
-            <View>
-              <TouchableOpacity>
-                {profileImage != null ? (
-                  <Image source={{uri: profileImage}} style={styles.propic} />
-                ) : (
-                  <Image
-                    source={require('../assets/profileImg.png')}
-                    style={styles.propic}
-                  />
-                )}
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={openProfileModal}
-                style={styles.editContainer}>
-                <Image
-                  source={require('../assets/edit.png')}
-                  style={styles.editIcon}
-                />
-              </TouchableOpacity>
-
-              {/* profile picture selector modal */}
-              <Modal
-                transparent={true}
-                visible={frofileModalVisible}
-                animationType="none"
-                onRequestClose={closeProfileModal}>
-                <KeyboardAvoidingView
-                  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                  style={{flex: 1}}>
-                  <ScrollView contentContainerStyle={{flexGrow: 1}}>
-                    {/* Close Modal when clicking outside */}
-                    <TouchableWithoutFeedback onPress={closeProfileModal}>
-                      <View style={styles.overlay}>
-                        <Animated.View
-                          style={[
-                            styles.modalContent,
-                            {transform: [{translateY: slideAnim}]},
-                          ]}>
-                          <View style={{width: '100%'}}>
-                            <Text style={styles.uploadHead}>Profile Photo</Text>
-                            <View style={styles.profileUpload}>
-                              <TouchableOpacity
-                                onPress={takePhoto}
-                                style={styles.iconButton}>
-                                <Image
-                                  source={require('../assets/cameraImg.png')}
-                                  style={styles.uploadImg}
-                                />
-                                <Text>Camera</Text>
-                              </TouchableOpacity>
-                              <TouchableOpacity
-                                onPress={selectImage}
-                                style={styles.iconButton}>
-                                <Image
-                                  source={require('../assets/galleryImg.png')}
-                                  style={styles.uploadImg}
-                                />
-                                <Text>Gallery</Text>
-                              </TouchableOpacity>
-                              {profileImage && (
-                                <TouchableOpacity
-                                  onPress={deleteProfileImage}
-                                  style={styles.iconButton}>
-                                  <Image
-                                    source={require('../assets/delete.png')}
-                                    style={styles.uploadImg}
-                                  />
-                                  <Text>Delete</Text>
-                                </TouchableOpacity>
-                              )}
-                            </View>
-                          </View>
-                        </Animated.View>
-                      </View>
-                    </TouchableWithoutFeedback>
-                  </ScrollView>
-                </KeyboardAvoidingView>
-              </Modal>
-              {/* <TouchableOpacity style={styles.edit} onPress={changeProfile}>
-                <Image
-                  source={require('../assets/Edit.png')}
-                  style={{
-                    width: 17,
-                    height: 14.432,
-                    marginEnd: 5,
-                    flexShrink: 0,
-                    marginLeft: 70,
-                    textAlign: 'right',
-                  }}
-                />
-              </TouchableOpacity> */}
-            </View>
-
-            {/* <Text style={styles.name}>{loggedUser.name}</Text>
-            <View style={styles.imgdel}>
-              <Text style={styles.emailVisible}>{userEmail}</Text>
-
-            </View> */}
-          </View>
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
           <View style={styles.indicatorBox}>
             <ActivityIndicator
               style={styles.activityIndicator}
               size="large"
               color="#0000ff"
             />
-
             <Text style={styles.text}>Logging Out...</Text>
           </View>
-        </>
+        </View>
       ) : (
         <View>
           <View style={styles.account}>
@@ -749,19 +649,6 @@ const Profile = ({navigation}) => {
                   </ScrollView>
                 </KeyboardAvoidingView>
               </Modal>
-              {/* <TouchableOpacity style={styles.edit} onPress={changeProfile}>
-                <Image
-                  source={require('../assets/Edit.png')}
-                  style={{
-                    width: 17,
-                    height: 14.432,
-                    marginEnd: 5,
-                    flexShrink: 0,
-                    marginLeft: 70,
-                    textAlign: 'right',
-                  }}
-                />
-              </TouchableOpacity> */}
             </View>
 
             <Text style={styles.name}>{loggedUser.name}</Text>
@@ -815,7 +702,9 @@ const Profile = ({navigation}) => {
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.buttonSection} onPress={onLogout}>
+            <TouchableOpacity
+              style={styles.buttonSection}
+              onPress={handleLogoutModal}>
               <View style={styles.buttonArea}>
                 <Text style={styles.buttonName}>Logout</Text>
                 <Image
@@ -1014,6 +903,39 @@ const Profile = ({navigation}) => {
                       </View>
                     </>
                   )}
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
+
+          <Modal
+            animationType="fade"
+            transparent={true}
+            visible={logoutModalVisible}
+            onRequestClose={() => setModalVisible(!logoutModalVisible)}>
+            <TouchableWithoutFeedback onPress={handleLogoutModal}>
+              <View style={styles.centeredView}>
+                <View style={OndeleteStyles.modalView}>
+                  <Text style={styles.shareLink}>
+                    Are you sure want to logout?
+                  </Text>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                    }}>
+                    <TouchableOpacity
+                      style={[styles.HomeButton, {backgroundColor: '#B21E2B'}]}
+                      onPress={onLogout}>
+                      <Text style={[styles.wewe, styles.wewe1]}>Yes</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.HomeButton, {backgroundColor: '#FFBE65'}]}
+                      onPress={() =>
+                        setLogoutModalVisible(!logoutModalVisible)
+                      }>
+                      <Text style={[styles.wewe, styles.wewe2]}>No</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
             </TouchableWithoutFeedback>
@@ -1353,12 +1275,12 @@ const styles = StyleSheet.create({
     height: 50,
     width: 120,
     backgroundColor: '#752A26',
-    paddingTop: 12,
-    paddingBottom: 12,
     borderRadius: 12,
     marginTop: 20,
     marginLeft: 4,
     marginRight: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   detailsNotEditableDialogue: {
     borderRadius: 30,
@@ -1373,6 +1295,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: 250,
+    height: 100,
     alignSelf: 'center',
     padding: 30,
     backgroundColor: '#fff',
