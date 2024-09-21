@@ -16,12 +16,12 @@ function ContextProvider({children}) {
   const [userType, setUserType] = useState(null);
   const [loggedUser, setLoggedUser] = useState(null);
   const [deviceToken, setDeviceToken] = useState(null);
-  // const [resident, setResident] = useState(false);
-  // const [employee, setEmployee] = useState(false);
-  // const [testResident, setTestResident] = useState(false);
-  const resident = useRef(false);
-  const employee = useRef(false);
-  const testResident = useRef(false);
+  const [resident, setResident] = useState(false);
+  const [employee, setEmployee] = useState(false);
+  const [testResident, setTestResident] = useState(false);
+  // const resident = false;
+  // const employee = false;
+  // const testResident = false;
   //let accessToken = ""
   const [accessToken, setAccessToken] = useState(''); // Use state for accessToken
 
@@ -75,10 +75,11 @@ function ContextProvider({children}) {
         deviceToken,
         setDeviceToken,
         resident,
-
+        setResident,
         employee,
-
+        setEmployee,
         testResident,
+        setTestResident,
         profileImage,
         setProfileImage,
       }}>
