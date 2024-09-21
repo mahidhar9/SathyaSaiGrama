@@ -553,14 +553,18 @@ const Profile = ({navigation}) => {
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#B21E2B" />
         </View>
-      ) : ((isLogOutIndicator ? (
-        <View style={{flex:1, justifyContent:"center", alignItems: "center"}}>
+      ) : isLogOutIndicator ? (
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
           <View style={styles.indicatorBox}>
-            <ActivityIndicator style={styles.activityIndicator} size="large" color="#0000ff" />
+            <ActivityIndicator
+              style={styles.activityIndicator}
+              size="large"
+              color="#0000ff"
+            />
             <Text style={styles.text}>Logging Out...</Text>
           </View>
-          </View>
-      ) :
+        </View>
+      ) : (
         <View>
           <View style={styles.account}>
             <Text style={styles.accountTitle}>Account</Text>
@@ -698,9 +702,9 @@ const Profile = ({navigation}) => {
               </View>
             </TouchableOpacity>
 
-
-            <TouchableOpacity style={styles.buttonSection} onPress={handleLogoutModal}>
-
+            <TouchableOpacity
+              style={styles.buttonSection}
+              onPress={handleLogoutModal}>
               <View style={styles.buttonArea}>
                 <Text style={styles.buttonName}>Logout</Text>
                 <Image
@@ -932,37 +936,6 @@ const Profile = ({navigation}) => {
                       <Text style={[styles.wewe, styles.wewe2]}>No</Text>
                     </TouchableOpacity>
                   </View>
-                </View>
-              </View>
-            </TouchableWithoutFeedback>
-          </Modal>
-
-          <Modal
-            animationType="fade"
-            transparent={true}
-            visible={logoutModalVisible}
-            onRequestClose={() => setModalVisible(!logoutModalVisible)}>
-            <TouchableWithoutFeedback onPress={handleLogoutModal}>
-              <View style={styles.centeredView}>
-                <View style={OndeleteStyles.modalView}>
-                    <Text style={styles.shareLink}>
-                      Are you sure want to logout?
-                    </Text>
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                      }}>
-                      <TouchableOpacity
-                        style={[styles.HomeButton, { backgroundColor: '#B21E2B' }]}
-                        onPress={onLogout}>
-                        <Text style={[styles.wewe, styles.wewe1]}>Yes</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={[styles.HomeButton, { backgroundColor: '#FFBE65' }]}
-                        onPress={() => setLogoutModalVisible(!logoutModalVisible)}>
-                        <Text style={[styles.wewe, styles.wewe2]}>No</Text>
-                      </TouchableOpacity>
-                    </View>
                 </View>
               </View>
             </TouchableWithoutFeedback>
@@ -1308,7 +1281,6 @@ const styles = StyleSheet.create({
     marginRight: 4,
     justifyContent: 'center',
     alignItems: 'center',
-
   },
   detailsNotEditableDialogue: {
     borderRadius: 30,
@@ -1318,7 +1290,6 @@ const styles = StyleSheet.create({
   detailsNotEditableTitle: {
     fontWeight: 'bold',
   },
-
   indicatorBox: {
     margin: 30,
     justifyContent: 'center',
