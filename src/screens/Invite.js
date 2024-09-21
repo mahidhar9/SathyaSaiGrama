@@ -224,7 +224,7 @@ const Invite = ({navigation}) => {
               </Text>
             </TouchableOpacity>
             <View style={styles.wrapper}>
-            <Modal
+              <Modal
                 animationType="fade"
                 transparent={true}
                 visible={modal}
@@ -246,7 +246,7 @@ const Invite = ({navigation}) => {
                         style={{
                           flexDirection: 'row',
                         }}>
-                        {resident.current ? (
+                        {resident ? (
                           <TouchableOpacity
                             style={[
                               styles.HomeButton,
@@ -260,7 +260,7 @@ const Invite = ({navigation}) => {
                             </Text>
                           </TouchableOpacity>
                         ) : null}
-                        {employee.current ? (
+                        {employee ? (
                           <TouchableOpacity
                             style={[
                               styles.HomeButton,
