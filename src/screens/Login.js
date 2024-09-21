@@ -165,7 +165,7 @@ const Login = ({navigation}) => {
             role: userType,
             email: currentUser.email,
             deptIds: departmentIds,
-            name: currentUser.L1name,
+            name: currentUser.name,
             profilePhoto: currentUser.profilePhoto,
           }),
         );
