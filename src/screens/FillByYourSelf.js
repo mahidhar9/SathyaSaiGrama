@@ -224,7 +224,25 @@ const FillByYourSelf = ({navigation}) => {
 
   const posttoL1aprroved = async DepartmentID => {
     console.log('inside posttoL1aprroved');
+   
     // const Vehicle_Info = await postVehicle();
+    let menCount = '0';
+    let womenCount='0';
+    if(selectedSG==='Single'){
+      if(selectedGender === 'Male' ){
+        console.log('Inside Single Male');
+        menCount='1';
+        womenCount='0';
+      }else if(selectedGender === 'Female'){
+        console.log('Inside Single Female');
+        menCount='0';
+        womenCount='1';
+      }
+    }
+    else{
+      menCount=men;
+        womenCount=women;
+    }
     const formData = {
       data: {
         Single_or_Group_Visit: selectedSG,
@@ -242,9 +260,9 @@ const FillByYourSelf = ({navigation}) => {
         Date_of_Visit: date,
         Gender: selectedGender,
         Guest_Category: guestCategory,
-        Number_of_Men: men,
+        Number_of_Men: menCount,
         Number_of_Boys: boys,
-        Number_of_Women: women,
+        Number_of_Women: womenCount,
         Number_of_Girls: girls,
         Home_or_Office: selectedHO,
         Vehicle_Information: vehicles,
@@ -372,6 +390,13 @@ const FillByYourSelf = ({navigation}) => {
     } else {
       setNameErr(null);
     }
+    if (!validateInput(firstName,setNameErr) || !validateInput(lastName,setNameErr)) {
+      // setNameErr('Prefix, First Name and Last Name are required');
+      Alert.alert('Error','Only letters are allowed in the name field ')
+      valid = false;
+    } else {
+      setNameErr(null);
+    }
 
     if (date === 'Select Date') {
       setDateOfVisitErr('Date of visit is required');
@@ -398,7 +423,13 @@ const FillByYourSelf = ({navigation}) => {
       setSingleOrGroupErr('Single or Group is required');
       valid = false;
     } else {
-      setSingleOrGroupErr(null);
+      // setSingleOrGroupErr(null);
+      if (selectedSG==='Group' && men==='0' && women==='0' && boys==='0' && girls === '0' ) {
+        setSingleOrGroupErr('Total No. of people cannot be 0');
+        valid = false;
+      } else {
+        setSingleOrGroupErr(null);
+      }
     }
 
     if (!selectedHO) {
@@ -426,9 +457,11 @@ const FillByYourSelf = ({navigation}) => {
   };
 
   const handleSubmit = async () => {
-    console.log('##########vehicles are: ', vehicles);
+  
+       console.log('##########vehicles are: ', vehicles);
     setSubmitFlag(true);
     if (validateForm()) {
+      
       setIsSubmitted(true);
       let office_id;
 
@@ -443,7 +476,7 @@ const FillByYourSelf = ({navigation}) => {
         console.log(empId);
         office_id = empId.data[0].Office_lookup.ID;
       }
-
+      
       try {
         const rese = await posttoL1aprroved(office_id);
         console.log('Response of posting to Approval_to_Visitor_Report', rese);
@@ -617,6 +650,30 @@ const FillByYourSelf = ({navigation}) => {
       PasscodeData();
     }
   }, [codeReload]);
+ 
+ 
+  const [firstNameError, setFirstNameError] = useState('');
+  const [lastNameError, setLastNameError] = useState('');
+  const validateInput = (txt, setError) => {
+    if (/^[a-zA-Z\s]+$/.test(txt) || txt === '') {
+      setError(''); // Clear error on valid input
+      return true; // Valid input
+    } else {
+      setError('Only letters are allowed.');
+      return false; // Invalid input
+    }
+  };
+
+  const handleFirstNameChange = (txt) => {
+    setFirstName(txt);
+    validateInput(txt, setFirstNameError);
+  };
+
+  const handleLastNameChange = (txt) => {
+    setLastName(txt);
+    validateInput(txt, setLastNameError);
+  };
+
 
   return (
     <>
@@ -654,6 +711,7 @@ const FillByYourSelf = ({navigation}) => {
                     onChange={item => {
                       if (submitFlag) {
                         validateForm();
+                        
                       }
                       setPrefix(item.value);
                       setIsFocus(false);
@@ -661,14 +719,15 @@ const FillByYourSelf = ({navigation}) => {
                   />
 
                   <TextInput
-                    style={[styles.dropdown, {width: '32%', color: '#71727A'}]}
+                    style={[styles.dropdown, {width: '32%', color: '#71727A'},styles.input]}
                     value={firstName}
                     onChangeText={txt => {
-                      setFirstName(txt);
-                      if (submitFlag) {
-                        validateForm();
+                      handleFirstNameChange(txt);
+                      if(firstName){
+                        setFirstName(txt);
+                        
                       }
-                    }}
+                     }}
                     selectionColor={'#B21E2B'}
                   />
 
@@ -676,11 +735,15 @@ const FillByYourSelf = ({navigation}) => {
                     style={[styles.dropdown, {width: '30%', color: '#71727A'}]}
                     value={lastName}
                     onChangeText={txt => {
+                      
+                      handleLastNameChange(txt);
+                     if((submitFlag )&&(lastName))  {
                       setLastName(txt);
-                      if (submitFlag) {
-                        validateForm();
+                      validateForm();
+                      
                       }
-                    }}
+                      
+                     }}
                     selectionColor={'#B21E2B'}
                   />
                 </View>
@@ -689,13 +752,16 @@ const FillByYourSelf = ({navigation}) => {
                     flex: 1,
                     flexDirection: 'row',
                   }}>
-                  <Text style={[styles.bottomtext, {marginRight: 75}]}>
-                    Prefix
-                  </Text>
+                  <Text style={[styles.bottomtext,{marginRight:75}]}>
+                                Prefix
+                            </Text>
+              {firstNameError ? <Text style={{color:'#B21E2B'}}>{firstNameError}</Text> : 
                   <Text style={[styles.bottomtext, {marginRight: 72}]}>
                     First Name
-                  </Text>
-                  <Text style={styles.bottomtext}>Last Name</Text>
+                  </Text> }
+            {lastNameError ? <Text style={{color:'#B21E2B'}}>{lastNameError}</Text> :
+              <Text style={styles.bottomtext}>Last Name</Text> 
+                 }
                 </View>
               </View>
               {nameErr && <Text style={styles.errorText}>{nameErr}</Text>}
@@ -803,6 +869,59 @@ const FillByYourSelf = ({navigation}) => {
                   <Text style={styles.errorText}>{singleOrGroupErr}</Text>
                 )}
               </View>
+              {selectedSG === 'Group' ? (
+                <View>
+                  <View style={styles.namecontainer}>
+                    <Text style={styles.label}>
+                      Number of Men <Text style={{color: 'red'}}>*</Text>
+                    </Text>
+                    <TextInput
+                      style={[styles.phoneInputContainer, {paddingLeft: 15}]}
+                      keyboardType="numeric"
+                      value={men}
+                      onChangeText={setMen}
+                      selectionColor="#B21E2B"
+                    />
+                  </View>
+
+                  <View style={styles.namecontainer}>
+                    <Text style={styles.label}>
+                      Number of Women <Text style={{color: 'red'}}>*</Text>
+                    </Text>
+                    <TextInput
+                      style={[styles.phoneInputContainer, {paddingLeft: 15}]}
+                      keyboardType="numeric"
+                      value={women}
+                      onChangeText={setWomen}
+                      selectionColor="#B21E2B"
+                    />
+                  </View>
+                  <View style={styles.namecontainer}>
+                    <Text style={styles.label}>
+                      Number of Boys <Text style={{color: 'red'}}>*</Text>
+                    </Text>
+                    <TextInput
+                      style={[styles.phoneInputContainer, {paddingLeft: 15}]}
+                      keyboardType="numeric"
+                      value={boys}
+                      onChangeText={setBoys}
+                      selectionColor="#B21E2B"
+                    />
+                  </View>
+                  <View style={styles.namecontainer}>
+                    <Text style={styles.label}>
+                      Number of Girls <Text style={{color: 'red'}}>*</Text>
+                    </Text>
+                    <TextInput
+                      style={[styles.phoneInputContainer, {paddingLeft: 15}]}
+                      keyboardType="numeric"
+                      value={girls}
+                      onChangeText={setGirls}
+                      selectionColor="#B21E2B"
+                    />
+                  </View>
+                </View>
+              ) : null}
               <View style={styles.namecontainer}>
                 <Text style={styles.label}>
                   Is the Guest being invited to Home or Office
@@ -978,59 +1097,9 @@ const FillByYourSelf = ({navigation}) => {
                   </TouchableOpacity>
                 </View>
               </View>
-              {selectedSG === 'Group' ? (
-                <View>
-                  <View style={styles.namecontainer}>
-                    <Text style={styles.label}>
-                      Number of Men <Text style={{color: 'red'}}>*</Text>
-                    </Text>
-                    <TextInput
-                      style={[styles.phoneInputContainer, {paddingLeft: 15}]}
-                      keyboardType="numeric"
-                      value={men}
-                      onChangeText={setMen}
-                      selectionColor="#B21E2B"
-                    />
-                  </View>
+              
 
-                  <View style={styles.namecontainer}>
-                    <Text style={styles.label}>
-                      Number of Women <Text style={{color: 'red'}}>*</Text>
-                    </Text>
-                    <TextInput
-                      style={[styles.phoneInputContainer, {paddingLeft: 15}]}
-                      keyboardType="numeric"
-                      value={women}
-                      onChangeText={setWomen}
-                      selectionColor="#B21E2B"
-                    />
-                  </View>
-                  <View style={styles.namecontainer}>
-                    <Text style={styles.label}>
-                      Number of Boys <Text style={{color: 'red'}}>*</Text>
-                    </Text>
-                    <TextInput
-                      style={[styles.phoneInputContainer, {paddingLeft: 15}]}
-                      keyboardType="numeric"
-                      value={boys}
-                      onChangeText={setBoys}
-                      selectionColor="#B21E2B"
-                    />
-                  </View>
-                  <View style={styles.namecontainer}>
-                    <Text style={styles.label}>
-                      Number of Girls <Text style={{color: 'red'}}>*</Text>
-                    </Text>
-                    <TextInput
-                      style={[styles.phoneInputContainer, {paddingLeft: 15}]}
-                      keyboardType="numeric"
-                      value={girls}
-                      onChangeText={setGirls}
-                      selectionColor="#B21E2B"
-                    />
-                  </View>
-                </View>
-              ) : null}
+
 
               <View style={styles.footer}>
                 <TouchableOpacity onPress={handleSubmit} style={styles.submit}>
@@ -1117,7 +1186,7 @@ const mediumScreen = StyleSheet.create({
     borderRadius: 40,
     width: 300,
   },
-
+ 
   RejectActivityIndicatorContainer: {
     top: 10,
     backgroundColor: 'pink',
@@ -1841,10 +1910,7 @@ const styles = StyleSheet.create({
     paddingRight: 10,
     marginRight: 10,
     flex: 1,
-    borderRadius: 5,
-  },
-  error: {
-    borderColor: 'red',
+    borderRadius: 15,
   },
   singleOptionContainer: {
     flexDirection: 'row', // ensure the circle and text are in a row
