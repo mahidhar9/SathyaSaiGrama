@@ -1100,7 +1100,7 @@ const styles = StyleSheet.create({
   options: {
     width: 375,
     paddingTop: 44,
-    paddingRight: 16,
+    paddingRight: 8,
     flexDirection: 'column',
     alignItems: 'flex-start',
     gap: 2,
@@ -1108,7 +1108,6 @@ const styles = StyleSheet.create({
   buttonSection: {
     padding: 15,
     marginStart: 10,
-    marginEnd: 10,
     gap: 10,
     alignSelf: 'stretch',
     borderBottomWidth: 0.3,
