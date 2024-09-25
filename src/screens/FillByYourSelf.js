@@ -10,6 +10,7 @@ import {
   ScrollView,
   LogBox,
   TouchableWithoutFeedback,
+  Button,
   Image,
   ImageBackground,
   Dimensions,
@@ -29,8 +30,12 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import QRCode from 'react-native-qrcode-svg';
 import {captureRef} from 'react-native-view-shot';
+import {launchImageLibrary} from 'react-native-image-picker';
+import axios from 'axios';
+
 import SentForApproval from './SentForApproval';
 import {updateRecord} from './approval/VerifyDetails';
+import { isJSDocCommentContainingNode } from 'typescript';
 
 LogBox.ignoreLogs(['Warnings...']);
 LogBox.ignoreAllLogs();
@@ -50,8 +55,8 @@ const FillByYourSelf = ({navigation}) => {
   const [value, setValue] = useState('');
   const [formattedValue, setFormattedValue] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [image, setImage] = useState('Upload Image');
-  // const [imageurl, setImageUrl] = useState('');
+  const [image, setImage] = useState(null);
+  const [imageUri, setImageUri] = useState(null);
   // const [RES_ID, setRES_ID] = useState('');
   const [guestCategory, setGuestCategory] = useState('');
   const [isFocus, setIsFocus] = useState(false);
@@ -64,8 +69,13 @@ const FillByYourSelf = ({navigation}) => {
 
   const [vehicles, setVehicles] = useState([]);
 
-  const {getAccessToken, loggedUser, testResident, accessToken} =
-    useContext(UserContext);
+  const {
+    getAccessToken,
+    loggedUser,
+    testResident,
+    accessToken,
+    setApproveDataFetched,
+  } = useContext(UserContext);
   const [date, setDate] = useState('Select Date');
   const [showModal, setShowModal] = useState(false);
   const L1ID = loggedUser.userId;
@@ -224,24 +234,23 @@ const FillByYourSelf = ({navigation}) => {
 
   const posttoL1aprroved = async DepartmentID => {
     console.log('inside posttoL1aprroved');
-   
+
     // const Vehicle_Info = await postVehicle();
     let menCount = '0';
-    let womenCount='0';
-    if(selectedSG==='Single'){
-      if(selectedGender === 'Male' ){
+    let womenCount = '0';
+    if (selectedSG === 'Single') {
+      if (selectedGender === 'Male') {
         console.log('Inside Single Male');
-        menCount='1';
-        womenCount='0';
-      }else if(selectedGender === 'Female'){
+        menCount = '1';
+        womenCount = '0';
+      } else if (selectedGender === 'Female') {
         console.log('Inside Single Female');
-        menCount='0';
-        womenCount='1';
+        menCount = '0';
+        womenCount = '1';
       }
-    }
-    else{
-      menCount=men;
-        womenCount=women;
+    } else {
+      menCount = men;
+      womenCount = women;
     }
     const formData = {
       data: {
@@ -268,6 +277,8 @@ const FillByYourSelf = ({navigation}) => {
         Vehicle_Information: vehicles,
       },
     };
+
+    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!form data", formData)
 
     if (loggedUser.role === 'L2') {
       if (
@@ -297,7 +308,9 @@ const FillByYourSelf = ({navigation}) => {
         },
       );
       const res = await response.json();
-      console.log(res);
+      console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@",res);
+      const photoUploadRes = await uploadPhoto(res.data.ID, "Approval_to_Visitor_Report");
+      console.log("",photoUploadRes);
       return res;
     } catch (error) {
       Alert.alert('Error', 'Something went wrong');
@@ -317,6 +330,7 @@ const FillByYourSelf = ({navigation}) => {
         Added_by_App_user_lookup: L1ID,
       },
     };
+
     try {
       const response = await fetch(
         `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Visitor_Details`,
@@ -329,7 +343,8 @@ const FillByYourSelf = ({navigation}) => {
         },
       );
       const res = await response.json();
-      console.log(res);
+      console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",res);
+      await uploadPhoto(res.data.ID, "All_Visitor_Details");
       return res;
     } catch (error) {
       Alert.alert('Error', 'Something went wrong');
@@ -350,6 +365,53 @@ const FillByYourSelf = ({navigation}) => {
       i === index ? {...vehicle, [field]: value} : vehicle,
     );
     setVehicles(updatedVehicles);
+  };
+
+  // Function to select an image
+  const selectImage = () => {
+    const options = {
+      mediaType: 'photo',
+      quality: 1,
+    };
+
+    launchImageLibrary(options, response => {
+      if (response.assets && response.assets.length > 0) {
+        const {uri, type, fileName} = response.assets[0];
+        setImage({uri, type, name: fileName});
+        setImageUri(uri); // For displaying the image preview
+      }
+    });
+  };
+
+  // Function to remove the selected image
+  const removeImage = () => {
+    setImage(null);
+    setImageUri(null); // Clear the image preview
+  };
+
+  // Function to upload Photo
+  const uploadPhoto = async (rec_id, report) => {
+    //To upload Photo
+    if (image) {
+      const imgFormData = new FormData();
+      imgFormData.append('file', {
+        uri: image.uri,
+        type: image.type,
+        name: image.name,
+      });
+
+      const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${report}/${rec_id}/Photo/upload`;
+      console.log('Photo Upload', url);
+      const imgResponse = await fetch(url, {
+        method: 'POST',
+        body: imgFormData,
+        headers: {
+          Authorization: `Zoho-oauthtoken ${accessToken}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      console.log('Photo posting response', imgResponse);
+    }
   };
 
   const [nameErr, setNameErr] = useState(null);
@@ -390,9 +452,12 @@ const FillByYourSelf = ({navigation}) => {
     } else {
       setNameErr(null);
     }
-    if (!validateInput(firstName,setNameErr) || !validateInput(lastName,setNameErr)) {
+    if (
+      !validateInput(firstName, setNameErr) ||
+      !validateInput(lastName, setNameErr)
+    ) {
       // setNameErr('Prefix, First Name and Last Name are required');
-      Alert.alert('Error','Only letters are allowed in the name field ')
+      Alert.alert('Error', 'Only letters are allowed in the name field ');
       valid = false;
     } else {
       setNameErr(null);
@@ -424,7 +489,13 @@ const FillByYourSelf = ({navigation}) => {
       valid = false;
     } else {
       // setSingleOrGroupErr(null);
-      if (selectedSG==='Group' && men==='0' && women==='0' && boys==='0' && girls === '0' ) {
+      if (
+        selectedSG === 'Group' &&
+        men === '0' &&
+        women === '0' &&
+        boys === '0' &&
+        girls === '0'
+      ) {
         setSingleOrGroupErr('Total No. of people cannot be 0');
         valid = false;
       } else {
@@ -457,11 +528,9 @@ const FillByYourSelf = ({navigation}) => {
   };
 
   const handleSubmit = async () => {
-  
-       console.log('##########vehicles are: ', vehicles);
+    console.log('##########vehicles are: ', vehicles);
     setSubmitFlag(true);
     if (validateForm()) {
-      
       setIsSubmitted(true);
       let office_id;
 
@@ -476,7 +545,7 @@ const FillByYourSelf = ({navigation}) => {
         console.log(empId);
         office_id = empId.data[0].Office_lookup.ID;
       }
-      
+
       try {
         const rese = await posttoL1aprroved(office_id);
         console.log('Response of posting to Approval_to_Visitor_Report', rese);
@@ -508,7 +577,7 @@ const FillByYourSelf = ({navigation}) => {
     setLastName('');
     setFirstName('');
     setValue('');
-    setImage('Upload Image');
+    setImage(null);
     setGuestCategory('');
     setPriority('');
     setVehicleType('');
@@ -621,6 +690,7 @@ const FillByYourSelf = ({navigation}) => {
       if (response.ok) {
         console.log('Image uploaded successfully to Zoho.');
         setIsSubmitted(false);
+        setApproveDataFetched(false);
         navigation.navigate('FooterTab', {
           screen: 'AppApproveStack',
           params: {
@@ -650,8 +720,7 @@ const FillByYourSelf = ({navigation}) => {
       PasscodeData();
     }
   }, [codeReload]);
- 
- 
+
   const [firstNameError, setFirstNameError] = useState('');
   const [lastNameError, setLastNameError] = useState('');
   const validateInput = (txt, setError) => {
@@ -664,16 +733,15 @@ const FillByYourSelf = ({navigation}) => {
     }
   };
 
-  const handleFirstNameChange = (txt) => {
+  const handleFirstNameChange = txt => {
     setFirstName(txt);
     validateInput(txt, setFirstNameError);
   };
 
-  const handleLastNameChange = (txt) => {
+  const handleLastNameChange = txt => {
     setLastName(txt);
     validateInput(txt, setLastNameError);
   };
-
 
   return (
     <>
@@ -711,7 +779,6 @@ const FillByYourSelf = ({navigation}) => {
                     onChange={item => {
                       if (submitFlag) {
                         validateForm();
-                        
                       }
                       setPrefix(item.value);
                       setIsFocus(false);
@@ -719,15 +786,18 @@ const FillByYourSelf = ({navigation}) => {
                   />
 
                   <TextInput
-                    style={[styles.dropdown, {width: '32%', color: '#71727A'},styles.input]}
+                    style={[
+                      styles.dropdown,
+                      {width: '32%', color: '#71727A'},
+                      styles.input,
+                    ]}
                     value={firstName}
                     onChangeText={txt => {
                       handleFirstNameChange(txt);
-                      if(firstName){
+                      if (firstName) {
                         setFirstName(txt);
-                        
                       }
-                     }}
+                    }}
                     selectionColor={'#B21E2B'}
                   />
 
@@ -735,15 +805,12 @@ const FillByYourSelf = ({navigation}) => {
                     style={[styles.dropdown, {width: '30%', color: '#71727A'}]}
                     value={lastName}
                     onChangeText={txt => {
-                      
                       handleLastNameChange(txt);
-                     if((submitFlag )&&(lastName))  {
-                      setLastName(txt);
-                      validateForm();
-                      
+                      if (submitFlag && lastName) {
+                        setLastName(txt);
+                        validateForm();
                       }
-                      
-                     }}
+                    }}
                     selectionColor={'#B21E2B'}
                   />
                 </View>
@@ -752,16 +819,21 @@ const FillByYourSelf = ({navigation}) => {
                     flex: 1,
                     flexDirection: 'row',
                   }}>
-                  <Text style={[styles.bottomtext,{marginRight:75}]}>
-                                Prefix
-                            </Text>
-              {firstNameError ? <Text style={{color:'#B21E2B'}}>{firstNameError}</Text> : 
-                  <Text style={[styles.bottomtext, {marginRight: 72}]}>
-                    First Name
-                  </Text> }
-            {lastNameError ? <Text style={{color:'#B21E2B'}}>{lastNameError}</Text> :
-              <Text style={styles.bottomtext}>Last Name</Text> 
-                 }
+                  <Text style={[styles.bottomtext, {marginRight: 75}]}>
+                    Prefix
+                  </Text>
+                  {firstNameError ? (
+                    <Text style={{color: '#B21E2B'}}>{firstNameError}</Text>
+                  ) : (
+                    <Text style={[styles.bottomtext, {marginRight: 72}]}>
+                      First Name
+                    </Text>
+                  )}
+                  {lastNameError ? (
+                    <Text style={{color: '#B21E2B'}}>{lastNameError}</Text>
+                  ) : (
+                    <Text style={styles.bottomtext}>Last Name</Text>
+                  )}
                 </View>
               </View>
               {nameErr && <Text style={styles.errorText}>{nameErr}</Text>}
@@ -830,7 +902,7 @@ const FillByYourSelf = ({navigation}) => {
                             backgroundColor: 'white',
                             textHeaderColor: '#B21E2b',
                             textDefaultColor: '#333',
-                            selectedTextColor: 'white',
+                            selectedTextColor: '#B21E2b',
                             mainColor: 'white',
                             textSecondaryColor: 'black',
                             borderColor: '#B21E2B',
@@ -976,7 +1048,20 @@ const FillByYourSelf = ({navigation}) => {
                   })}
                 </View>
                 {genderErr && <Text style={styles.errorText}>{genderErr}</Text>}
+                <Button
+                  title={imageUri ? 'Update Image' : 'Select Image'}
+                  onPress={selectImage}
+                />
 
+                {imageUri && (
+                  <>
+                    <Image
+                      source={{uri: imageUri}}
+                      style={{width: 100, height: 100}}
+                    />
+                    <Button title="Remove Image" onPress={removeImage} />
+                  </>
+                )}
                 <View style={styles.namecontainer}>
                   <Text style={styles.label}>Guest Category</Text>
                   <Dropdown
@@ -1097,9 +1182,6 @@ const FillByYourSelf = ({navigation}) => {
                   </TouchableOpacity>
                 </View>
               </View>
-              
-
-
 
               <View style={styles.footer}>
                 <TouchableOpacity onPress={handleSubmit} style={styles.submit}>
@@ -1186,7 +1268,7 @@ const mediumScreen = StyleSheet.create({
     borderRadius: 40,
     width: 300,
   },
- 
+
   RejectActivityIndicatorContainer: {
     top: 10,
     backgroundColor: 'pink',

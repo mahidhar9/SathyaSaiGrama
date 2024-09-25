@@ -23,6 +23,7 @@ const ForgotPassword = ({navigation}) => {
   } = useForm();
 
   const [emailSent, setemailSent] = useState(false);
+
   const handleForgotPassword = async ({email}) => {
     try {
       // Attempt to send password reset email
