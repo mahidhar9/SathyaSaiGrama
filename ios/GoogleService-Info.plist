@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyCG8ewuhYWxJA7oABfODvD_v84dtCAJQuI</string>
+	<key>GCM_SENDER_ID</key>
+	<string>142974661728</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.SathyaSaiGrama</string>
+	<key>PROJECT_ID</key>
+	<string>sathya-sai-grama-1</string>
+	<key>STORAGE_BUCKET</key>
+	<string>sathya-sai-grama-1.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:142974661728:ios:cc4e6d00706d00ae8f7f05</string>
+</dict>
+</plist>
