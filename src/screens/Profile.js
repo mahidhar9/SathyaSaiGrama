@@ -40,7 +40,6 @@ import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME } from '@env';
 import Toast from 'react-native-toast-message';
 import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
 import { PERMISSIONS, request } from 'react-native-permissions';
-
 const Profile = ({ navigation }) => {
   const {
     getAccessToken,
@@ -63,9 +62,7 @@ const Profile = ({ navigation }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-
-  const [isLogOutIndicator, setIsLogOutIndicator] = useState(false);
-
+    const [isLogOutIndicator, setIsLogOutIndicator] = useState(false);
   let OndeleteStyles;
   if (deleteLoading) {
     OndeleteStyles = deleteLoadingStyles;
@@ -92,10 +89,9 @@ const Profile = ({ navigation }) => {
     handleSubmit,
     formState: { errors },
   } = useForm();
-
+  
   const handleDeleteAccount = async (email, password) => {
     const credential = EmailAuthProvider.credential(email, password);
-
     try {
       await reauthenticateWithCredential(user, credential);
       console.log('User reauthenticated successfully.');
@@ -106,14 +102,14 @@ const Profile = ({ navigation }) => {
       setDeleteLoading(false);
       setToastVisible(true);
     } catch (error) {
+     
       console.error('Error reauthenticating or deleting user:', error);
       Alert.alert(
         'Error',
         `Error reauthenticating or deleting user: ${error.message}`,
       );
     }
-  };
-
+  };  
   const updateDeviceToken = async (modified_data, id) => {
     try {
       const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${id}`;
@@ -162,19 +158,41 @@ const Profile = ({ navigation }) => {
       }
     }
   };
+  const [modalVisibleLogout, setModalVisibleLogout] = useState(false);
 
+  const showLogoutModal = () => {
+    setModalVisibleLogout(true);
+  };
+
+  const hideLogoutModal = () => {
+    setModalVisibleLogout(false);
+  };
   const onDelete = async userCred => {
     setDeleteLoading(true);
     console.log(userCred);
+    console.log("Deleting account...");
     await handleDeleteAccount(userCred.email, userCred.password);
+
   };
   const onLogout = () => {
+    // Alert.alert(
+    //   'Confirm Logout',
+    //   'Are you sure you want to log out?',
+    //   [
+    //     {
+    //       text: 'Cancel',
+    //       onPress: () => console.log('Cancel Pressed'),
+    //       style: 'cancel',
+    //     },
+    //     {
+    //       text: 'OK',
+    //       onPress: () => {
+    hideLogoutModal();
     setIsLogOutIndicator(true);
     signOut(auth)
       .then(async response => {
         console.log('response :', response);
         setUser(null);
-
         const respon = await findDeviceToken(loggedUser.userId);
         console.log('findDeviceToken response is: ', respon);
         const replaceToken = deviceToken + '||';
@@ -200,10 +218,16 @@ const Profile = ({ navigation }) => {
       .catch(error => {
         console.log('error :', error);
         Alert.alert('Not able to logout!');
-      });
+      }); 
+
+//     },
+//     },
+//   ],
+//   { cancelable: false }
+// );
   };
 
-
+  
   const changeProfile = () => {
     setProfileImageModalVisible(!profileImageModalVisible);
   };
@@ -366,7 +390,7 @@ const Profile = ({ navigation }) => {
   };
 
   useEffect(() => {
-    setIsLogOutIndicator(false)
+    setIsLogOutIndicator(false);
   }, [Profile])
 
   useEffect(() => {
@@ -520,7 +544,6 @@ const Profile = ({ navigation }) => {
     data: updateField,
   };
 
-
   const deleteProfileImage = async (url) => {
     const reqUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${L1ID}`;
     try {
@@ -567,11 +590,16 @@ const Profile = ({ navigation }) => {
                     <Image source={{ uri: profileImage }} style={styles.propic} /> :
                     <Image source={require('../assets/profileImg.png')} style={styles.propic} />
                 }
-              </TouchableOpacity>
 
-              <TouchableOpacity onPress={openProfileModal} style={styles.editContainer}>
-                <Image source={require('../assets/edit.png')} style={styles.editIcon} />
               </TouchableOpacity>
+              
+              <Text style={styles.name}>{loggedUser.name}</Text>
+                <Text style={styles.emailVisible}>{userEmail}</Text>
+              
+
+              {/* <TouchableOpacity onPress={openProfileModal} style={styles.editContainer}>
+                <Image source={require('../assets/edit.png')} style={styles.editIcon} />
+              </TouchableOpacity> */}
 
               {/* profile picture selector modal */}
               <Modal transparent={true} visible={frofileModalVisible} animationType="none" onRequestClose={closeProfileModal}>
@@ -592,6 +620,7 @@ const Profile = ({ navigation }) => {
                               <TouchableOpacity onPress={selectImage} style={styles.iconButton}>
                                 <Image source={require('../assets/galleryImg.png')} style={styles.uploadImg} />
                                 <Text>Gallery</Text>
+                                
                               </TouchableOpacity>
                               {
                                 profileImage && (
@@ -630,14 +659,12 @@ const Profile = ({ navigation }) => {
               <Text style={styles.emailVisible}>{userEmail}</Text>
 
             </View> */}
-          </View><View style={styles.indicatorBox}>
-            <ActivityIndicator style={styles.activityIndicator} size="large" color="#0000ff" />
+          </View>
+          <View style={styles.indicatorBox}>
+            <ActivityIndicator style={styles.activityIndicator} size="large" color="#B21E2B" />
 
-            <Text style={styles.text}>Logging Out...</Text>
+            <Text style={styles.text}>Logging Out...</Text>  
           </View></>
-
-
-
       ) :
         <View>
           <View style={styles.account}>
@@ -707,8 +734,6 @@ const Profile = ({ navigation }) => {
                 />
               </TouchableOpacity> */}
             </View>
-
-
             <Text style={styles.name}>{loggedUser.name}</Text>
             <View style={styles.imgdel}>
               <Text style={styles.emailVisible}>{userEmail}</Text>
@@ -722,11 +747,6 @@ const Profile = ({ navigation }) => {
               </TouchableOpacity>
             </View>
           </View>
-
-
-
-
-
           <View style={styles.options}>
             <TouchableOpacity
               style={styles.buttonSection}
@@ -764,15 +784,46 @@ const Profile = ({ navigation }) => {
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.buttonSection} onPress={onLogout}>
+            <TouchableOpacity style={styles.buttonSection} onPress={showLogoutModal} >
               <View style={styles.buttonArea}>
-                <Text style={styles.buttonName}>Logout</Text>
+                <Text style={styles.buttonName} >Logout</Text>
                 <Image
                   source={require('../assets/RightArrow.png')}
                   style={styles.img}
                 />
               </View>
             </TouchableOpacity>
+            <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisibleLogout}
+        onRequestClose={hideLogoutModal}
+         >
+          <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+          <View style={styles.containerModel}>
+            <Text style={styles.modalTitle}>Log out</Text>
+            <Text style={styles.modalMessage}>
+                   Are you sure you want to log out? You'll need to login again to use the app.</Text>
+            </View>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={hideLogoutModal}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.okButton}
+                onPress={onLogout}
+              >
+                <Text style={styles.logoutButtonText}>Log out</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          </View>
+
+         </Modal>
           </View>
 
 
@@ -827,7 +878,9 @@ const Profile = ({ navigation }) => {
             animationType="fade"
             transparent={true}
             visible={modalVisible}
-            onRequestClose={() => setModalVisible(!modalVisible)}>
+            onRequestClose={() => setModalVisible(!modalVisible)}
+            // onRequestClose={() => {onCloseDeleteOption}}
+            >
             <TouchableWithoutFeedback onPress={handleModal}>
               <View style={styles.centeredView}>
                 <View style={OndeleteStyles.modalView}>
@@ -839,10 +892,12 @@ const Profile = ({ navigation }) => {
                     <Controller
                       name="email"
                       control={control}
-                      render={({ field: { onChange, value } }) => (
+                      render={({ field: { onChange,
+                      // value
+                         } }) => (
                         <TextInput
                           placeholder="Email Address"
-                          value={value}
+                          // value={value}
                           style={[
                             styles.email,
                             focusedInput === 'email' && styles.inputFocused,
@@ -856,10 +911,10 @@ const Profile = ({ navigation }) => {
                       rules={{ required: true, pattern: /^\S+@\S+$/i }}
                     />
                     {errors.email?.type === 'required' && (
-                      <Text style={styles.textError}>Email is required</Text>
+                      <Text style={[styles.textError]}>Email is required</Text>
                     )}
                     {errors.email?.type === 'pattern' && (
-                      <Text style={styles.textError}>Enter valid email</Text>
+                      <Text style={[styles.textError]}>Enter valid email</Text>
                     )}
 
                     <View
@@ -870,11 +925,13 @@ const Profile = ({ navigation }) => {
                       <Controller
                         name="password"
                         control={control}
-                        render={({ field: { onChange, value } }) => (
+                        render={({ field: { onChange ,
+                        // value
+                         } }) => (
                           <TextInput
                             placeholder="Password"
                             style={styles.inputBox}
-                            value={value}
+                            // value={value}
                             selectionColor="#B21E2B"
                             onFocus={() => setFocusedInput('password')}
                             secureTextEntry={!showPassword}
@@ -883,9 +940,10 @@ const Profile = ({ navigation }) => {
                         )}
                         rules={{
                           required: true,
-                          minLength: 8,
+                          // minLength: 8,
+                          // maxLength:20,
                           pattern:
-                            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/,
                         }}
                       />
                       {showPassword === false ? (
@@ -909,35 +967,49 @@ const Profile = ({ navigation }) => {
                       )}
                     </View>
 
-                    {errors.password?.type === 'required' && (
-                      <Text style={styles.textError}>Password is required</Text>
-                    )}
-                    {errors.password?.type === 'minLength' && (
-                      <Text style={styles.textError}>
-                        Password must be 8 characters long
-                      </Text>
-                    )}
-                    {errors.password?.type === 'pattern' && (
-                      <Text style={styles.textError}>
+                   
+                    {/* {errors.password?.type === 'pattern' && (
+                      <Text style={[styles.textError,{color:'#2f3020'}]}>
                         Password must contain at least a uppercase,lowercase,
-                        number and a special character
+                        number and a special character and length between
+                        
                       </Text>
-                    )}
-
+                    )} 
+                    {errors.password?.type === 'required' && (
+                      <Text style={styles.txtError}>Password is required</Text>
+                    )} */}
+               
+         
                     <View
                       style={{
                         flexDirection: 'row',
-                      }}>
+                      }} >
                       <TouchableOpacity
-                        style={[styles.HomeButton, { backgroundColor: '#B21E2B' }]}
-                        onPress={handleSubmit(onDelete)}>
-                        <Text style={[styles.wewe, styles.wewe1]}>Delete</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={[styles.HomeButton, { backgroundColor: '#FFBE65' }]}
-                        onPress={() => setModalVisible(!modalVisible)}>
-                        <Text style={[styles.wewe, styles.wewe2]}>Cancel</Text>
-                      </TouchableOpacity>
+                          style={[
+                            styles.HomeButton,
+                            {backgroundColor: '#B21E2B'},
+                          ]}
+                          onPress={handleSubmit(onDelete)}>
+                          <Text style={[styles.wewe, styles.wewe1]}>
+                            Delete
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={[
+                            styles.HomeButton,
+                            {backgroundColor: '#fff',borderColor:'#B21E2B',borderWidth:2},
+                          ]}
+                          
+                          onPress={() =>{
+                            setModalVisible(!modalVisible);
+                            setEmail(''); 
+                            setPassword('');
+                          }
+                          }>
+                          <Text style={[styles.wewe, styles.wewe2]}>
+                            Cancel
+                          </Text>
+                        </TouchableOpacity>
                     </View>
                   </>}
                 </View>
@@ -977,13 +1049,13 @@ const Profile = ({ navigation }) => {
               </View>
             </TouchableWithoutFeedback>
           </Modal>
-
+                    
 
         </View>
       ))}
 
       <Toast />
-
+      
 
     </SafeAreaView>
 
@@ -1088,7 +1160,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     borderWidth: 0.2,
     borderColor: 'gray',
-  },
+    alignSelf:'center',
+    margin:10,
+    },
   name: {
     color: '#1F2024',
     textAlign: 'center',
@@ -1221,7 +1295,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   email: {
-    width: 250,
+    width: 270,
     marginTop: 10,
     fontFamily: 'Inter',
     fontSize: 14,
@@ -1236,8 +1310,10 @@ const styles = StyleSheet.create({
   },
   textError: {
     color: 'red',
+    fontFamily: 'Inter',
     fontSize: 12,
     marginBottom: 16,
+    
   },
   modalView: {
     margin: 20,
@@ -1329,6 +1405,77 @@ const styles = StyleSheet.create({
     color: '#333',
   },
 
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
+    width: 320,
+    height:190,
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 18,
+    
+  },containerModel:{
+      display: 'flex',
+      padding:8,
+      flexdirection: 'column',
+      alignitems: 'center',
+      gap: 8,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    alignSelf:'center',
+    color:'#000'
+
+  },
+  modalMessage: {
+    textalign: 'center',
+    justifyContent:'space-evenly',
+    fontfamily: 'Inter',
+    fontsize: 12,
+    fontstyle: 'normal',
+    fontweight: 400,
+    lineheight: 16, 
+    letterspacing: 0.12,
+    alignSelf:'stretch',
+    textAlign: 'center', 
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  cancelButton: {
+    backgroundColor: '#fff', // Black color for Cancel button
+    padding: 10,
+    borderRadius: 14,
+    width: '48%',
+    marginTop:20,
+    borderWidth:2,
+    borderColor:'#B21E2B',
+  },
+  okButton: {
+    backgroundColor: '#B21E2B', // Red color for OK button
+    padding: 10,
+    fontweight:'bold',
+    borderRadius: 14,
+    width: '48%',
+    marginTop:20,
+  },
+  cancelButtonText: {
+    color: '#B21E2B',
+    textAlign: 'center',
+    alignSelf:'stretch',
+    fontWeight:'bold',
+  },
+  logoutButtonText: {
+    color: 'white',
+    textAlign: 'center',
+  },
 
 });
 
