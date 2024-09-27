@@ -90,25 +90,27 @@ const Profile = ({ navigation }) => {
     formState: { errors },
   } = useForm();
   
-  const handleDeleteAccount = async (email, password) => {
-    const credential = EmailAuthProvider.credential(email, password);
+  const handleDeleteAccount = async ( password) => {
+    const credential = EmailAuthProvider.credential(userEmail, password);
     try {
+      
       await reauthenticateWithCredential(user, credential);
-      console.log('User reauthenticated successfully.');
-
+      console.log(' reauthenticated  successfully.');
       await deleteUser(user);
       console.log('User account deleted successfully.');
       setModalVisible(!modalVisible);
-      setDeleteLoading(false);
       setToastVisible(true);
+      
     } catch (error) {
-     
+         
       console.error('Error reauthenticating or deleting user:', error);
+
       Alert.alert(
         'Error',
         `Error reauthenticating or deleting user: ${error.message}`,
       );
     }
+    setDeleteLoading(false);
   };  
   const updateDeviceToken = async (modified_data, id) => {
     try {
@@ -171,7 +173,7 @@ const Profile = ({ navigation }) => {
     setDeleteLoading(true);
     console.log(userCred);
     console.log("Deleting account...");
-    await handleDeleteAccount(userCred.email, userCred.password);
+    await handleDeleteAccount( userCred.password);
 
   };
   const onLogout = () => {
@@ -886,10 +888,10 @@ const Profile = ({ navigation }) => {
                 <View style={OndeleteStyles.modalView}>
                   {deleteLoading ? (<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator size="large" color="#B21E2B" /><Text>Deleting profile...</Text></View>) : <>
                     <Text style={styles.shareLink}>
-                      Enter your credentials to delete your account permanently
+                      Attention! You are Enter your credentials to delete your account permanently
                     </Text>
 
-                    <Controller
+                    {/* <Controller
                       name="email"
                       control={control}
                       render={({ field: { onChange,
@@ -915,7 +917,7 @@ const Profile = ({ navigation }) => {
                     )}
                     {errors.email?.type === 'pattern' && (
                       <Text style={[styles.textError]}>Enter valid email</Text>
-                    )}
+                    )} */}
 
                     <View
                       style={[
