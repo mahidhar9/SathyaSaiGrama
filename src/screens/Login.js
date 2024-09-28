@@ -557,11 +557,12 @@ const Login = ({navigation}) => {
               )}
               
             </View>
-            {errors.password?.type === 'pattern' && (
+            {/* {errors.password?.type === 'pattern' && (
               <Text style={styles.errorMessage}>
           Password must be at least 8 characters long, contains both upper and lower case letters, includes at least one number, and has at least one special character<Text style={styles.errMes} >(e.g., !@#$%^&*).</Text>
-        </Text>
-      )}{errors.password?.type==='required'&&(
+        </Text> 
+      )}*/}
+      {errors.password?.type==='required'&&(
         <Text style={styles.textError}>
         Password is required
         </Text>
