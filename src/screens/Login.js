@@ -511,8 +511,8 @@ const Login = ({ navigation }) => {
                 rules={{required: true,
                   // minLength: 8,
                   //         maxLength:20,
-                  pattern:
-                            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/,
+                  // pattern:
+                  //           /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/,
                 }}
               />
               {showPassword === false ? (

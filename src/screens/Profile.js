@@ -107,8 +107,9 @@ const Profile = ({ navigation }) => {
 
       Alert.alert(
         'Error',
-        `Error reauthenticating or deleting user: ${error.message}`,
+        `Invalid password`,
       );
+      
     }
     setDeleteLoading(false);
   };  
@@ -169,7 +170,9 @@ const Profile = ({ navigation }) => {
   const hideLogoutModal = () => {
     setModalVisibleLogout(false);
   };
+  
   const onDelete = async userCred => {
+    
     setDeleteLoading(true);
     console.log(userCred);
     console.log("Deleting account...");
@@ -576,7 +579,7 @@ const Profile = ({ navigation }) => {
 
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} >
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#B21E2B" />
@@ -662,13 +665,13 @@ const Profile = ({ navigation }) => {
 
             </View> */}
           </View>
-          <View style={styles.indicatorBox}>
+          <View style={styles.indicatorBox} >
             <ActivityIndicator style={styles.activityIndicator} size="large" color="#B21E2B" />
 
             <Text style={styles.text}>Logging Out...</Text>  
           </View></>
       ) :
-        <View>
+        <View  >
           <View style={styles.account}>
             <Text style={styles.accountTitle}>Account</Text>
           </View>
@@ -796,13 +799,16 @@ const Profile = ({ navigation }) => {
               </View>
             </TouchableOpacity>
             <Modal
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         visible={modalVisibleLogout}
         onRequestClose={hideLogoutModal}
          >
+          <TouchableWithoutFeedback onPress={hideLogoutModal}>
           <View style={styles.modalBackground}>
+         <TouchableWithoutFeedback>         
           <View style={styles.modalContainer}>
+        
           <View style={styles.containerModel}>
             <Text style={styles.modalTitle}>Log out</Text>
             <Text style={styles.modalMessage}>
@@ -822,9 +828,11 @@ const Profile = ({ navigation }) => {
                 <Text style={styles.logoutButtonText}>Log out</Text>
               </TouchableOpacity>
             </View>
+            
           </View>
+          </TouchableWithoutFeedback>
           </View>
-
+          </TouchableWithoutFeedback>
          </Modal>
           </View>
 
@@ -880,15 +888,17 @@ const Profile = ({ navigation }) => {
             animationType="fade"
             transparent={true}
             visible={modalVisible}
-            onRequestClose={() => setModalVisible(!modalVisible)}
-            // onRequestClose={() => {onCloseDeleteOption}}
+              onRequestClose={()=> setModalVisible(!modalVisible)}
+            
             >
-            <TouchableWithoutFeedback onPress={handleModal}>
-              <View style={styles.centeredView}>
-                <View style={OndeleteStyles.modalView}>
+            <TouchableWithoutFeedback onPress={()=> setModalVisible(!modalVisible)}>
+              <View style={styles.centeredView} >
+              <TouchableWithoutFeedback>
+                <View style={OndeleteStyles.modalView}   >
                   {deleteLoading ? (<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator size="large" color="#B21E2B" /><Text>Deleting profile...</Text></View>) : <>
+                    <Text style={styles.shareLinkAttention}>Attention! </Text>
                     <Text style={styles.shareLink}>
-                      Attention! You are Enter your credentials to delete your account permanently
+                      You are about to delete your account permanently. Enter your password to confirm.
                     </Text>
 
                     {/* <Controller
@@ -944,8 +954,8 @@ const Profile = ({ navigation }) => {
                           required: true,
                           // minLength: 8,
                           // maxLength:20,
-                          pattern:
-                            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/,
+                          // pattern:
+                          //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/,
                         }}
                       />
                       {showPassword === false ? (
@@ -985,13 +995,18 @@ const Profile = ({ navigation }) => {
                     <View
                       style={{
                         flexDirection: 'row',
+                        textAlign: 'center', 
+                       
+                        justifyContent: 'space-between',
                       }} >
                       <TouchableOpacity
                           style={[
                             styles.HomeButton,
                             {backgroundColor: '#B21E2B'},
                           ]}
-                          onPress={handleSubmit(onDelete)}>
+                          onPress={handleSubmit(onDelete)}
+                          
+                          >
                           <Text style={[styles.wewe, styles.wewe1]}>
                             Delete
                           </Text>
@@ -999,7 +1014,8 @@ const Profile = ({ navigation }) => {
                         <TouchableOpacity
                           style={[
                             styles.HomeButton,
-                            {backgroundColor: '#fff',borderColor:'#B21E2B',borderWidth:2},
+                            {backgroundColor: '#fff',borderColor:'#B21E2B',borderWidth:2,marginLeft:10,
+   },
                           ]}
                           
                           onPress={() =>{
@@ -1015,6 +1031,7 @@ const Profile = ({ navigation }) => {
                     </View>
                   </>}
                 </View>
+                </TouchableWithoutFeedback>
               </View>
             </TouchableWithoutFeedback>
           </Modal>
@@ -1028,6 +1045,7 @@ const Profile = ({ navigation }) => {
             }>
             <TouchableWithoutFeedback onPress={handleProfileModal}>
               <View style={styles.centeredView}>
+              <TouchableWithoutFeedback>
                 <View style={styles.modalView}>
                   <View style={styles.profileHead}>
                     <Text style={styles.shareLink}>Profile Photo</Text>
@@ -1048,6 +1066,7 @@ const Profile = ({ navigation }) => {
                     </TouchableOpacity>
                   </View>
                 </View>
+                </TouchableWithoutFeedback>
               </View>
             </TouchableWithoutFeedback>
           </Modal>
@@ -1344,34 +1363,51 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter',
     fontSize: 16,
     fontStyle: 'normal',
+    fontWeight: '400',
+    letterSpacing: 0.08,
+    height: 61,
+    alignSelf: 'stretch',
+  },
+  shareLinkAttention:{
+    color: '#B21E2B',
+    textAlign: 'center',
+    fontFamily: 'Inter',
+    fontSize: 26,
+    fontStyle: 'normal',
     fontWeight: '900',
     letterSpacing: 0.08,
-    height: 41,
     alignSelf: 'stretch',
+    marginBottom:11,
   },
   wewe: {
     fontFamily: 'Inter',
     fontSize: 14,
     fontStyle: 'normal',
     fontWeight: '600',
-    textAlign: 'center',
+    textAlign: 'center', 
+    paddingVertical: 0,
   },
   wewe1: {
     color: '#fff',
+    
+    
   },
   wewe2: {
     color: '#B21E2B',
   },
   HomeButton: {
     height: 50,
-    width: 120,
+    width: 110,
     backgroundColor: '#752A26',
     paddingTop: 12,
     paddingBottom: 12,
     borderRadius: 12,
     marginTop: 20,
-    marginLeft: 4,
-    marginRight: 4,
+    marginLeft:4,
+    marginRight:4,
+
+    justifyContent:'center'
+    
   },
   detailsNotEditableDialogue: {
     borderRadius: 30,
