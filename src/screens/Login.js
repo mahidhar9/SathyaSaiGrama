@@ -60,7 +60,37 @@ const Login = ({navigation}) => {
   const [showPassword, setShowPassword] = useState(false);
   const [focusedInput, setFocusedInput] = useState(null);
   const [DialogVisible, setDialogVisible] = useState(false);
+  const [password, setPassword] = useState();
+  const [validation, setValidation] = useState({
+    hasNumber: false,
+    hasUpperCase: false,
+    hasSpecialChar: false,
+    isValidLength: false,
+  });
 
+  // const validatePassword = (text) => {
+  //   const hasNumber = /\d/.test(text);
+  //   const hasUpperCase = /[A-Z]/.test(text);
+  //   const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(text);
+  //   const isValidLength = text.length >= 8 && text.length <= 20;
+
+  //   setValidation({
+  //     hasNumber,
+  //     hasUpperCase,
+  //     hasSpecialChar,
+  //     isValidLength,
+  //   });
+
+  //   setPassword(text);
+  // };
+  // const isValidPassword = () => {
+  //   return (
+  //     validation.hasNumber &&
+  //     validation.hasUpperCase &&
+  //     validation.hasSpecialChar &&
+  //     validation.isValidLength
+  //   );
+  // };
   const onPressOk = () => {
     setDialogVisible(false);
   };
@@ -422,7 +452,7 @@ const Login = ({navigation}) => {
                   <Text style={styles.textError}>Enter valid email</Text>
                 )}
 
-                <View
+                {/* <View
                   style={[
                     styles.passBorder,
                     focusedInput === 'password' && styles.inputFocused,
@@ -474,7 +504,69 @@ const Login = ({navigation}) => {
                   <Text style={styles.textError}>
                     Password must be 6 characters long
                   </Text>
+                )} */}
+            <View
+              style={[
+                styles.passBorder,
+                focusedInput === 'password' && styles.inputFocused, 
+              ]}>
+              <Controller
+                name="password"
+                control={control}
+                render={({field: {onChange, value}}) => (
+                  <TextInput
+                    placeholder="Password"
+                    style={styles.inputBox}
+                    value={value}
+                    selectionColor="#B21E2B"
+                    onFocus={() => setFocusedInput('password')}
+                    secureTextEntry={!showPassword}
+                    onChangeText={value => {
+                       const trimmedValue = value.trim(); 
+                       onChange(trimmedValue);
+                       setPassword(trimmedValue); 
+                     }}
+
+                  />
                 )}
+                rules={{required: true,
+                  // minLength: 8,
+                  //         maxLength:20,
+                  // pattern:
+                  //           /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/,
+                }}
+              />
+              {showPassword === false ? (
+                <TouchableOpacity
+                  onPress={() => {
+                    setShowPassword(!showPassword);
+                  }}>
+                  <Image
+                    source={require('../assets/eyestrike.png')}
+                    style={{width: 16, height: 16}}
+                  />
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  onPress={() => setShowPassword(!showPassword)}>
+                  <Image
+                    source={require('../assets/eye.png')}
+                    style={{width: 16, height: 16}}
+                  />
+                </TouchableOpacity>
+              )}
+              
+            </View>
+            {errors.password?.type === 'pattern' && (
+              <Text style={styles.errorMessage}>
+          Password must be at least 8 characters long, contains both upper and lower case letters, includes at least one number, and has at least one special character<Text style={styles.errMes} >(e.g., !@#$%^&*).</Text>
+        </Text>
+      )}{errors.password?.type==='required'&&(
+        <Text style={styles.textError}>
+        Password is required
+        </Text>
+      )}
+
 
                 <TouchableOpacity
                   onPress={() => navigation.navigate('ForgotPassword')}>
@@ -483,7 +575,10 @@ const Login = ({navigation}) => {
 
                 <TouchableOpacity
                   onPress={handleSubmit(handleLoginForm)}
-                  style={styles.register}>
+                  // disabled={!isValidPassword()}
+                  style={[styles.register]}>
+             
+                  {/* style={styles.register}> */}
                   <Text style={styles.registerTitle}>Login</Text>
                 </TouchableOpacity>
                 <View style={styles.redirect}>
@@ -668,4 +763,23 @@ const styles = StyleSheet.create({
   dialogTitle: {
     color: 'black',
   },
+  errorMessage: {
+    color: '#2F3036',
+    fontFamily: 'Inter',
+    fontSize: 12,
+    fontStyle: 'normal',
+    fontWeight: '600',
+    alignSelf: 'stretch',
+    marginStart: 6,
+    marginBottom: 10,
+  },errMes:{
+    color: '#B21E2B',
+    fontFamily: 'Inter',
+    fontSize: 12,
+    fontStyle: 'normal',
+    fontWeight: '600',
+    alignSelf: 'stretch',
+    marginStart: 6,
+    marginBottom: 10,
+  }
 });
