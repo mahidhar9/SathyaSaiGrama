@@ -35,7 +35,7 @@ import axios from 'axios';
 
 import SentForApproval from './SentForApproval';
 import {updateRecord} from './approval/VerifyDetails';
-import { isJSDocCommentContainingNode } from 'typescript';
+import {isJSDocCommentContainingNode} from 'typescript';
 
 LogBox.ignoreLogs(['Warnings...']);
 LogBox.ignoreAllLogs();
@@ -68,6 +68,9 @@ const FillByYourSelf = ({navigation}) => {
   //just so that the othe code gets commited can delete after
 
   const [vehicles, setVehicles] = useState([]);
+  const [vehicleErrorMessages, setVehicleErrorMessages] = useState({});
+  // Regex format for vehicle number like 'KA 01 CU 1234'
+  const vehicleNumberPattern = /^[a-z]{2}[0-9]{2}[a-z]{2}[0-9]{4}$/;
 
   const {
     getAccessToken,
@@ -278,7 +281,10 @@ const FillByYourSelf = ({navigation}) => {
       },
     };
 
-    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!form data", formData)
+    console.log(
+      '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!form data',
+      formData,
+    );
 
     if (loggedUser.role === 'L2') {
       if (
@@ -308,9 +314,12 @@ const FillByYourSelf = ({navigation}) => {
         },
       );
       const res = await response.json();
-      console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@",res);
-      const photoUploadRes = await uploadPhoto(res.data.ID, "Approval_to_Visitor_Report");
-      console.log("",photoUploadRes);
+      console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@', res);
+      const photoUploadRes = await uploadPhoto(
+        res.data.ID,
+        'Approval_to_Visitor_Report',
+      );
+      console.log('', photoUploadRes);
       return res;
     } catch (error) {
       Alert.alert('Error', 'Something went wrong');
@@ -343,8 +352,8 @@ const FillByYourSelf = ({navigation}) => {
         },
       );
       const res = await response.json();
-      console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",res);
-      await uploadPhoto(res.data.ID, "All_Visitor_Details");
+      console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^', res);
+      await uploadPhoto(res.data.ID, 'All_Visitor_Details');
       return res;
     } catch (error) {
       Alert.alert('Error', 'Something went wrong');
@@ -352,14 +361,17 @@ const FillByYourSelf = ({navigation}) => {
   };
 
   const handleAddVehicle = () => {
-    setVehicles([...vehicles, {Vehicle_Type: '', Vehicle_Number: ''}]);
+    setVehicles([
+      ...vehicles,
+      {Vehicle_Type: '', Vehicle_Number: '', ID: Date.now()}, //Date now is used to create a unique id for each vehicle row
+    ]);
   };
 
   const handleRemoveVehicle = index => {
     const updatedVehicles = vehicles.filter((_, i) => i !== index);
     setVehicles(updatedVehicles);
   };
-
+  //  Function to handle vehicle number change
   const handleTextChange = (index, field, value) => {
     const updatedVehicles = vehicles.map((vehicle, i) =>
       i === index ? {...vehicle, [field]: value} : vehicle,
@@ -523,6 +535,34 @@ const FillByYourSelf = ({navigation}) => {
     } else {
       setGenderErr(null);
     }
+    const errors = {};
+
+    vehicles.forEach((vehicle, index) => {
+      const vehicleNumber = vehicle.Vehicle_Number;
+      if (
+        !vehicleNumberPattern.test(
+          vehicleNumber.replace(/\s+/g, '').toLowerCase(),
+        )
+      ) {
+        errors[vehicle.ID] = `Invalid Vehicle Number`;
+        valid = false;
+      }
+      if (vehicle.Vehicle_Type === '') {
+        errors[vehicle.ID] = `Please select Vehicle Type`;
+        valid = false;
+      }
+      if (
+        !vehicleNumberPattern.test(
+          vehicleNumber.replace(/\s+/g, '').toLowerCase(),
+        ) &&
+        vehicle.Vehicle_Type === ''
+      ) {
+        errors[vehicle.ID] = `Invalid Vehicle Information`;
+        valid = false;
+      }
+    });
+
+    setVehicleErrorMessages(errors);
 
     return valid;
   };
@@ -1117,59 +1157,77 @@ const FillByYourSelf = ({navigation}) => {
                   <Text style={styles.label}>Vehicle Information</Text>
                   <View style={styles.vehicle}>
                     <Text>Vehicle type</Text>
+                    <Text>|</Text>
                     <Text>Vehicle Number</Text>
                   </View>
                   {vehicles.map((vehicle, index) => (
-                    <View key={index} style={styles.newvehicle}>
-                      <Picker
-                        selectedValue={vehicle.Vehicle_Type}
-                        style={styles.picker}
-                        onValueChange={value =>
-                          handleTextChange(index, 'Vehicle_Type', value)
-                        }>
-                        <Picker.Item label="Select" value="" />
-                        <Picker.Item label="2-Wheeler" value="2-Wheeler" />
-                        <Picker.Item label="Car" value="Car" />
-                        <Picker.Item label="Bus" value="Bus" />
-                        <Picker.Item label="Taxi" value="Taxi" />
-                        <Picker.Item label="School Bus" value="School Bus" />
-                        <Picker.Item label="Police Van" value="Police Van" />
-                        <Picker.Item label="Van" value="Van" />
-                        <Picker.Item label="Auto" value="Auto" />
-                        <Picker.Item label="Ambulance" value="Ambulancer" />
-                        <Picker.Item label="Truck" value="Truck" />
-                        <Picker.Item label="Tractor" value="Tractor" />
-                        <Picker.Item
-                          label="Cement Mixer"
-                          value="Cement Mixer"
+                    <>
+                      <View key={index} style={styles.newvehicle}>
+                        <Picker
+                          selectedValue={vehicle.Vehicle_Type}
+                          style={styles.picker}
+                          onValueChange={value =>
+                            handleTextChange(index, 'Vehicle_Type', value)
+                          }>
+                          <Picker.Item label="Select" value="" />
+                          <Picker.Item label="2-Wheeler" value="2-Wheeler" />
+                          <Picker.Item label="Car" value="Car" />
+                          <Picker.Item label="Bus" value="Bus" />
+                          <Picker.Item label="Taxi" value="Taxi" />
+                          <Picker.Item label="School Bus" value="School Bus" />
+                          <Picker.Item label="Police Van" value="Police Van" />
+                          <Picker.Item label="Van" value="Van" />
+                          <Picker.Item label="Auto" value="Auto" />
+                          <Picker.Item label="Ambulance" value="Ambulance" />
+                          <Picker.Item label="Truck" value="Truck" />
+                          <Picker.Item label="Tractor" value="Tractor" />
+                          <Picker.Item
+                            label="Cement Mixer"
+                            value="Cement Mixer"
+                          />
+                          <Picker.Item
+                            label="Fire Engine"
+                            value="Fire Engine"
+                          />
+                          <Picker.Item
+                            label="Transport Van"
+                            value="Transport Van"
+                          />
+                          <Picker.Item label="Bulldozer" value="Bulldozer" />
+                          <Picker.Item
+                            label="Roller Machine"
+                            value="Roller Machine"
+                          />
+                          {/* Add more vehicle types as needed */}
+                        </Picker>
+                        <TextInput
+                          style={styles.vehicleinput}
+                          placeholder="KA 01 1234"
+                          placeholderTextColor="#c5c7ca"
+                          value={vehicle.Vehicle_Number}
+                          onChangeText={text =>
+                            handleTextChange(index, 'Vehicle_Number', text)
+                          }
                         />
-                        <Picker.Item label="Fire Engine" value="Fire Engine" />
-                        <Picker.Item
-                          label="Transport Van"
-                          value="Transport Van"
-                        />
-                        <Picker.Item label="Bulldozer" value="Bulldozer" />
-                        <Picker.Item
-                          label="Roller Machine"
-                          value="Roller Machine"
-                        />
-                        {/* Add more vehicle types as needed */}
-                      </Picker>
-                      <TextInput
-                        style={styles.vehicleinput}
-                        value={vehicle.Vehicle_Number}
-                        onChangeText={text =>
-                          handleTextChange(index, 'Vehicle_Number', text)
-                        }
-                      />
-                      <TouchableOpacity
-                        onPress={() => handleRemoveVehicle(index)}>
-                        <Image
-                          source={require('../assets/delete.png')}
-                          style={styles.removeButton}
-                        />
-                      </TouchableOpacity>
-                    </View>
+
+                        <TouchableOpacity
+                          onPress={() => handleRemoveVehicle(index)}>
+                          <Image
+                            source={require('../assets/delete.png')}
+                            style={styles.removeButton}
+                          />
+                        </TouchableOpacity>
+                      </View>
+                      {vehicleErrorMessages[vehicle.ID] && (
+                        <Text
+                          style={[
+                            styles.errorText,
+                            {marginTop: -10, paddingLeft: 30},
+                          ]}>
+                          {vehicleErrorMessages[vehicle.ID]}
+                        </Text>
+                      )}
+                    </>
                   ))}
                   <TouchableOpacity
                     style={styles.addvehicle}
@@ -1778,8 +1836,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
   },
   picker: {
-    flex: 2,
+    flex: 1,
     height: 40,
+    paddingRight: 10,
   },
   vehicleinput: {
     flex: 1,
