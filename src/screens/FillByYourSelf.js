@@ -512,7 +512,7 @@ const FillByYourSelf = ({navigation}) => {
         !validateInput(lastName, setNameErr)
       ) {
         // setNameErr('Prefix, First Name and Last Name are required');
-        Alert.alert('Error', 'Only letters are allowed in the name field ');
+        // Alert.alert('Error', '20 letters Only letters are allowed in the name field ');
         valid = false;
       } else {
         setNameErr(null);
@@ -823,11 +823,11 @@ const FillByYourSelf = ({navigation}) => {
   const [firstNameError, setFirstNameError] = useState('');
   const [lastNameError, setLastNameError] = useState('');
   const validateInput = (txt, setError) => {
-    if (/^[a-zA-Z\s]+$/.test(txt) || txt === '') {
+    if (/^[a-zA-Z\s]{1,20}$/.test(txt) || txt === '') {
       setError(''); // Clear error on valid input
       return true; // Valid input
     } else {
-      setError('Only letters are allowed.');
+      setError('20 letters only are allowed');
       return false; // Invalid input
     }
   };
@@ -929,20 +929,17 @@ const FillByYourSelf = ({navigation}) => {
                   <Text style={[styles.bottomtext, {marginRight: 75}]}>
                     Prefix
                   </Text>
-                  {firstNameError ? (
-                    <Text style={{color: '#B21E2B'}}>{firstNameError}</Text>
-                  ) : (
-                    <Text style={[styles.bottomtext, {marginRight: 72}]}>
-                      First Name
-                    </Text>
-                  )}
-                  {lastNameError ? (
-                    <Text style={{color: '#B21E2B'}}>{lastNameError}</Text>
-                  ) : (
-                    <Text style={styles.bottomtext}>Last Name</Text>
-                  )}
+
+                  <Text style={[styles.bottomtext, {marginRight: 72}]}>
+                    First Name
+                  </Text>
+
+                  <Text style={styles.bottomtext}>Last Name</Text>
                 </View>
                 {nameErr && <Text style={styles.errorText}>{nameErr}</Text>}
+                {(firstNameError || lastNameError) && (
+                  <Text style={styles.errorText}>{firstNameError}</Text>
+                )}
               </View>
 
               <View style={styles.namecontainer}>
