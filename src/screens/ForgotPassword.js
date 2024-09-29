@@ -28,6 +28,7 @@ const ForgotPassword = ({navigation}) => {
     try {
       // Attempt to send password reset email
       await sendPasswordResetEmail(auth, email.toLowerCase().trim());
+
       // Alert.alert(
       //   'Success',
       //   'A password reset email has been sent (if the email exists). Please log back in after resetting your password.',
@@ -88,33 +89,7 @@ const ForgotPassword = ({navigation}) => {
             style={styles.register}>
             <Text style={styles.registerTitle}>Send</Text>
           </TouchableOpacity>
-          <View style={styles.redirect}>
-            <Text
-              style={{
-                color: '#71727A',
 
-                fontFamily: 'Inter',
-                fontSize: 12,
-                fontWeight: 400,
-                lineHeight: 16,
-                marginRight: 5,
-              }}>
-              Back to
-            </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <Text
-                style={{
-                  color: '#B21E2B',
-
-                  fontFamily: 'Inter',
-                  fontSize: 12,
-                  fontWeight: 600,
-                  lineHeight: 16,
-                }}>
-                Login
-              </Text>
-            </TouchableOpacity>
-          </View>
           <View style={[styles.redirect, {marginTop: '5%'}]}>
             <Text
               style={{
@@ -126,7 +101,7 @@ const ForgotPassword = ({navigation}) => {
                 lineHeight: 16,
                 marginRight: 5,
               }}>
-              Do not have an account?
+              Haven't registered yet?
             </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Register')}>
               <Text
@@ -154,7 +129,7 @@ const ForgotPassword = ({navigation}) => {
             <Text
               style={{
                 width: 350,
-                height: 38,
+                // height: 38,
                 color: '#1F2024',
                 alignSelf: 'center',
                 fontFamily: 'Inter',
@@ -163,22 +138,11 @@ const ForgotPassword = ({navigation}) => {
                 fontSize: 17,
                 fontWeight: '900',
                 letterSpacing: 0.09,
+                lineHeight: 22,
+                marginTop: 20,
+                marginBottom: 20,
               }}>
-              Password reset email sent succesfully
-            </Text>
-            <Text
-              style={{
-                width: 220,
-                color: '#71727A',
-                alignSelf: 'center',
-                textAlign: 'center',
-                fontFamily: 'Inter',
-                fontSize: 14,
-                fontWeight: '400',
-                lineHeight: 20,
-              }}>
-              {' '}
-              Please log back in after resetting your password.
+              A password reset link is sent to your registered email
             </Text>
           </View>
 
@@ -196,13 +160,60 @@ const ForgotPassword = ({navigation}) => {
               Open Email App
             </Text>
           </TouchableOpacity>
+          {/* <Text
+            style={{
+              width: 280,
+              color: '#71727A',
+              alignSelf: 'center',
+              textAlign: 'center',
+              fontFamily: 'Inter',
+              fontSize: 14,
+              fontWeight: '400',
+              lineHeight: 20,
+            }}>
+            {' '}
+            Please register if you haven't registered.
+          </Text> */}
+
+          <View
+            style={[
+              styles.redirect,
+              {marginTop: '25%'},
+              {alignSelf: 'center'},
+            ]}>
+            <Text
+              style={{
+                color: '#71727A',
+
+                fontFamily: 'Inter',
+                fontSize: 14,
+                fontWeight: 400,
+                lineHeight: 16,
+                marginRight: 5,
+              }}>
+              Haven't registered yet?
+            </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+              <Text
+                style={{
+                  color: '#B21E2B',
+
+                  fontFamily: 'Inter',
+                  fontSize: 14,
+                  fontWeight: 900,
+                  lineHeight: 16,
+                }}>
+                Register
+              </Text>
+            </TouchableOpacity>
+          </View>
           <View style={[styles.redirect, {alignSelf: 'center'}]}>
             <Text
               style={{
                 color: '#71727A',
 
                 fontFamily: 'Inter',
-                fontSize: 12,
+                fontSize: 14,
                 fontWeight: 400,
                 lineHeight: 16,
                 marginRight: 5,
@@ -218,39 +229,11 @@ const ForgotPassword = ({navigation}) => {
                   color: '#B21E2B',
 
                   fontFamily: 'Inter',
-                  fontSize: 12,
-                  fontWeight: 600,
+                  fontSize: 14,
+                  fontWeight: 900,
                   lineHeight: 16,
                 }}>
                 Login
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <View
-            style={[styles.redirect, {marginTop: '5%'}, {alignSelf: 'center'}]}>
-            <Text
-              style={{
-                color: '#71727A',
-
-                fontFamily: 'Inter',
-                fontSize: 12,
-                fontWeight: 400,
-                lineHeight: 16,
-                marginRight: 5,
-              }}>
-              Do not have an account?
-            </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-              <Text
-                style={{
-                  color: '#B21E2B',
-
-                  fontFamily: 'Inter',
-                  fontSize: 12,
-                  fontWeight: 600,
-                  lineHeight: 16,
-                }}>
-                Register
               </Text>
             </TouchableOpacity>
           </View>
@@ -276,7 +259,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: '25%',
+    marginTop: '5%',
   },
   inputBox: {
     paddingVertical: 12,
@@ -324,7 +307,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Inter',
     fontStyle: 'normal',
-    fontWeight: '600',
+    fontWeight: '800',
     textAlign: 'center',
     lineHeight: 26,
     color: 'white',
