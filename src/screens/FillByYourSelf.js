@@ -98,6 +98,23 @@ const FillByYourSelf = ({navigation}) => {
     today.setDate(today.getDate()),
     'YYYY/MM/DD',
   );
+  const addDaysToDate = (dateString, daysToAdd) => {
+    // Convert the input string (YYYY/MM/DD) into a Date object
+    const [year, month, day] = dateString.split('/'); // Split the string by '/'
+    const date = new Date(year, month - 1, day); // Month is 0-indexed in JavaScript
+
+    // Add the specified number of days (60 days in this case)
+    date.setDate(date.getDate() + daysToAdd);
+
+    // Format the new date back to 'YYYY/MM/DD'
+    const newYear = date.getFullYear();
+    const newMonth = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed, so add 1
+    const newDay = String(date.getDate()).padStart(2, '0');
+
+    return `${newYear}/${newMonth}/${newDay}`;
+  };
+  const endDate = addDaysToDate(startDate, 60);
+  console.log('endDate', endDate);
   const approvalToVisitorID = useRef(null);
   const viewRef = useRef();
   const [code, setCode] = useState('');
@@ -502,10 +519,24 @@ const FillByYourSelf = ({navigation}) => {
       }
     }
 
+    const isDateWithinTwoMonths = selectedDate => {
+      const currentDate = new Date(); // Get current date
+
+      // Create a date 2 months from today
+      const twoMonthsLater = new Date();
+      twoMonthsLater.setMonth(currentDate.getDate() + 1);
+
+      // Compare the selected date with the date 2 months later
+      return selectedDate <= twoMonthsLater;
+    };
     if (date === 'Select Date') {
       setDateOfVisitErr('Date of visit is required');
       valid = false;
     } else {
+      if (!isDateWithinTwoMonths(date)) {
+        setDateOfVisitErr('Please select a date within 2 months from today');
+        valid = false;
+      }
       setDateOfVisitErr(null);
     }
 
@@ -974,6 +1005,7 @@ const FillByYourSelf = ({navigation}) => {
                         <DatePicker
                           mode="calendar"
                           minimumDate={startDate}
+                          maximumDate={endDate}
                           onSelectedChange={handleDateChange}
                           options={{
                             backgroundColor: 'white',
