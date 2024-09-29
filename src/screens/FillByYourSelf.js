@@ -160,7 +160,10 @@ const FillByYourSelf = ({navigation}) => {
     {label: 'Other', value: 'Other'},
   ];
 
-  console.log('Screen Height:', height);
+  let menCount = '0';
+  let womenCount = '0';
+  let boysCount = '0';
+  let girlsCount = '0';
 
   const PasscodeUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Passcode`;
 
@@ -239,8 +242,8 @@ const FillByYourSelf = ({navigation}) => {
     console.log('inside posttoL1aprroved');
 
     // const Vehicle_Info = await postVehicle();
-    let menCount = '0';
-    let womenCount = '0';
+    // let menCount = '0';
+    // let womenCount = '0';
     if (selectedSG === 'Single') {
       if (selectedGender === 'Male') {
         console.log('Inside Single Male');
@@ -252,8 +255,8 @@ const FillByYourSelf = ({navigation}) => {
         womenCount = '1';
       }
     } else {
-      menCount = men;
-      womenCount = women;
+      menCount = men === '' ? '0' : men;
+      womenCount = women === '' ? '0' : women;
     }
     const formData = {
       data: {
@@ -458,21 +461,36 @@ const FillByYourSelf = ({navigation}) => {
 
   const validateForm = () => {
     let valid = true;
-    if (!prefix || !firstName || !lastName) {
+
+    menCount = men === '' ? '0' : men;
+    womenCount = women === '' ? '0' : women;
+    boysCount = boys === '' ? '0' : boys;
+    girlsCount = girls === '' ? '0' : girls;
+
+    setMen(menCount);
+    setWomen(womenCount);
+    setBoys(boysCount);
+    setGirls(girlsCount);
+
+    if (
+      prefix.trim() === '' ||
+      firstName.trim() === '' ||
+      lastName.trim() === ''
+    ) {
+      console.log('inside name null validation');
       setNameErr('Prefix, First Name and Last Name are required');
       valid = false;
     } else {
-      setNameErr(null);
-    }
-    if (
-      !validateInput(firstName, setNameErr) ||
-      !validateInput(lastName, setNameErr)
-    ) {
-      // setNameErr('Prefix, First Name and Last Name are required');
-      Alert.alert('Error', 'Only letters are allowed in the name field ');
-      valid = false;
-    } else {
-      setNameErr(null);
+      if (
+        !validateInput(firstName, setNameErr) ||
+        !validateInput(lastName, setNameErr)
+      ) {
+        // setNameErr('Prefix, First Name and Last Name are required');
+        Alert.alert('Error', 'Only letters are allowed in the name field ');
+        valid = false;
+      } else {
+        setNameErr(null);
+      }
     }
 
     if (date === 'Select Date') {
@@ -503,10 +521,10 @@ const FillByYourSelf = ({navigation}) => {
       // setSingleOrGroupErr(null);
       if (
         selectedSG === 'Group' &&
-        men === '0' &&
-        women === '0' &&
-        boys === '0' &&
-        girls === '0'
+        menCount === '0' &&
+        womenCount === '0' &&
+        boysCount === '0' &&
+        girlsCount === '0'
       ) {
         setSingleOrGroupErr('Total No. of people cannot be 0');
         valid = false;
@@ -876,8 +894,9 @@ const FillByYourSelf = ({navigation}) => {
                     <Text style={styles.bottomtext}>Last Name</Text>
                   )}
                 </View>
+                {nameErr && <Text style={styles.errorText}>{nameErr}</Text>}
               </View>
-              {nameErr && <Text style={styles.errorText}>{nameErr}</Text>}
+
               <View style={styles.namecontainer}>
                 <Text style={styles.label}>
                   Phone <Text style={{color: 'red'}}>*</Text>
@@ -992,7 +1011,11 @@ const FillByYourSelf = ({navigation}) => {
                       style={[styles.phoneInputContainer, {paddingLeft: 15}]}
                       keyboardType="numeric"
                       value={men}
-                      onChangeText={setMen}
+                      onChangeText={text => {
+                        // Allow only numbers
+                        const numericValue = text.replace(/[^0-9]/g, '');
+                        setMen(numericValue);
+                      }}
                       selectionColor="#B21E2B"
                     />
                   </View>
@@ -1005,7 +1028,11 @@ const FillByYourSelf = ({navigation}) => {
                       style={[styles.phoneInputContainer, {paddingLeft: 15}]}
                       keyboardType="numeric"
                       value={women}
-                      onChangeText={setWomen}
+                      onChangeText={text => {
+                        // Allow only numbers
+                        const numericValue = text.replace(/[^0-9]/g, '');
+                        setWomen(numericValue);
+                      }}
                       selectionColor="#B21E2B"
                     />
                   </View>
@@ -1017,7 +1044,11 @@ const FillByYourSelf = ({navigation}) => {
                       style={[styles.phoneInputContainer, {paddingLeft: 15}]}
                       keyboardType="numeric"
                       value={boys}
-                      onChangeText={setBoys}
+                      onChangeText={text => {
+                        // Allow only numbers
+                        const numericValue = text.replace(/[^0-9]/g, '');
+                        setBoys(numericValue);
+                      }}
                       selectionColor="#B21E2B"
                     />
                   </View>
@@ -1029,7 +1060,11 @@ const FillByYourSelf = ({navigation}) => {
                       style={[styles.phoneInputContainer, {paddingLeft: 15}]}
                       keyboardType="numeric"
                       value={girls}
-                      onChangeText={setGirls}
+                      onChangeText={text => {
+                        // Allow only numbers
+                        const numericValue = text.replace(/[^0-9]/g, '');
+                        setGirls(numericValue);
+                      }}
                       selectionColor="#B21E2B"
                     />
                   </View>
