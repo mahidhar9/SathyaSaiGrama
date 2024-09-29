@@ -605,33 +605,34 @@ const FillByYourSelf = ({navigation}) => {
   };
 
   const handleReset = () => {
-    setBoys('0');
-    setWomen('0');
-    setMen('0');
-    setGirls('0');
-    setPrefix(' ');
-    setDate('Select Date');
-    setSelectedGender('');
-    setSelectedHO('');
-    setSelectedSG('');
-    setLastName('');
-    setFirstName('');
-    setValue('');
-    setImage(null);
-    setGuestCategory('');
-    setPriority('');
-    setVehicleType('');
-    setVehicleNumber('');
-    setIsVehicle(false);
-    setIsFocus(false);
-    setFocus(false);
-    setNameErr(null);
-    setDateOfVisitErr(null);
-    setPhoneErr(null);
-    setSingleOrGroupErr(null);
-    setHomeOrOfficeErr(null);
-    setGenderErr(null);
-    setPhoneValidErr(null);
+    // setBoys('0');
+    // setWomen('0');
+    // setMen('0');
+    // setGirls('0');
+    // setPrefix(' ');
+    // setDate('Select Date');
+    // setSelectedGender('');
+    // setSelectedHO('');
+    // setSelectedSG('');
+    // setLastName('');
+    // setFirstName('');
+    // setValue('');
+    // setImage(null);
+    // setGuestCategory('');
+    // setPriority('');
+    // setVehicleType('');
+    // setVehicleNumber('');
+    // setIsVehicle(false);
+    // setIsFocus(false);
+    // setFocus(false);
+    // setNameErr(null);
+    // setDateOfVisitErr(null);
+    // setPhoneErr(null);
+    // setSingleOrGroupErr(null);
+    // setHomeOrOfficeErr(null);
+    // setGenderErr(null);
+    // setPhoneValidErr(null);
+    navigation.navigate('Invite');
   };
   let heightStyles;
   if (height > 900) {
@@ -1229,15 +1230,19 @@ const FillByYourSelf = ({navigation}) => {
                       )}
                     </>
                   ))}
-                  <TouchableOpacity
-                    style={styles.addvehicle}
-                    onPress={handleAddVehicle}>
-                    <Image
-                      source={require('../assets/add.png')}
-                      style={{width: 15, height: 15}}
-                    />
-                    <Text style={{color: 'black', fontSize: 15}}>Add New</Text>
-                  </TouchableOpacity>
+                  {vehicles.length < 5 && (
+                    <TouchableOpacity
+                      style={styles.addvehicle}
+                      onPress={handleAddVehicle}>
+                      <Image
+                        source={require('../assets/add.png')}
+                        style={{width: 15, height: 15}}
+                      />
+                      <Text style={{color: 'black', fontSize: 15}}>
+                        Add New
+                      </Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               </View>
 
