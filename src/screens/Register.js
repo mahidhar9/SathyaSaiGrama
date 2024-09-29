@@ -50,6 +50,37 @@ const Register = ({navigation}) => {
   const [focusedInput, setFocusedInput] = useState(null);
   const [email, setEmail] = useState('');
 
+
+  const [validation, setValidation] = useState({
+    hasNumber: false,
+    hasUpperCase: false,
+    hasSpecialChar: false,
+    isValidLength: false,
+  });
+
+  const validatePassword = (text) => {
+    const hasNumber = /\d/.test(text);
+    const hasUpperCase = /[A-Z]/.test(text);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(text);
+    const isValidLength = text.length >= 8 && text.length <= 20;
+
+    setValidation({
+      hasNumber,
+      hasUpperCase,
+      hasSpecialChar,
+      isValidLength,
+    });
+
+    setPassword(text);
+  };
+  const isValidPassword = () => {
+    return (
+      validation.hasNumber &&
+      validation.hasUpperCase &&
+      validation.hasSpecialChar &&
+      validation.isValidLength
+    );
+  };
   const isTestResident = async id => {
     const res = await getDataWithTwoInt(
       'All_Residents',
@@ -267,11 +298,14 @@ const Register = ({navigation}) => {
                     secureTextEntry={!showPassword}
                     onChangeText={text => {
                       onChange(text);
-                      setPassword(text);
+                      //setPassword(text);
+                      validatePassword(text);
                     }}
                   />
                 )}
-                rules={{required: true, minLength: 6, maxLength: 20}}
+                rules={{required: true, 
+                // minLength: 6, maxLength: 20
+                }}
               />
               {showPassword === false ? (
                 <TouchableOpacity
@@ -293,7 +327,7 @@ const Register = ({navigation}) => {
                 </TouchableOpacity>
               )}
             </View>
-            {errors.password?.type === 'required' && (
+            {/* {errors.password?.type === 'required' && (
               <Text style={[styles.textError, styles.passErro]}>
                 Password is required
               </Text>
@@ -307,7 +341,21 @@ const Register = ({navigation}) => {
               <Text style={[styles.textError, styles.passErro]}>
                 Password must be between 6 to 20 characters long
               </Text>
-            )}
+            )} */}
+
+            
+            <Text style={[styles.text, validation.hasNumber ? styles.valid : styles.invalid]}>
+             {validation.hasNumber ? '✓ ' : '✗ '} Contains at least one number
+            </Text>
+            <Text style={[styles.text, validation.hasUpperCase ? styles.valid : styles.invalid]}>
+              {validation.hasUpperCase ? '✓ ' : '✗ '} Contains at least one uppercase letter
+            </Text>
+            <Text style={[styles.text, validation.hasSpecialChar ? styles.valid : styles.invalid]}>
+              {validation.hasSpecialChar ? '✓ ' : '✗ '} Contains at least one special character
+            </Text>
+            <Text style={[styles.text, validation.isValidLength ? styles.valid : styles.invalid]}>
+              {validation.isValidLength ? '✓ ' : '✗ '} Password length is between 8-20 characters
+            </Text>
 
             <View
               style={[
@@ -330,7 +378,7 @@ const Register = ({navigation}) => {
                 )}
                 rules={{
                   required: true,
-                  minLength: 6,
+                  // minLength: 6,
                   validate: value =>
                     value === password || 'Passwords do not match',
                 }}
@@ -356,11 +404,11 @@ const Register = ({navigation}) => {
             {errors.confirmPassword?.type === 'required' && (
               <Text style={styles.textError}>Password is required</Text>
             )}
-            {errors.confirmPassword?.type === 'minLength' && (
+            {/* {errors.confirmPassword?.type === 'minLength' && (
               <Text style={[styles.textError, styles.passErro]}>
                 Password must be between 6 to 20 characters long
               </Text>
-            )}
+            )} */}
             {errors.confirmPassword?.type === 'validate' && (
               <Text style={[styles.textError, styles.passErro]}>
                 Passwords do not match
@@ -405,11 +453,21 @@ const Register = ({navigation}) => {
               </Text>
             )} */}
 
-            <TouchableOpacity
+            {/* <TouchableOpacity
               onPress={handleSubmit(handleRegForm)}
               style={styles.register}>
               <Text style={styles.registerTitle}>Register</Text>
+            </TouchableOpacity> */}
+
+
+            <TouchableOpacity
+              onPress={handleSubmit(handleRegForm)}
+              // style={styles.register}
+              disabled={!isValidPassword()} 
+              style={[styles.register, !isValidPassword() ]}>
+              <Text style={styles.registerTitle}>Register</Text>
             </TouchableOpacity>
+
 
             <View style={styles.redirect}>
               <Text
@@ -613,4 +671,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  text: {
+    fontFamily: 'Inter',
+    fontSize: 12,
+    fontStyle: 'normal',
+    letterSpacing: 0.12,
+    fontWeight: '400',
+  },
+  valid: {
+    color: 'green',
+  },
+  invalid: {
+    color: 'red',
+  },
+   disabledButton: {
+    backgroundColor: '#B0C4DE',
+    },
 });
