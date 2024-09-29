@@ -810,7 +810,15 @@ const FillByYourSelf = ({navigation}) => {
     setLastName(txt);
     validateInput(txt, setLastNameError);
   };
-
+  let addNewButtonVisibility;
+  if (
+    (selectedSG === 'Group' && vehicles.length < 5) ||
+    (selectedSG === 'Single' && vehicles.length < 1)
+  ) {
+    addNewButtonVisibility = true;
+  } else {
+    addNewButtonVisibility = false;
+  }
   return (
     <>
       {isSubmitted ? (
@@ -1305,7 +1313,7 @@ const FillByYourSelf = ({navigation}) => {
                       )}
                     </>
                   ))}
-                  {vehicles.length < 5 && (
+                  {addNewButtonVisibility && (
                     <TouchableOpacity
                       style={styles.addvehicle}
                       onPress={handleAddVehicle}>
