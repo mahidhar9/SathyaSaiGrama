@@ -1089,10 +1089,39 @@ const FillByYourSelf = ({navigation}) => {
                   })}
                 </View>
                 {genderErr && <Text style={styles.errorText}>{genderErr}</Text>}
-                <Button
+                <View style={styles.namecontainer}>
+                  <Text style={styles.label}>Photo</Text>
+                  <View
+                    style={[
+                      styles.dropdown,
+                      {flexDirection: 'row', justifyContent: 'space-between'},
+                    ]}>
+                    <Text style={{color: 'gray', marginHorizontal: 10}}>
+                      {imageUri ? image.name : 'Select Image'}
+                    </Text>
+                    <View style={{paddingHorizontal: 10}}>
+                      {imageUri ? (
+                        <TouchableOpacity onPress={removeImage}>
+                          <Image
+                            source={require('../assets/close_icon.png')}
+                            style={{width: 20, height: 20}}
+                          />
+                        </TouchableOpacity>
+                      ) : (
+                        <TouchableOpacity onPress={selectImage}>
+                          <Image
+                            source={require('../assets/upload.png')}
+                            style={{width: 20, height: 20}}
+                          />
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  </View>
+                </View>
+                {/* <Button
                   title={imageUri ? 'Update Image' : 'Select Image'}
                   onPress={selectImage}
-                />
+                /> */}
 
                 {imageUri && (
                   <>
@@ -1100,7 +1129,7 @@ const FillByYourSelf = ({navigation}) => {
                       source={{uri: imageUri}}
                       style={{width: 100, height: 100}}
                     />
-                    <Button title="Remove Image" onPress={removeImage} />
+                    {/* <Button title="Remove Image" onPress={removeImage} /> */}
                   </>
                 )}
                 <View style={styles.namecontainer}>
