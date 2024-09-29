@@ -51,7 +51,7 @@ const FillByYourSelf = ({navigation}) => {
   const [girls, setGirls] = useState('0');
   const [selectedGender, setSelectedGender] = useState('');
   const [selectedSG, setSelectedSG] = useState('');
-  const [selectedHO, setSelectedHO] = useState('');
+
   const [value, setValue] = useState('');
   const [formattedValue, setFormattedValue] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -71,6 +71,7 @@ const FillByYourSelf = ({navigation}) => {
   const [vehicleErrorMessages, setVehicleErrorMessages] = useState({});
   // Regex format for vehicle number like 'KA 01 CU 1234'
   const vehicleNumberPattern = /^[a-z]{2}[0-9]{2}[a-z]{2}[0-9]{4}$/;
+  let selectedHomeOffice = '';
 
   const {
     getAccessToken,
@@ -79,6 +80,14 @@ const FillByYourSelf = ({navigation}) => {
     accessToken,
     setApproveDataFetched,
   } = useContext(UserContext);
+  if (loggedUser.resident === true && loggedUser.employee === true) {
+    selectedHomeOffice = '';
+  } else if (loggedUser.resident === true && loggedUser.employee === false) {
+    selectedHomeOffice = 'Home';
+  } else if (loggedUser.resident === false && loggedUser.employee === true) {
+    selectedHomeOffice = 'Office';
+  }
+  const [selectedHO, setSelectedHO] = useState(selectedHomeOffice);
   const [date, setDate] = useState('Select Date');
   const [showModal, setShowModal] = useState(false);
   const L1ID = loggedUser.userId;
@@ -1070,35 +1079,37 @@ const FillByYourSelf = ({navigation}) => {
                   </View>
                 </View>
               ) : null}
-              <View style={styles.namecontainer}>
-                <Text style={styles.label}>
-                  Is the Guest being invited to Home or Office
-                  <Text style={{color: 'red'}}> *</Text>
-                </Text>
-                <View style={styles.radioButtonContainer}>
-                  {homeoroffice.map(option => {
-                    return (
-                      <TouchableOpacity
-                        key={option}
-                        style={styles.singleOptionContainer}
-                        onPress={() => {
-                          setSelectedHO(option);
-                          setHomeOrOfficeErr(null);
-                        }}>
-                        <View style={styles.outerCircle}>
-                          {selectedHO === option ? (
-                            <View style={styles.innerCircle} />
-                          ) : null}
-                        </View>
-                        <Text style={{marginLeft: 10}}>{option}</Text>
-                      </TouchableOpacity>
-                    );
-                  })}
+              {loggedUser.resident === true && loggedUser.employee === true ? (
+                <View style={styles.namecontainer}>
+                  <Text style={styles.label}>
+                    Is the Guest being invited to Home or Office
+                    <Text style={{color: 'red'}}> *</Text>
+                  </Text>
+                  <View style={styles.radioButtonContainer}>
+                    {homeoroffice.map(option => {
+                      return (
+                        <TouchableOpacity
+                          key={option}
+                          style={styles.singleOptionContainer}
+                          onPress={() => {
+                            setSelectedHO(option);
+                            setHomeOrOfficeErr(null);
+                          }}>
+                          <View style={styles.outerCircle}>
+                            {selectedHO === option ? (
+                              <View style={styles.innerCircle} />
+                            ) : null}
+                          </View>
+                          <Text style={{marginLeft: 10}}>{option}</Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                  {homeOrOfficeErr && (
+                    <Text style={styles.errorText}>{homeOrOfficeErr}</Text>
+                  )}
                 </View>
-                {homeOrOfficeErr && (
-                  <Text style={styles.errorText}>{homeOrOfficeErr}</Text>
-                )}
-              </View>
+              ) : null}
               <View style={styles.namecontainer}>
                 <Text style={styles.label}>
                   Select Gender <Text style={{color: 'red'}}>*</Text>
