@@ -18,7 +18,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME} from '@env';
 import {openInbox} from 'react-native-email-link';
 const VerificationNotice = ({route, navigation}) => {
-  const {id} = route.params;
+  const {id, residentLocalVar, employeeLocalVar, testResidentLocalVar, name} =
+    route.params;
   console.log('Id in verification notice: ', id);
   const user = auth.currentUser;
   const {
@@ -33,10 +34,6 @@ const VerificationNotice = ({route, navigation}) => {
   const {setUser} = useContext(AuthContext);
   const [departmentIds, setDepartmentIds] = useState([]);
   const {email} = route.params;
-
-  let residentLocalVar = false;
-  let employeeLocalVar = false;
-  let testResidentLocalVar = false;
 
   useEffect(() => {
     const fetchDataFromOffice = async () => {
@@ -56,74 +53,7 @@ const VerificationNotice = ({route, navigation}) => {
       }
     };
 
-    const isTestResident = async id => {
-      const res = await getDataWithTwoInt(
-        'All_Residents',
-        'App_User_lookup',
-        id,
-        'Flats_lookup',
-        '3318254000031368021',
-        accessToken,
-      );
-      if (
-        res &&
-        res.data &&
-        res.data[0].Accommodation_Approval === 'APPROVED'
-      ) {
-        console.log('Test resident is true');
-        // testResident.current = true;
-        testResidentLocalVar = true;
-      } else {
-        console.log('Test Resident is false');
-        // testResident.current = false;
-        testResidentLocalVar = false;
-      }
-    };
-
-    const isResident = async id => {
-      const res = await getDataWithInt(
-        'All_Residents',
-        'App_User_lookup',
-        id,
-        accessToken,
-      );
-      if (
-        res &&
-        res.data &&
-        res.data[0].Accommodation_Approval === 'APPROVED'
-      ) {
-        console.log('resident is true');
-        // resident.current = true;
-        residentLocalVar = true;
-      } else {
-        console.log('resident is false');
-        // resident.current = false;
-        residentLocalVar = false;
-      }
-    };
-
-    const isEmployee = async id => {
-      const res = await getDataWithInt(
-        'All_Employees',
-        'App_User_lookup',
-        id,
-        accessToken,
-      );
-      if (res && res.data && res.data[0].Department_Approval === 'APPROVED') {
-        console.log('employee is true');
-        // employee.current = true;
-        employeeLocalVar = true;
-      } else {
-        console.log('employee is false');
-        // employee.current = false;
-        employeeLocalVar = false;
-      }
-    };
-
     fetchDataFromOffice();
-    isResident(id);
-    isEmployee(id);
-    isTestResident(id);
   }, []);
 
   useEffect(() => {
@@ -195,6 +125,7 @@ const VerificationNotice = ({route, navigation}) => {
                 role: userType,
                 email: user.email,
                 deptIds: departmentIds,
+                name: name,
                 resident: residentLocalVar,
                 employee: employeeLocalVar,
                 testResident: testResidentLocalVar,
