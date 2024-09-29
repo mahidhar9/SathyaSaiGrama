@@ -33,23 +33,15 @@ const Register = ({navigation}) => {
     formState: {errors},
   } = useForm();
   const [password, setPassword] = useState();
-  const {
-    accessToken,
-    resident,
-    setResident,
-    employee,
-    setEmployee,
-    testResident,
-    setTestResident,
-  } = useContext(UserContext);
-  let residentLocalVar = resident;
-  let employeeLocalVar = employee;
-  let testResidentLocalVar = testResident;
+  const {accessToken} = useContext(UserContext);
+  let residentLocalVar = false;
+  let employeeLocalVar = false;
+  let testResidentLocalVar = false;
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [focusedInput, setFocusedInput] = useState(null);
   const [email, setEmail] = useState('');
-
 
   const [validation, setValidation] = useState({
     hasNumber: false,
@@ -58,7 +50,7 @@ const Register = ({navigation}) => {
     isValidLength: false,
   });
 
-  const validatePassword = (text) => {
+  const validatePassword = text => {
     const hasNumber = /\d/.test(text);
     const hasUpperCase = /[A-Z]/.test(text);
     const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(text);
@@ -81,27 +73,6 @@ const Register = ({navigation}) => {
       validation.isValidLength
     );
   };
-  const isTestResident = async id => {
-    const res = await getDataWithTwoInt(
-      'All_Residents',
-      'App_User_lookup',
-      id,
-      'Flats_lookup',
-      '3318254000031368021',
-      accessToken,
-    );
-    if (res && res.data && res.data[0].Accommodation_Approval === 'APPROVED') {
-      console.log('Test resident is true');
-      // testResident.current = true;
-      testResidentLocalVar = true;
-      setTestResident(true);
-    } else {
-      console.log('Test Resident is false');
-      // testResident.current = false;
-      testResidentLocalVar = false;
-      setTestResident(false);
-    }
-  };
 
   const isResident = async id => {
     const res = await getDataWithInt(
@@ -114,11 +85,9 @@ const Register = ({navigation}) => {
       console.log('resident data found in Login:', res.data);
       // resident.current = true;
       residentLocalVar = true;
-      setResident(true);
     } else {
       // resident.current = false;
       residentLocalVar = false;
-      setResident(false);
     }
     console.log('response in fetchDataFromOffice in login: '.res);
   };
@@ -134,13 +103,31 @@ const Register = ({navigation}) => {
       console.log('employee data found in Login:', res.data);
       // employee.current = true;
       employeeLocalVar = true;
-      setEmployee(true);
     } else {
       // employee.current = false;
       employeeLocalVar = false;
-      setEmployee(false);
     }
     console.log('response in fetchDataFromOffice in login: '.res);
+  };
+
+  const isTestResident = async id => {
+    const res = await getDataWithTwoInt(
+      'All_Residents',
+      'App_User_lookup',
+      id,
+      'Flats_lookup',
+      '3318254000031368021',
+      accessToken,
+    );
+    if (res && res.data && res.data[0].Accommodation_Approval === 'APPROVED') {
+      console.log('Test resident is true');
+      // testResident.current = true;
+      testResidentLocalVar = true;
+    } else {
+      console.log('Test Resident is false');
+      // testResident.current = false;
+      testResidentLocalVar = false;
+    }
   };
 
   const handleRegForm = async userCred => {
@@ -162,6 +149,7 @@ const Register = ({navigation}) => {
         employeeLocalVar,
       );
       await isTestResident(res.data[0].ID);
+
       if (residentLocalVar || employeeLocalVar) {
         //authentication
         try {
@@ -176,6 +164,10 @@ const Register = ({navigation}) => {
           navigation.navigate('VerificationNotice', {
             id: res.data[0].ID,
             email: email,
+            name: res.data[0].Name_field,
+            resident: residentLocalVar,
+            employee: employeeLocalVar,
+            testResident: testResidentLocalVar,
           });
         } catch (error) {
           setLoading(false);
@@ -303,8 +295,9 @@ const Register = ({navigation}) => {
                     }}
                   />
                 )}
-                rules={{required: true, 
-                // minLength: 6, maxLength: 20
+                rules={{
+                  required: true,
+                  // minLength: 6, maxLength: 20
                 }}
               />
               {showPassword === false ? (
@@ -343,18 +336,36 @@ const Register = ({navigation}) => {
               </Text>
             )} */}
 
-            
-            <Text style={[styles.text, validation.hasNumber ? styles.valid : styles.invalid]}>
-             {validation.hasNumber ? '✓ ' : '✗ '} Contains at least one number
+            <Text
+              style={[
+                styles.text,
+                validation.hasNumber ? styles.valid : styles.invalid,
+              ]}>
+              {validation.hasNumber ? '✓ ' : '✗ '} Contains at least one number
             </Text>
-            <Text style={[styles.text, validation.hasUpperCase ? styles.valid : styles.invalid]}>
-              {validation.hasUpperCase ? '✓ ' : '✗ '} Contains at least one uppercase letter
+            <Text
+              style={[
+                styles.text,
+                validation.hasUpperCase ? styles.valid : styles.invalid,
+              ]}>
+              {validation.hasUpperCase ? '✓ ' : '✗ '} Contains at least one
+              uppercase letter
             </Text>
-            <Text style={[styles.text, validation.hasSpecialChar ? styles.valid : styles.invalid]}>
-              {validation.hasSpecialChar ? '✓ ' : '✗ '} Contains at least one special character
+            <Text
+              style={[
+                styles.text,
+                validation.hasSpecialChar ? styles.valid : styles.invalid,
+              ]}>
+              {validation.hasSpecialChar ? '✓ ' : '✗ '} Contains at least one
+              special character
             </Text>
-            <Text style={[styles.text, validation.isValidLength ? styles.valid : styles.invalid]}>
-              {validation.isValidLength ? '✓ ' : '✗ '} Password length is between 8-20 characters
+            <Text
+              style={[
+                styles.text,
+                validation.isValidLength ? styles.valid : styles.invalid,
+              ]}>
+              {validation.isValidLength ? '✓ ' : '✗ '} Password length is
+              between 8-20 characters
             </Text>
 
             <View
@@ -459,15 +470,13 @@ const Register = ({navigation}) => {
               <Text style={styles.registerTitle}>Register</Text>
             </TouchableOpacity> */}
 
-
             <TouchableOpacity
               onPress={handleSubmit(handleRegForm)}
               // style={styles.register}
-              disabled={!isValidPassword()} 
-              style={[styles.register, !isValidPassword() ]}>
+              disabled={!isValidPassword()}
+              style={[styles.register, !isValidPassword()]}>
               <Text style={styles.registerTitle}>Register</Text>
             </TouchableOpacity>
-
 
             <View style={styles.redirect}>
               <Text
@@ -684,7 +693,7 @@ const styles = StyleSheet.create({
   invalid: {
     color: 'red',
   },
-   disabledButton: {
+  disabledButton: {
     backgroundColor: '#B0C4DE',
-    },
+  },
 });
