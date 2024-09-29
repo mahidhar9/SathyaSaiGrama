@@ -197,6 +197,9 @@ const Login = ({navigation}) => {
             deptIds: departmentIds,
             name: currentUser.name,
             profilePhoto: currentUser.profilePhoto,
+            resident: residentLocalVar,
+            employee: employeeLocalVar,
+            testResident: testResidentLocalVar,
           }),
         );
         console.log('login data saved into local storage');
@@ -505,69 +508,65 @@ const Login = ({navigation}) => {
                     Password must be 6 characters long
                   </Text>
                 )} */}
-            <View
-              style={[
-                styles.passBorder,
-                focusedInput === 'password' && styles.inputFocused, 
-              ]}>
-              <Controller
-                name="password"
-                control={control}
-                render={({field: {onChange, value}}) => (
-                  <TextInput
-                    placeholder="Password"
-                    style={styles.inputBox}
-                    value={value}
-                    selectionColor="#B21E2B"
-                    onFocus={() => setFocusedInput('password')}
-                    secureTextEntry={!showPassword}
-                    onChangeText={value => {
-                       const trimmedValue = value.trim(); 
-                       onChange(trimmedValue);
-                       setPassword(trimmedValue); 
-                     }}
-
+                <View
+                  style={[
+                    styles.passBorder,
+                    focusedInput === 'password' && styles.inputFocused,
+                  ]}>
+                  <Controller
+                    name="password"
+                    control={control}
+                    render={({field: {onChange, value}}) => (
+                      <TextInput
+                        placeholder="Password"
+                        style={styles.inputBox}
+                        value={value}
+                        selectionColor="#B21E2B"
+                        onFocus={() => setFocusedInput('password')}
+                        secureTextEntry={!showPassword}
+                        onChangeText={value => {
+                          const trimmedValue = value.trim();
+                          onChange(trimmedValue);
+                          setPassword(trimmedValue);
+                        }}
+                      />
+                    )}
+                    rules={{
+                      required: true,
+                      // minLength: 8,
+                      //         maxLength:20,
+                      // pattern:
+                      //           /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/,
+                    }}
                   />
-                )}
-                rules={{required: true,
-                  // minLength: 8,
-                  //         maxLength:20,
-                  // pattern:
-                  //           /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/,
-                }}
-              />
-              {showPassword === false ? (
-                <TouchableOpacity
-                  onPress={() => {
-                    setShowPassword(!showPassword);
-                  }}>
-                  <Image
-                    source={require('../assets/eyestrike.png')}
-                    style={{width: 16, height: 16}}
-                  />
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity
-                  onPress={() => setShowPassword(!showPassword)}>
-                  <Image
-                    source={require('../assets/eye.png')}
-                    style={{width: 16, height: 16}}
-                  />
-                </TouchableOpacity>
-              )}
-              
-            </View>
-            {/* {errors.password?.type === 'pattern' && (
+                  {showPassword === false ? (
+                    <TouchableOpacity
+                      onPress={() => {
+                        setShowPassword(!showPassword);
+                      }}>
+                      <Image
+                        source={require('../assets/eyestrike.png')}
+                        style={{width: 16, height: 16}}
+                      />
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      onPress={() => setShowPassword(!showPassword)}>
+                      <Image
+                        source={require('../assets/eye.png')}
+                        style={{width: 16, height: 16}}
+                      />
+                    </TouchableOpacity>
+                  )}
+                </View>
+                {/* {errors.password?.type === 'pattern' && (
               <Text style={styles.errorMessage}>
           Password must be at least 8 characters long, contains both upper and lower case letters, includes at least one number, and has at least one special character<Text style={styles.errMes} >(e.g., !@#$%^&*).</Text>
         </Text> 
       )}*/}
-      {errors.password?.type==='required'&&(
-        <Text style={styles.textError}>
-        Password is required
-        </Text>
-      )}
-
+                {errors.password?.type === 'required' && (
+                  <Text style={styles.textError}>Password is required</Text>
+                )}
 
                 <TouchableOpacity
                   onPress={() => navigation.navigate('ForgotPassword')}>
@@ -578,7 +577,6 @@ const Login = ({navigation}) => {
                   onPress={handleSubmit(handleLoginForm)}
                   // disabled={!isValidPassword()}
                   style={[styles.register]}>
-             
                   {/* style={styles.register}> */}
                   <Text style={styles.registerTitle}>Login</Text>
                 </TouchableOpacity>
@@ -773,7 +771,8 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     marginStart: 6,
     marginBottom: 10,
-  },errMes:{
+  },
+  errMes: {
     color: '#B21E2B',
     fontFamily: 'Inter',
     fontSize: 12,
@@ -782,5 +781,5 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     marginStart: 6,
     marginBottom: 10,
-  }
+  },
 });
