@@ -307,7 +307,7 @@ const Login = ({navigation}) => {
       accessToken,
     );
     console.log('Whether user exis or not in login: ', res);
-    if (res.code === '3000') {
+    if (res.code === 3000) {
     
     await isResident(res.data[0].ID);
     await isEmployee(res.data[0].ID);
@@ -397,7 +397,7 @@ const Login = ({navigation}) => {
       setDialogVisible(true);
     }
   }
-  else if(res.code === '9280') {
+  else if(res.code === 9280) {
     setLoading(false);
     setDialogVisible(true);
     console.log('inside whether error')
