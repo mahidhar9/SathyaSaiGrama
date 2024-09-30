@@ -389,29 +389,21 @@ const Login = ({navigation}) => {
         else if (error.code === 'auth/invalid-email') {
           Alert.alert('That email address is invalid!');
         } else {
-          // Alert.alert('Error in account details:','Please check your email or password and try again.');
           setDialogVisible(true);
         }
         console.log('Error in auth: ', error);
       }
     } else {
       setLoading(false);
-      // Alert.alert('Account does not exist Please register first');
-      // navigation.navigate('Register');
       setDialogVisible(true);
     }
   }
   else if(res.code === '9280') {
     setLoading(false);
-    // Alert.alert('Account does not exist Please register first');
-    // navigation.navigate('Register');
     setDialogVisible(true);
     console.log('inside whether error')
   }  else {
     setLoading(false);
-    // Alert.alert('Account does not exist Please register first');
-    // navigation.navigate('Register');
-    // setDialogVisible(true);\
     Alert.alert('Something went wrong. Please try again later.')
   }
   };
