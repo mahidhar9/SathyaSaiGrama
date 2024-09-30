@@ -307,6 +307,8 @@ const Login = ({navigation}) => {
       accessToken,
     );
     console.log('Whether user exis or not in login: ', res);
+    if (res.code === '3000') {
+    
     await isResident(res.data[0].ID);
     await isEmployee(res.data[0].ID);
     console.log(
@@ -398,6 +400,20 @@ const Login = ({navigation}) => {
       // navigation.navigate('Register');
       setDialogVisible(true);
     }
+  }
+  else if(res.code === '9280') {
+    setLoading(false);
+    // Alert.alert('Account does not exist Please register first');
+    // navigation.navigate('Register');
+    setDialogVisible(true);
+    console.log('inside whether error')
+  }  else {
+    setLoading(false);
+    // Alert.alert('Account does not exist Please register first');
+    // navigation.navigate('Register');
+    // setDialogVisible(true);\
+    Alert.alert('Something went wrong. Please try again later.')
+  }
   };
 
   return (
