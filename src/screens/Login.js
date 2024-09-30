@@ -374,7 +374,6 @@ const Login = ({navigation}) => {
           );
           console.log('update device token response: ', updateResponse);
         } else {
-          // Email is not verified, display message and send verification email (if needed)
           await sendEmailVerification(auth.currentUser);
           setLoading(false);
           navigation.navigate('VerificationNotice', {id: res.data[0].ID});
