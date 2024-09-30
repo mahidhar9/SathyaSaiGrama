@@ -307,6 +307,8 @@ const Login = ({navigation}) => {
       accessToken,
     );
     console.log('Whether user exis or not in login: ', res);
+    if (res.code === 3000) {
+    
     await isResident(res.data[0].ID);
     await isEmployee(res.data[0].ID);
     console.log(
@@ -372,7 +374,6 @@ const Login = ({navigation}) => {
           );
           console.log('update device token response: ', updateResponse);
         } else {
-          // Email is not verified, display message and send verification email (if needed)
           await sendEmailVerification(auth.currentUser);
           setLoading(false);
           navigation.navigate('VerificationNotice', {id: res.data[0].ID});
@@ -387,17 +388,23 @@ const Login = ({navigation}) => {
         else if (error.code === 'auth/invalid-email') {
           Alert.alert('That email address is invalid!');
         } else {
-          // Alert.alert('Error in account details:','Please check your email or password and try again.');
           setDialogVisible(true);
         }
         console.log('Error in auth: ', error);
       }
     } else {
       setLoading(false);
-      // Alert.alert('Account does not exist Please register first');
-      // navigation.navigate('Register');
       setDialogVisible(true);
     }
+  }
+  else if(res.code === 9280) {
+    setLoading(false);
+    setDialogVisible(true);
+    console.log('inside whether error')
+  }  else {
+    setLoading(false);
+    Alert.alert('Something went wrong. Please try again later.')
+  }
   };
 
   return (
