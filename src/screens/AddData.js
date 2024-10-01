@@ -28,6 +28,7 @@ const AddData = ({navigation, route}) => {
     handleSubmit,
     formState: {errors},
   } = useForm();
+  const [invalidVehicleNumber, setInvalidVehicleNumber] = useState(false);
 
   const flatexist = route.params.flat;
   const flatdata = route.params.flatdata;
@@ -35,10 +36,6 @@ const AddData = ({navigation, route}) => {
   const vehicleTypeDropDown = [
     {label: '2-wheeler', value: '2-wheeler'},
     {label: 'Car', value: 'Car'},
-    {label: 'Bus', value: 'Bus'},
-    {label: 'Taxi', value: 'Taxi'},
-    {label: 'School Bus', value: 'School Bus'},
-    {label: 'Police Van', value: 'Police Van'},
   ];
 
   const relationTypeDropDown = [
@@ -71,31 +68,41 @@ const AddData = ({navigation, route}) => {
   const [selectedGender, setSelectedGender] = useState('');
 
   const saveDataFromVehicle = async vehicledata => {
-    console.log(vehicledata);
-    const vehicle = {
-      data: {
-        App_User_lookup: L1ID,
-        Vehicle_Type: vehicledata.vehicleType,
-        Vehicle_Number: vehicledata.vehicleNumber,
-      },
-    };
+    const vehicleNumberPattern = /^[a-z]{2}[0-9]{2}[a-z]{2}[0-9]{4}$/;
+    const vehicleNumber = vehicledata.vehicleNumber;
+    if (
+      vehicleNumberPattern.test(vehicleNumber.replace(/\s+/g, '').toLowerCase())
+    ) {
+      setInvalidVehicleNumber(false);
 
-    const resFromVehicle = await postDataWithInt(
-      'Vehicle_Information',
-      vehicle,
-      getAccessToken(),
-    );
+      console.log(vehicledata);
+      const vehicle = {
+        data: {
+          App_User_lookup: L1ID,
+          Vehicle_Type: vehicledata.vehicleType,
+          Vehicle_Number: vehicledata.vehicleNumber,
+        },
+      };
 
-    if (resFromVehicle.message === 'Data Added Successfully') {
-      navigation.navigate('Profile', {
-        userInfo: route.params.user,
-        vehicleInfo: route.params.vehicle,
-        familyMembersData: route.params.family,
-        flatExists: flatexist,
-        flat: flatdata,
-        dapartment: dept,
-        dapartmentExists: deptExist,
-      });
+      const resFromVehicle = await postDataWithInt(
+        'Vehicle_Information',
+        vehicle,
+        getAccessToken(),
+      );
+
+      if (resFromVehicle.message === 'Data Added Successfully') {
+        navigation.navigate('Profile', {
+          userInfo: route.params.user,
+          vehicleInfo: route.params.vehicle,
+          familyMembersData: route.params.family,
+          flatExists: flatexist,
+          flat: flatdata,
+          dapartment: dept,
+          dapartmentExists: deptExist,
+        });
+      }
+    } else {
+      setInvalidVehicleNumber(true);
     }
   };
 
@@ -375,6 +382,8 @@ const AddData = ({navigation, route}) => {
                 render={({field: {onChange, value}}) => (
                   <TextInput
                     style={styles.inputBox}
+                    placeholder="KA 01 CU 1234"
+                    placeholderTextColor="#c5c7ca"
                     value={value}
                     onChangeText={onChange}
                   />
@@ -383,6 +392,9 @@ const AddData = ({navigation, route}) => {
               />
               {errors.vehicleNumber && (
                 <Text style={styles.textError}>Vehicle number is required</Text>
+              )}
+              {invalidVehicleNumber && (
+                <Text style={styles.textError}>Invalid Vehicle number</Text>
               )}
             </View>
 

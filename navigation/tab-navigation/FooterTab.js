@@ -55,7 +55,7 @@ function InviteStackScreen() {
       <InviteStack.Screen
         name="Invite"
         component={Invite}
-        options={{headerShown: false}}
+        options={{headerShown: false, animation: 'none'}}
       />
       {/* <InviteStack.Screen
                 name="VisitorFills"
@@ -80,6 +80,7 @@ function InviteStackScreen() {
             lineHeight: 30,
             alignItems: 'center',
           },
+          animation: 'fade',
         }}
       />
     </InviteStack.Navigator>
