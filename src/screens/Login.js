@@ -26,10 +26,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME} from '@env';
 import Dialog from 'react-native-dialog';
 import {encode} from 'base64-arraybuffer';
-
+import DotsBlinkingLoaderEllipsis from '../components/DotsBlinkingLoaderEllipsis';
 const Login = ({navigation}) => {
   const screenWidth = Dimensions.get('window').width;
   const [loading, setLoading] = useState(false);
+  const [dotsBlinkingLoaderEllipsis,setDotsBlinkingLoaderEllipsis] =useState(false);
   const {
     control,
     handleSubmit,
@@ -308,6 +309,7 @@ const Login = ({navigation}) => {
     );
     console.log('Whether user exis or not in login: ', res);
     if (res.code === 3000) {
+      setDotsBlinkingLoaderEllipsis(true);
     
     await isResident(res.data[0].ID);
     await isEmployee(res.data[0].ID);
@@ -409,12 +411,13 @@ const Login = ({navigation}) => {
 
   return (
     <>
-      {loading ? (
+      {loading ? dotsBlinkingLoaderEllipsis?(<DotsBlinkingLoaderEllipsis />): (
         <ActivityIndicator
           size="large"
           color="#752A26"
           style={styles.loadingContainer}
         />
+        
       ) : (
         <>
           <ScrollView>
