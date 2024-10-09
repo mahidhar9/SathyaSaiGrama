@@ -26,10 +26,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME} from '@env';
 import Dialog from 'react-native-dialog';
 import {encode} from 'base64-arraybuffer';
-
+import DotsBlinkingLoaderEllipsis from '../components/DotsBlinkingLoaderEllipsis';
 const Login = ({navigation}) => {
   const screenWidth = Dimensions.get('window').width;
   const [loading, setLoading] = useState(false);
+  const [dotsBlinkingLoaderEllipsis,setDotsBlinkingLoaderEllipsis] =useState(false);
   const {
     control,
     handleSubmit,
@@ -60,7 +61,37 @@ const Login = ({navigation}) => {
   const [showPassword, setShowPassword] = useState(false);
   const [focusedInput, setFocusedInput] = useState(null);
   const [DialogVisible, setDialogVisible] = useState(false);
+  const [password, setPassword] = useState();
+  const [validation, setValidation] = useState({
+    hasNumber: false,
+    hasUpperCase: false,
+    hasSpecialChar: false,
+    isValidLength: false,
+  });
 
+  // const validatePassword = (text) => {
+  //   const hasNumber = /\d/.test(text);
+  //   const hasUpperCase = /[A-Z]/.test(text);
+  //   const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(text);
+  //   const isValidLength = text.length >= 8 && text.length <= 20;
+
+  //   setValidation({
+  //     hasNumber,
+  //     hasUpperCase,
+  //     hasSpecialChar,
+  //     isValidLength,
+  //   });
+
+  //   setPassword(text);
+  // };
+  // const isValidPassword = () => {
+  //   return (
+  //     validation.hasNumber &&
+  //     validation.hasUpperCase &&
+  //     validation.hasSpecialChar &&
+  //     validation.isValidLength
+  //   );
+  // };
   const onPressOk = () => {
     setDialogVisible(false);
   };
@@ -167,6 +198,9 @@ const Login = ({navigation}) => {
             deptIds: departmentIds,
             name: currentUser.name,
             profilePhoto: currentUser.profilePhoto,
+            resident: residentLocalVar,
+            employee: employeeLocalVar,
+            testResident: testResidentLocalVar,
           }),
         );
         console.log('login data saved into local storage');
@@ -274,6 +308,9 @@ const Login = ({navigation}) => {
       accessToken,
     );
     console.log('Whether user exis or not in login: ', res);
+    if (res.code === 3000) {
+      setDotsBlinkingLoaderEllipsis(true);
+    
     await isResident(res.data[0].ID);
     await isEmployee(res.data[0].ID);
     console.log(
@@ -339,7 +376,6 @@ const Login = ({navigation}) => {
           );
           console.log('update device token response: ', updateResponse);
         } else {
-          // Email is not verified, display message and send verification email (if needed)
           await sendEmailVerification(auth.currentUser);
           setLoading(false);
           navigation.navigate('VerificationNotice', {id: res.data[0].ID});
@@ -354,27 +390,34 @@ const Login = ({navigation}) => {
         else if (error.code === 'auth/invalid-email') {
           Alert.alert('That email address is invalid!');
         } else {
-          // Alert.alert('Error in account details:','Please check your email or password and try again.');
           setDialogVisible(true);
         }
         console.log('Error in auth: ', error);
       }
     } else {
       setLoading(false);
-      // Alert.alert('Account does not exist Please register first');
-      // navigation.navigate('Register');
       setDialogVisible(true);
     }
+  }
+  else if(res.code === 9280) {
+    setLoading(false);
+    setDialogVisible(true);
+    console.log('inside whether error')
+  }  else {
+    setLoading(false);
+    Alert.alert('Something went wrong. Please try again later.')
+  }
   };
 
   return (
     <>
-      {loading ? (
+      {loading ? dotsBlinkingLoaderEllipsis?(<DotsBlinkingLoaderEllipsis />): (
         <ActivityIndicator
           size="large"
           color="#752A26"
           style={styles.loadingContainer}
         />
+        
       ) : (
         <>
           <ScrollView>
@@ -422,7 +465,7 @@ const Login = ({navigation}) => {
                   <Text style={styles.textError}>Enter valid email</Text>
                 )}
 
-                <View
+                {/* <View
                   style={[
                     styles.passBorder,
                     focusedInput === 'password' && styles.inputFocused,
@@ -474,6 +517,65 @@ const Login = ({navigation}) => {
                   <Text style={styles.textError}>
                     Password must be 6 characters long
                   </Text>
+                )} */}
+                <View
+                  style={[
+                    styles.passBorder,
+                    focusedInput === 'password' && styles.inputFocused,
+                  ]}>
+                  <Controller
+                    name="password"
+                    control={control}
+                    render={({field: {onChange, value}}) => (
+                      <TextInput
+                        placeholder="Password"
+                        style={styles.inputBox}
+                        value={value}
+                        selectionColor="#B21E2B"
+                        onFocus={() => setFocusedInput('password')}
+                        secureTextEntry={!showPassword}
+                        onChangeText={value => {
+                          const trimmedValue = value.trim();
+                          onChange(trimmedValue);
+                          setPassword(trimmedValue);
+                        }}
+                      />
+                    )}
+                    rules={{
+                      required: true,
+                      // minLength: 8,
+                      //         maxLength:20,
+                      // pattern:
+                      //           /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/,
+                    }}
+                  />
+                  {showPassword === false ? (
+                    <TouchableOpacity
+                      onPress={() => {
+                        setShowPassword(!showPassword);
+                      }}>
+                      <Image
+                        source={require('../assets/eyestrike.png')}
+                        style={{width: 16, height: 16}}
+                      />
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      onPress={() => setShowPassword(!showPassword)}>
+                      <Image
+                        source={require('../assets/eye.png')}
+                        style={{width: 16, height: 16}}
+                      />
+                    </TouchableOpacity>
+                  )}
+                </View>
+                {/* {errors.password?.type === 'pattern' && (
+              <Text style={styles.errorMessage}>
+          Password must be at least 8 characters long, contains both upper and lower case letters, includes at least one number, and has at least one special character<Text style={styles.errMes} >(e.g., !@#$%^&*).</Text>
+        </Text> 
+      )}*/}
+                {errors.password?.type === 'required' && (
+                  <Text style={styles.textError}>Password is required</Text>
                 )}
 
                 <TouchableOpacity
@@ -483,7 +585,9 @@ const Login = ({navigation}) => {
 
                 <TouchableOpacity
                   onPress={handleSubmit(handleLoginForm)}
-                  style={styles.register}>
+                  // disabled={!isValidPassword()}
+                  style={[styles.register]}>
+                  {/* style={styles.register}> */}
                   <Text style={styles.registerTitle}>Login</Text>
                 </TouchableOpacity>
                 <View style={styles.redirect}>
@@ -667,5 +771,25 @@ const styles = StyleSheet.create({
 
   dialogTitle: {
     color: 'black',
+  },
+  errorMessage: {
+    color: '#2F3036',
+    fontFamily: 'Inter',
+    fontSize: 12,
+    fontStyle: 'normal',
+    fontWeight: '600',
+    alignSelf: 'stretch',
+    marginStart: 6,
+    marginBottom: 10,
+  },
+  errMes: {
+    color: '#B21E2B',
+    fontFamily: 'Inter',
+    fontSize: 12,
+    fontStyle: 'normal',
+    fontWeight: '600',
+    alignSelf: 'stretch',
+    marginStart: 6,
+    marginBottom: 10,
   },
 });

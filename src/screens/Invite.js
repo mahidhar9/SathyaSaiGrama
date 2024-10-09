@@ -239,14 +239,16 @@ const Invite = ({navigation}) => {
                       </View>
                       <View>
                         <Text style={styles.HomeorOffice}>
-                          Are you inviting your visitor to your Home or Office?
+                          {loggedUser.resident && loggedUser.employee
+                            ? 'Are you inviting your visitor to your Home or Office?'
+                            : 'Click the button below to share link with the visitor'}
                         </Text>
                       </View>
                       <View
                         style={{
                           flexDirection: 'row',
                         }}>
-                        {resident ? (
+                        {loggedUser.resident ? (
                           <TouchableOpacity
                             style={[
                               styles.HomeButton,
@@ -256,11 +258,13 @@ const Invite = ({navigation}) => {
                               onShare('Home');
                             }}>
                             <Text style={[styles.wewe, styles.wewe1]}>
-                              Home
+                              {loggedUser.resident && loggedUser.employee
+                                ? 'Home'
+                                : 'Share Link'}
                             </Text>
                           </TouchableOpacity>
                         ) : null}
-                        {employee ? (
+                        {loggedUser.employee ? (
                           <TouchableOpacity
                             style={[
                               styles.HomeButton,
@@ -270,7 +274,9 @@ const Invite = ({navigation}) => {
                               onShare('Office');
                             }}>
                             <Text style={[styles.wewe, styles.wewe2]}>
-                              Office
+                              {loggedUser.resident && loggedUser.employee
+                                ? 'Office'
+                                : 'Share Link'}
                             </Text>
                           </TouchableOpacity>
                         ) : null}
@@ -450,7 +456,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter',
     fontSize: 14,
     fontStyle: 'normal',
-    fontWeight: '600',
+    fontWeight: '800',
     textAlign: 'center',
   },
   wewe1: {

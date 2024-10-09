@@ -94,7 +94,7 @@ const Profile = ({navigation}) => {
   } = useForm();
 
   const handleDeleteAccount = async (email, password) => {
-    const credential = EmailAuthProvider.credential(email, password);
+    const credential = EmailAuthProvider.credential(userEmail, password);
 
     try {
       await reauthenticateWithCredential(user, credential);
@@ -103,15 +103,15 @@ const Profile = ({navigation}) => {
       await deleteUser(user);
       console.log('User account deleted successfully.');
       setModalVisible(!modalVisible);
-      setDeleteLoading(false);
       setToastVisible(true);
     } catch (error) {
       console.error('Error reauthenticating or deleting user:', error);
       Alert.alert(
         'Error',
-        `Error reauthenticating or deleting user: ${error.message}`,
+        `Invalid Password`,
       );
     }
+    setDeleteLoading(false);
   };
 
   const updateDeviceToken = async (modified_data, id) => {
@@ -166,7 +166,7 @@ const Profile = ({navigation}) => {
   const onDelete = async userCred => {
     setDeleteLoading(true);
     console.log(userCred);
-    await handleDeleteAccount(userCred.email, userCred.password);
+    await handleDeleteAccount(userCred.name, userCred.password);
   };
   const onLogout = () => {
     setIsLogOutIndicator(true);
@@ -554,12 +554,26 @@ const Profile = ({navigation}) => {
           <ActivityIndicator size="large" color="#B21E2B" />
         </View>
       ) : isLogOutIndicator ? (
+        
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <TouchableOpacity>
+                {profileImage != null ? (
+                  <Image source={{uri: profileImage}} style={styles.propic} />
+                ) : (
+                  <Image
+                    source={require('../assets/profileImg.png')}
+                    style={styles.propic}
+                  />
+                )}
+              </TouchableOpacity>
+              
+              <Text style={[styles.name,]} >{loggedUser.name}</Text>
+              <Text style={[styles.emailVisible,{marginTop:5}]}>{userEmail}</Text>
           <View style={styles.indicatorBox}>
             <ActivityIndicator
               style={styles.activityIndicator}
               size="large"
-              color="#0000ff"
+              color="#B21E2B"
             />
             <Text style={styles.text}>Logging Out...</Text>
           </View>
@@ -768,6 +782,7 @@ const Profile = ({navigation}) => {
             onRequestClose={() => setModalVisible(!modalVisible)}>
             <TouchableWithoutFeedback onPress={handleModal}>
               <View style={styles.centeredView}>
+              <TouchableWithoutFeedback>
                 <View style={OndeleteStyles.modalView}>
                   {deleteLoading ? (
                     <View
@@ -781,12 +796,14 @@ const Profile = ({navigation}) => {
                     </View>
                   ) : (
                     <>
-                      <Text style={styles.shareLink}>
-                        Enter your credentials to delete your account
-                        permanently
-                      </Text>
+                      
+                      <Text style={styles.shareLinkAttention}>Attention! </Text>
+                    <Text style={[styles.shareLink,{fontSize:15,fontWeight:'400'}]}>
+                      You are about to delete your account permanently. Enter your password to confirm deletion.
+                    </Text>
 
-                      <Controller
+
+                      {/* <Controller
                         name="email"
                         control={control}
                         render={({field: {onChange, value}}) => (
@@ -810,7 +827,7 @@ const Profile = ({navigation}) => {
                       )}
                       {errors.email?.type === 'pattern' && (
                         <Text style={styles.textError}>Enter valid email</Text>
-                      )}
+                      )} */}
 
                       <View
                         style={[
@@ -820,11 +837,13 @@ const Profile = ({navigation}) => {
                         <Controller
                           name="password"
                           control={control}
-                          render={({field: {onChange, value}}) => (
+                          render={({field: {onChange,
+                          // value
+                           }}) => (
                             <TextInput
                               placeholder="Password"
                               style={styles.inputBox}
-                              value={value}
+                             // value={value}
                               selectionColor="#B21E2B"
                               onFocus={() => setFocusedInput('password')}
                               secureTextEntry={!showPassword}
@@ -833,9 +852,9 @@ const Profile = ({navigation}) => {
                           )}
                           rules={{
                             required: true,
-                            minLength: 8,
-                            pattern:
-                              /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                            // minLength: 8,
+                            // pattern:
+                            //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/,
                           }}
                         />
                         {showPassword === false ? (
@@ -864,11 +883,11 @@ const Profile = ({navigation}) => {
                           Password is required
                         </Text>
                       )}
-                      {errors.password?.type === 'minLength' && (
+                      {/* {errors.password?.type === 'minLength' && (
                         <Text style={styles.textError}>
                           Password must be 8 characters long
                         </Text>
-                      )}
+                      )} */}
                       {errors.password?.type === 'pattern' && (
                         <Text style={styles.textError}>
                           Password must contain at least a uppercase,lowercase,
@@ -893,7 +912,7 @@ const Profile = ({navigation}) => {
                         <TouchableOpacity
                           style={[
                             styles.HomeButton,
-                            {backgroundColor: '#FFBE65'},
+                            {backgroundColor: '#fff',borderWidth:2,borderColor:'#B21E2B'},
                           ]}
                           onPress={() => setModalVisible(!modalVisible)}>
                           <Text style={[styles.wewe, styles.wewe2]}>
@@ -904,20 +923,23 @@ const Profile = ({navigation}) => {
                     </>
                   )}
                 </View>
+                </TouchableWithoutFeedback>
               </View>
             </TouchableWithoutFeedback>
           </Modal>
 
-          <Modal
+          {/* <Modal
             animationType="fade"
             transparent={true}
             visible={logoutModalVisible}
             onRequestClose={() => setModalVisible(!logoutModalVisible)}>
             <TouchableWithoutFeedback onPress={handleLogoutModal}>
               <View style={styles.centeredView}>
+              <TouchableWithoutFeedback>
                 <View style={OndeleteStyles.modalView}>
+                <Text>LogOut</Text>
                   <Text style={styles.shareLink}>
-                    Are you sure want to logout?
+                    Are you sure want to logout? You'll need to login again to the app
                   </Text>
                   <View
                     style={{
@@ -926,20 +948,56 @@ const Profile = ({navigation}) => {
                     <TouchableOpacity
                       style={[styles.HomeButton, {backgroundColor: '#B21E2B'}]}
                       onPress={onLogout}>
-                      <Text style={[styles.wewe, styles.wewe1]}>Yes</Text>
+                      <Text style={[styles.wewe, styles.wewe1]}>Logout</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={[styles.HomeButton, {backgroundColor: '#FFBE65'}]}
+                      style={[styles.HomeButton, {backgroundColor: '#fff',borderColor:'#B21E2B',borderWidth:2}]}
                       onPress={() =>
                         setLogoutModalVisible(!logoutModalVisible)
                       }>
-                      <Text style={[styles.wewe, styles.wewe2]}>No</Text>
+                      <Text style={[styles.wewe, styles.wewe2]}>cancle</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
+                </TouchableWithoutFeedback>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal> */}
+
+          <Modal
+            animationType="fade"
+            transparent={true}
+            visible={logoutModalVisible}
+            onRequestClose={() => setLogoutModalVisible(!logoutModalVisible)}
+          >
+            <TouchableWithoutFeedback onPress={handleLogoutModal}>
+              <View style={styles.centeredView}>
+                <TouchableWithoutFeedback>
+                  <View style={OndeleteStyles.modalView}>
+                    <Text style={styles.modalTitle}>Logout</Text>
+                    <Text style={[styles.shareLink,{fontWeight:'400',fontSize:15,marginBottom:-30}]}>
+                      Are you sure you want to logout? You'll need to login again to the app.
+                    </Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginTop: 20 }}>
+                      <TouchableOpacity
+                        style={[styles.HomeButton, { backgroundColor: '#B21E2B' }]}
+                        onPress={onLogout}
+                      >
+                        <Text style={[styles.wewe, styles.wewe1]}>Logout</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.HomeButton, { backgroundColor: '#fff', borderColor: '#B21E2B', borderWidth: 2 }]}
+                        onPress={() => setLogoutModalVisible(!logoutModalVisible)}
+                      >
+                        <Text style={[styles.wewe, styles.wewe2]}>Cancel</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </TouchableWithoutFeedback>
               </View>
             </TouchableWithoutFeedback>
           </Modal>
+
 
           <Modal
             animationType="fade"
@@ -1246,11 +1304,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.75)',
   },
+  modalTitle: {
+    fontSize: 24, 
+    fontFamily: 'Inter',
+    fontWeight: 'bold', 
+    textAlign: 'center', 
+    marginBottom: 15,
+    color: '#1F2024', 
+  },
   shareLink: {
     color: '#1F2024',
     textAlign: 'center',
     fontFamily: 'Inter',
     fontSize: 16,
+    fontStyle: 'normal',
+    fontWeight: '900',
+    letterSpacing: 0.08,
+    height: 41,
+    alignSelf: 'stretch',
+  },
+  shareLinkAttention:{
+    color: '#B21E2B',
+    textAlign: 'center',
+    fontFamily: 'Inter',
+    fontSize: 24,
     fontStyle: 'normal',
     fontWeight: '900',
     letterSpacing: 0.08,

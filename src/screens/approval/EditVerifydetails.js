@@ -79,6 +79,9 @@ const EditVerifyDetails = ({navigation, route}) => {
   const [girls, setGirls] = useState(user.Number_of_Girls);
   const [remarks, setRemarks] = useState(user.Remarks);
   const [vehicles, setVehicles] = useState(user.Vehicle_Information);
+  const [vehicleErrorMessages, setVehicleErrorMessages] = useState({});
+  // Regex format for vehicle number like 'KA 01 CU 1234'
+  const vehicleNumberPattern = /^[a-z]{2}[0-9]{2}[a-z]{2}[0-9]{4}$/;
   const [selectedGender, setSelectedGender] = useState(user.Gender);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [DialogVisible, setDialogVisible] = useState(false);
@@ -87,6 +90,10 @@ const EditVerifyDetails = ({navigation, route}) => {
   const gender = ['Male', 'Female'];
 
   const {getAccessToken} = useContext(UserContext);
+  let menCount = '0';
+  let womenCount = '0';
+  let boysCount = '0';
+  let girlsCount = '0';
 
   const handleDateChange = selectedDate => {
     const formattedDate = moment(selectedDate, 'YYYY-MM-DD').format(
@@ -127,6 +134,22 @@ const EditVerifyDetails = ({navigation, route}) => {
     today.setDate(today.getDate()),
     'YYYY/MM/DD',
   );
+  const addDaysToDate = (dateString, daysToAdd) => {
+    // Convert the input string (YYYY/MM/DD) into a Date object
+    const [year, month, day] = dateString.split('/'); // Split the string by '/'
+    const date = new Date(year, month - 1, day); // Month is 0-indexed in JavaScript
+
+    // Add the specified number of days (60 days in this case)
+    date.setDate(date.getDate() + daysToAdd);
+
+    // Format the new date back to 'YYYY/MM/DD'
+    const newYear = date.getFullYear();
+    const newMonth = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed, so add 1
+    const newDay = String(date.getDate()).padStart(2, '0');
+
+    return `${newYear}-${newMonth}-${newDay}`;
+  };
+  const endDate = addDaysToDate(startDate, 60);
 
   const updateRecord = async (reportName, modified_data, token, id) => {
     setUpdateLoading(true);
@@ -181,75 +204,141 @@ const EditVerifyDetails = ({navigation, route}) => {
     if (!remarks) {
       setRemarks('');
     }
+    if (validateForm()) {
+      menCount = men === '' ? '0' : men;
+      womenCount = women === '' ? '0' : women;
+      boysCount = boys === '' ? '0' : boys;
+      girlsCount = girls === '' ? '0' : girls;
 
-    let menCount = men;
-    let womenCount = women;
-    let boysCount = boys;
-    let girlsCount = girls;
+      if (selectedGender == 'Male' && isSingle == 'Single') {
+        menCount = 1;
+        womenCount = 0;
+        boysCount = 0;
+        girlsCount = 0;
+      } else if (selectedGender == 'Female' && isSingle == 'Single') {
+        menCount = 0;
+        womenCount = 1;
+        boysCount = 0;
+        girlsCount = 0;
+      }
 
-    if (selectedGender == 'Male' && isSingle == 'Single') {
-      menCount = 1;
-      womenCount = 0;
-      boysCount = 0;
-      girlsCount = 0;
-    } else if (selectedGender == 'Female' && isSingle == 'Single') {
-      menCount = 0;
-      womenCount = 1;
-      boysCount = 0;
-      girlsCount = 0;
-    }
+      let people = menCount + womenCount + boysCount + girlsCount;
+      console.log('Total people : ', people);
 
-    let people = menCount + womenCount + boysCount + girlsCount;
-    console.log('Total people : ', people);
+      vehicles.map(vehicle => {
+        delete vehicle.ID;
+        delete vehicle.zc_display_value;
+      });
 
-    vehicles.map(vehicle => {
-      delete vehicle.ID;
-      delete vehicle.zc_display_value;
-    });
+      const updateField = {
+        Date_of_Visit: date,
+        Gender: selectedGender,
+        Home_or_Office: isHome,
+        Number_of_Boys: boysCount,
+        Number_of_Girls: girlsCount,
+        Number_of_Men: menCount,
+        Number_of_People: people,
+        Number_of_Women: womenCount,
+        Priority: priority,
+        Remarks: remarks,
+        Single_or_Group_Visit: isSingle,
+        Guest_Category: category,
+        Vehicle_Information: vehicles,
+      };
 
-    const updateField = {
-      Date_of_Visit: date,
-      Gender: selectedGender,
-      Home_or_Office: isHome,
-      Number_of_Boys: boysCount,
-      Number_of_Girls: girlsCount,
-      Number_of_Men: menCount,
-      Number_of_People: people,
-      Number_of_Women: womenCount,
-      Priority: priority,
-      Remarks: remarks,
-      Single_or_Group_Visit: isSingle,
-      Guest_Category: category,
-      Vehicle_Information: vehicles,
-    };
+      const updateData = {
+        criteria: `ID==${user.ID}`,
+        data: updateField,
+      };
 
-    const updateData = {
-      criteria: `ID==${user.ID}`,
-      data: updateField,
-    };
+      console.log('#############saved details are : ', updateField);
 
-    console.log('#############saved details are : ', updateField);
-
-    const response = await updateRecord(
-      'Approval_to_Visitor_Report',
-      updateData,
-      getAccessToken(),
-    );
-
-    if (response.result[0].code === 3000) {
-      console.log(
-        '----------------------------Update Successful---------------------------------',
+      const response = await updateRecord(
+        'Approval_to_Visitor_Report',
+        updateData,
+        getAccessToken(),
       );
-      const newUser = {...user, ...updateData};
-      console.log('New user data is:', newUser);
-      navigation.navigate('VerifyDetails', {user: {...user, ...updateField}});
-    } else {
-      Alert.alert('Error: ', response.code);
+
+      if (response.result[0].code === 3000) {
+        console.log(
+          '----------------------------Update Successful---------------------------------',
+        );
+        const newUser = {...user, ...updateData};
+        console.log('New user data is:', newUser);
+        navigation.navigate('VerifyDetails', {user: {...user, ...updateField}});
+      } else {
+        Alert.alert('Error: ', response.code);
+      }
     }
   };
 
   const onCancel = () => {
     navigation.navigate('VerifyDetails', {user: user});
+  };
+  const validateForm = () => {
+    let valid = true;
+
+    menCount = men === '' ? '0' : men;
+    womenCount = women === '' ? '0' : women;
+    boysCount = boys === '' ? '0' : boys;
+    girlsCount = girls === '' ? '0' : girls;
+
+    setMen(menCount);
+    setWomen(womenCount);
+    setBoys(boysCount);
+    setGirls(girlsCount);
+
+    // const isDateWithinTwoMonths = selectedDate => {
+    //   const currentDate = new Date(); // Get current date
+
+    //   // Create a date 2 months from today
+    //   const twoMonthsLater = new Date();
+    //   twoMonthsLater.setMonth(currentDate.getDate() + 1);
+
+    //   // Compare the selected date with the date 2 months later
+    //   return selectedDate <= twoMonthsLater;
+    // };
+    // if (date === 'Select Date') {
+    //   setDateOfVisitErr('Date of visit is required');
+    //   valid = false;
+    // } else {
+    //   if (!isDateWithinTwoMonths(date)) {
+    //     setDateOfVisitErr('Please select a date within 2 months from today');
+    //     valid = false;
+    //   }
+    //   setDateOfVisitErr(null);
+    // }
+
+    const errors = {};
+
+    vehicles.forEach((vehicle, index) => {
+      const vehicleNumber = vehicle.Vehicle_Number;
+      if (
+        !vehicleNumberPattern.test(
+          vehicleNumber.replace(/\s+/g, '').toLowerCase(),
+        )
+      ) {
+        errors[vehicle.ID] = `Invalid Vehicle Number`;
+        valid = false;
+      }
+      if (vehicle.Vehicle_Type === '') {
+        errors[vehicle.ID] = `Please select Vehicle Type`;
+        valid = false;
+      }
+      if (
+        !vehicleNumberPattern.test(
+          vehicleNumber.replace(/\s+/g, '').toLowerCase(),
+        ) &&
+        vehicle.Vehicle_Type === ''
+      ) {
+        errors[vehicle.ID] = `Invalid Vehicle Information`;
+        valid = false;
+      }
+    });
+
+    setVehicleErrorMessages(errors);
+
+    return valid;
   };
 
   const onPressOk = () => {
@@ -262,7 +351,10 @@ const EditVerifyDetails = ({navigation, route}) => {
   };
 
   const handleAddVehicle = () => {
-    setVehicles([...vehicles, {Vehicle_Type: '', Vehicle_Number: ''}]);
+    setVehicles([
+      ...vehicles,
+      {Vehicle_Type: '', Vehicle_Number: '', ID: Date.now()},
+    ]);
   };
 
   const handleRemoveVehicle = index => {
@@ -291,6 +383,15 @@ const EditVerifyDetails = ({navigation, route}) => {
     }
     return () => clearInterval(interval); // Clean up the interval on unmount
   }, [updateLoading]);
+  let addNewButtonVisibility;
+  if (
+    (isSingle === 'Group' && vehicles.length < 5) ||
+    (isSingle === 'Single' && vehicles.length < 1)
+  ) {
+    addNewButtonVisibility = true;
+  } else {
+    addNewButtonVisibility = false;
+  }
 
   return (
     <SafeAreaView style={{flex: 1}}>
@@ -332,9 +433,10 @@ const EditVerifyDetails = ({navigation, route}) => {
                 <TouchableWithoutFeedback onPress={() => {}}>
                   <View style={styles.modalContent}>
                     <DatePicker
-                      mode="calendar"
+                      mode="calender"
                       onSelectedChange={handleDateChange}
                       minimumDate={startDate}
+                      maximumDate={endDate}
                       options={{
                         backgroundColor: '#fff',
                         textHeaderColor: '#333',
@@ -393,7 +495,7 @@ const EditVerifyDetails = ({navigation, route}) => {
           <View
             style={{
               width: '90%',
-              height: '20%',
+              height: '15%',
               marginTop: 10,
               marginLeft: 20,
             }}>
@@ -404,8 +506,13 @@ const EditVerifyDetails = ({navigation, route}) => {
               <View style={styles.right}>
                 <TextInput
                   style={styles.num}
+                  keyboardType="numeric"
                   value={men}
-                  onChangeText={txt => setMen(Number(txt))}
+                  onChangeText={text => {
+                    // Allow only numbers
+                    const numericValue = text.replace(/[^0-9]/g, '');
+                    setMen(numericValue);
+                  }}
                 />
               </View>
             </View>
@@ -416,8 +523,13 @@ const EditVerifyDetails = ({navigation, route}) => {
               <View style={styles.right}>
                 <TextInput
                   style={styles.num}
+                  keyboardType="numeric"
                   value={women}
-                  onChangeText={txt => setWomen(Number(txt))}
+                  onChangeText={text => {
+                    // Allow only numbers
+                    const numericValue = text.replace(/[^0-9]/g, '');
+                    setWomen(numericValue);
+                  }}
                 />
               </View>
             </View>
@@ -428,8 +540,13 @@ const EditVerifyDetails = ({navigation, route}) => {
               <View style={styles.right}>
                 <TextInput
                   style={styles.num}
+                  keyboardType="numeric"
                   value={boys}
-                  onChangeText={txt => setBoys(Number(txt))}
+                  onChangeText={text => {
+                    // Allow only numbers
+                    const numericValue = text.replace(/[^0-9]/g, '');
+                    setBoys(numericValue);
+                  }}
                 />
               </View>
             </View>
@@ -440,8 +557,13 @@ const EditVerifyDetails = ({navigation, route}) => {
               <View style={styles.right}>
                 <TextInput
                   style={styles.num}
+                  keyboardType="numeric"
                   value={girls}
-                  onChangeText={txt => setGirls(Number(txt))}
+                  onChangeText={text => {
+                    // Allow only numbers
+                    const numericValue = text.replace(/[^0-9]/g, '');
+                    setGirls(numericValue);
+                  }}
                 />
               </View>
             </View>
@@ -538,56 +660,67 @@ const EditVerifyDetails = ({navigation, route}) => {
             <Text>Vehicle Number</Text>
           </View>
           {vehicles.map((vehicle, index) => (
-            <View key={index} style={styles.newvehicle}>
-              <Picker
-                selectedValue={vehicle.Vehicle_Type}
-                style={styles.picker}
-                onValueChange={value =>
-                  handleTextChange(index, 'Vehicle_Type', value)
-                }>
-                <Picker.Item label="Select" value="" />
-                <Picker.Item label="2-Wheeler" value="2-Wheeler" />
-                <Picker.Item label="Car" value="Car" />
-                <Picker.Item label="Bus" value="Bus" />
-                <Picker.Item label="Taxi" value="Taxi" />
-                <Picker.Item label="School Bus" value="School Bus" />
-                <Picker.Item label="Police Van" value="Police Van" />
-                <Picker.Item label="Van" value="Van" />
-                <Picker.Item label="Auto" value="Auto" />
-                <Picker.Item label="Ambulance" value="Ambulancer" />
-                <Picker.Item label="Truck" value="Truck" />
-                <Picker.Item label="Tractor" value="Tractor" />
-                <Picker.Item label="Cement Mixer" value="Cement Mixer" />
-                <Picker.Item label="Fire Engine" value="Fire Engine" />
-                <Picker.Item label="Transport Van" value="Transport Van" />
-                <Picker.Item label="Bulldozer" value="Bulldozer" />
-                <Picker.Item label="Roller Machine" value="Roller Machine" />
-                {/* Add more vehicle types as needed */}
-              </Picker>
-              <TextInput
-                style={styles.vehicleinput}
-                value={vehicle.Vehicle_Number}
-                onChangeText={text =>
-                  handleTextChange(index, 'Vehicle_Number', text)
-                }
-              />
-              <TouchableOpacity onPress={() => handleRemoveVehicle(index)}>
-                <Image
-                  source={require('../../assets/delete.png')}
-                  style={styles.removeButton}
+            <View style={{flexDirection: 'column'}}>
+              <View key={index} style={styles.newvehicle}>
+                <Picker
+                  selectedValue={vehicle.Vehicle_Type}
+                  style={styles.picker}
+                  onValueChange={value =>
+                    handleTextChange(index, 'Vehicle_Type', value)
+                  }>
+                  <Picker.Item label="Select" value="" />
+                  <Picker.Item label="2-Wheeler" value="2-Wheeler" />
+                  <Picker.Item label="Car" value="Car" />
+                  <Picker.Item label="Bus" value="Bus" />
+                  <Picker.Item label="Taxi" value="Taxi" />
+                  <Picker.Item label="School Bus" value="School Bus" />
+                  <Picker.Item label="Police Van" value="Police Van" />
+                  <Picker.Item label="Van" value="Van" />
+                  <Picker.Item label="Auto" value="Auto" />
+                  <Picker.Item label="Ambulance" value="Ambulancer" />
+                  <Picker.Item label="Truck" value="Truck" />
+                  <Picker.Item label="Tractor" value="Tractor" />
+                  <Picker.Item label="Cement Mixer" value="Cement Mixer" />
+                  <Picker.Item label="Fire Engine" value="Fire Engine" />
+                  <Picker.Item label="Transport Van" value="Transport Van" />
+                  <Picker.Item label="Bulldozer" value="Bulldozer" />
+                  <Picker.Item label="Roller Machine" value="Roller Machine" />
+                  {/* Add more vehicle types as needed */}
+                </Picker>
+                <TextInput
+                  style={styles.vehicleinput}
+                  value={vehicle.Vehicle_Number}
+                  placeholder="KA 01 ab 1234"
+                  placeholderTextColor="#c5c7ca"
+                  onChangeText={text =>
+                    handleTextChange(index, 'Vehicle_Number', text)
+                  }
                 />
-              </TouchableOpacity>
+                <TouchableOpacity onPress={() => handleRemoveVehicle(index)}>
+                  <Image
+                    source={require('../../assets/delete.png')}
+                    style={styles.removeButton}
+                  />
+                </TouchableOpacity>
+              </View>
+              {vehicleErrorMessages[vehicle.ID] && (
+                <Text style={[styles.errorText, {paddingLeft: 30}]}>
+                  {vehicleErrorMessages[vehicle.ID]}
+                </Text>
+              )}
             </View>
           ))}
-          <TouchableOpacity
-            style={styles.addvehicle}
-            onPress={handleAddVehicle}>
-            <Image
-              source={require('../../assets/add.png')}
-              style={{width: 15, height: 15}}
-            />
-            <Text style={{color: 'black', fontSize: 15}}>Add New</Text>
-          </TouchableOpacity>
+          {addNewButtonVisibility && (
+            <TouchableOpacity
+              style={styles.addvehicle}
+              onPress={handleAddVehicle}>
+              <Image
+                source={require('../../assets/add.png')}
+                style={{width: 15, height: 15}}
+              />
+              <Text style={{color: 'black', fontSize: 15}}>Add New</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* <View style={styles.btnRoot}>
@@ -682,8 +815,10 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
   },
   picker: {
-    flex: 2,
+    flex: 1,
     height: 40,
+    paddingRight: 70,
+    // marginRight: -10,
   },
   vehicleinput: {
     flex: 1,

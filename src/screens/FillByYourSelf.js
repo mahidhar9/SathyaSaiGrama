@@ -35,7 +35,7 @@ import axios from 'axios';
 
 import SentForApproval from './SentForApproval';
 import {updateRecord} from './approval/VerifyDetails';
-import { isJSDocCommentContainingNode } from 'typescript';
+import {isJSDocCommentContainingNode} from 'typescript';
 
 LogBox.ignoreLogs(['Warnings...']);
 LogBox.ignoreAllLogs();
@@ -51,7 +51,7 @@ const FillByYourSelf = ({navigation}) => {
   const [girls, setGirls] = useState('0');
   const [selectedGender, setSelectedGender] = useState('');
   const [selectedSG, setSelectedSG] = useState('');
-  const [selectedHO, setSelectedHO] = useState('');
+
   const [value, setValue] = useState('');
   const [formattedValue, setFormattedValue] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -68,6 +68,10 @@ const FillByYourSelf = ({navigation}) => {
   //just so that the othe code gets commited can delete after
 
   const [vehicles, setVehicles] = useState([]);
+  const [vehicleErrorMessages, setVehicleErrorMessages] = useState({});
+  // Regex format for vehicle number like 'KA 01 CU 1234'
+  const vehicleNumberPattern = /^[a-z]{2}[0-9]{2}[a-z]{2}[0-9]{4}$/;
+  let selectedHomeOffice = '';
 
   const {
     getAccessToken,
@@ -76,6 +80,15 @@ const FillByYourSelf = ({navigation}) => {
     accessToken,
     setApproveDataFetched,
   } = useContext(UserContext);
+  if (loggedUser.resident === true && loggedUser.employee === true) {
+    selectedHomeOffice = '';
+  } else if (loggedUser.resident === true && loggedUser.employee === false) {
+    selectedHomeOffice = 'Home';
+  } else if (loggedUser.resident === false && loggedUser.employee === true) {
+    selectedHomeOffice = 'Office';
+  }
+
+  const [selectedHO, setSelectedHO] = useState(selectedHomeOffice);
   const [date, setDate] = useState('Select Date');
   const [showModal, setShowModal] = useState(false);
   const L1ID = loggedUser.userId;
@@ -86,6 +99,23 @@ const FillByYourSelf = ({navigation}) => {
     today.setDate(today.getDate()),
     'YYYY/MM/DD',
   );
+  const addDaysToDate = (dateString, daysToAdd) => {
+    // Convert the input string (YYYY/MM/DD) into a Date object
+    const [year, month, day] = dateString.split('/'); // Split the string by '/'
+    const date = new Date(year, month - 1, day); // Month is 0-indexed in JavaScript
+
+    // Add the specified number of days (60 days in this case)
+    date.setDate(date.getDate() + daysToAdd);
+
+    // Format the new date back to 'YYYY/MM/DD'
+    const newYear = date.getFullYear();
+    const newMonth = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed, so add 1
+    const newDay = String(date.getDate()).padStart(2, '0');
+
+    return `${newYear}/${newMonth}/${newDay}`;
+  };
+  const endDate = addDaysToDate(startDate, 60);
+  console.log('endDate', endDate);
   const approvalToVisitorID = useRef(null);
   const viewRef = useRef();
   const [code, setCode] = useState('');
@@ -163,7 +193,10 @@ const FillByYourSelf = ({navigation}) => {
     {label: 'Other', value: 'Other'},
   ];
 
-  console.log('Screen Height:', height);
+  let menCount = '0';
+  let womenCount = '0';
+  let boysCount = '0';
+  let girlsCount = '0';
 
   const PasscodeUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Passcode`;
 
@@ -242,8 +275,8 @@ const FillByYourSelf = ({navigation}) => {
     console.log('inside posttoL1aprroved');
 
     // const Vehicle_Info = await postVehicle();
-    let menCount = '0';
-    let womenCount = '0';
+    // let menCount = '0';
+    // let womenCount = '0';
     if (selectedSG === 'Single') {
       if (selectedGender === 'Male') {
         console.log('Inside Single Male');
@@ -255,8 +288,8 @@ const FillByYourSelf = ({navigation}) => {
         womenCount = '1';
       }
     } else {
-      menCount = men;
-      womenCount = women;
+      menCount = men === '' ? '0' : men;
+      womenCount = women === '' ? '0' : women;
     }
     const formData = {
       data: {
@@ -284,7 +317,10 @@ const FillByYourSelf = ({navigation}) => {
       },
     };
 
-    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!form data", formData)
+    console.log(
+      '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!form data',
+      formData,
+    );
 
     if (loggedUser.role === 'L2') {
       if (
@@ -314,9 +350,12 @@ const FillByYourSelf = ({navigation}) => {
         },
       );
       const res = await response.json();
-      console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@",res);
-      const photoUploadRes = await uploadPhoto(res.data.ID, "Approval_to_Visitor_Report");
-      console.log("",photoUploadRes);
+      console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@', res);
+      const photoUploadRes = await uploadPhoto(
+        res.data.ID,
+        'Approval_to_Visitor_Report',
+      );
+      console.log('', photoUploadRes);
       return res;
     } catch (error) {
       Alert.alert('Error', 'Something went wrong');
@@ -349,8 +388,8 @@ const FillByYourSelf = ({navigation}) => {
         },
       );
       const res = await response.json();
-      console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",res);
-      await uploadPhoto(res.data.ID, "All_Visitor_Details");
+      console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^', res);
+      await uploadPhoto(res.data.ID, 'All_Visitor_Details');
       return res;
     } catch (error) {
       Alert.alert('Error', 'Something went wrong');
@@ -358,14 +397,17 @@ const FillByYourSelf = ({navigation}) => {
   };
 
   const handleAddVehicle = () => {
-    setVehicles([...vehicles, {Vehicle_Type: '', Vehicle_Number: ''}]);
+    setVehicles([
+      ...vehicles,
+      {Vehicle_Type: '', Vehicle_Number: '', ID: Date.now()}, //Date now is used to create a unique id for each vehicle row
+    ]);
   };
 
   const handleRemoveVehicle = index => {
     const updatedVehicles = vehicles.filter((_, i) => i !== index);
     setVehicles(updatedVehicles);
   };
-
+  //  Function to handle vehicle number change
   const handleTextChange = (index, field, value) => {
     const updatedVehicles = vehicles.map((vehicle, i) =>
       i === index ? {...vehicle, [field]: value} : vehicle,
@@ -452,38 +494,72 @@ const FillByYourSelf = ({navigation}) => {
 
   const validateForm = () => {
     let valid = true;
-    if (!prefix || !firstName || !lastName) {
+
+    menCount = men === '' ? '0' : men;
+    womenCount = women === '' ? '0' : women;
+    boysCount = boys === '' ? '0' : boys;
+    girlsCount = girls === '' ? '0' : girls;
+
+    setMen(menCount);
+    setWomen(womenCount);
+    setBoys(boysCount);
+    setGirls(girlsCount);
+
+    if (
+      prefix.trim() === '' ||
+      firstName.trim() === '' ||
+      lastName.trim() === ''
+    ) {
+      console.log('inside name null validation');
       setNameErr('Prefix, First Name and Last Name are required');
       valid = false;
     } else {
-      setNameErr(null);
-    }
-    if (
-      !validateInput(firstName, setNameErr) ||
-      !validateInput(lastName, setNameErr)
-    ) {
-      // setNameErr('Prefix, First Name and Last Name are required');
-      Alert.alert('Error', 'Only letters are allowed in the name field ');
-      valid = false;
-    } else {
-      setNameErr(null);
+      if (
+        !validateInput(firstName, setNameErr) ||
+        !validateInput(lastName, setNameErr)
+      ) {
+        // setNameErr('Prefix, First Name and Last Name are required');
+        // Alert.alert('Error', '20 letters Only letters are allowed in the name field ');
+        console.log('inside !validateInput');
+        valid = false;
+      } else {
+        setNameErr(null);
+      }
     }
 
+    // const isDateWithinTwoMonths = selectedDate => {
+    //   const currentDate = new Date(); // Get current date
+
+    //   // Create a date 2 months from today
+    //   const twoMonthsLater = new Date();
+    //   twoMonthsLater.setMonth(currentDate.getDate() + 1);
+
+    //   // Compare the selected date with the date 2 months later
+    //   return selectedDate <= twoMonthsLater;
+    // };
     if (date === 'Select Date') {
       setDateOfVisitErr('Date of visit is required');
+      console.log('inside Select Date');
       valid = false;
     } else {
+      // if (!isDateWithinTwoMonths(date)) {
+      //   setDateOfVisitErr('Please select a date within 2 months from today');
+      //   console.log('inside 2 months from today');
+      //   valid = false;
+      // }
       setDateOfVisitErr(null);
     }
 
     if (!formattedValue) {
       setPhoneErr('Phone number is required');
+      console.log('inside !formattedValue');
       valid = false;
     } else {
       setPhoneErr(null);
       const parsedPhoneNumber = parsePhoneNumberFromString(formattedValue);
       if (!parsedPhoneNumber || !parsedPhoneNumber.isValid()) {
         setPhoneValidErr('Invalid phone number');
+        console.log('invalid phone number');
         valid = false;
       } else {
         setPhoneValidErr(null);
@@ -491,25 +567,28 @@ const FillByYourSelf = ({navigation}) => {
     }
 
     if (!selectedSG) {
+      console.log('inside !selectedSG', selectedSG);
       setSingleOrGroupErr('Single or Group is required');
       valid = false;
     } else {
       // setSingleOrGroupErr(null);
       if (
         selectedSG === 'Group' &&
-        men === '0' &&
-        women === '0' &&
-        boys === '0' &&
-        girls === '0'
+        menCount === '0' &&
+        womenCount === '0' &&
+        boysCount === '0' &&
+        girlsCount === '0'
       ) {
         setSingleOrGroupErr('Total No. of people cannot be 0');
+        console.log('inside Total No. of people cannot be 0');
         valid = false;
       } else {
         setSingleOrGroupErr(null);
       }
     }
-
+    console.log('selectedHO', selectedHO);
     if (!selectedHO) {
+      console.log('inside !selectedHO', selectedHO);
       setHomeOrOfficeErr('Home or Office is required');
       valid = false;
     } else {
@@ -517,6 +596,7 @@ const FillByYourSelf = ({navigation}) => {
     }
 
     if (!selectedGender) {
+      console.log('inside !selectedGender', selectedGender);
       setGenderErr('Gender is required');
       if (selectedGender === 'Male') {
         setMen('1');
@@ -529,6 +609,34 @@ const FillByYourSelf = ({navigation}) => {
     } else {
       setGenderErr(null);
     }
+    const errors = {};
+
+    vehicles.forEach((vehicle, index) => {
+      const vehicleNumber = vehicle.Vehicle_Number;
+      if (
+        !vehicleNumberPattern.test(
+          vehicleNumber.replace(/\s+/g, '').toLowerCase(),
+        )
+      ) {
+        errors[vehicle.ID] = `Invalid Vehicle Number`;
+        valid = false;
+      }
+      if (vehicle.Vehicle_Type === '') {
+        errors[vehicle.ID] = `Please select Vehicle Type`;
+        valid = false;
+      }
+      if (
+        !vehicleNumberPattern.test(
+          vehicleNumber.replace(/\s+/g, '').toLowerCase(),
+        ) &&
+        vehicle.Vehicle_Type === ''
+      ) {
+        errors[vehicle.ID] = `Invalid Vehicle Information`;
+        valid = false;
+      }
+    });
+
+    setVehicleErrorMessages(errors);
 
     return valid;
   };
@@ -571,33 +679,34 @@ const FillByYourSelf = ({navigation}) => {
   };
 
   const handleReset = () => {
-    setBoys('0');
-    setWomen('0');
-    setMen('0');
-    setGirls('0');
-    setPrefix(' ');
-    setDate('Select Date');
-    setSelectedGender('');
-    setSelectedHO('');
-    setSelectedSG('');
-    setLastName('');
-    setFirstName('');
-    setValue('');
-    setImage(null);
-    setGuestCategory('');
-    setPriority('');
-    setVehicleType('');
-    setVehicleNumber('');
-    setIsVehicle(false);
-    setIsFocus(false);
-    setFocus(false);
-    setNameErr(null);
-    setDateOfVisitErr(null);
-    setPhoneErr(null);
-    setSingleOrGroupErr(null);
-    setHomeOrOfficeErr(null);
-    setGenderErr(null);
-    setPhoneValidErr(null);
+    // setBoys('0');
+    // setWomen('0');
+    // setMen('0');
+    // setGirls('0');
+    // setPrefix(' ');
+    // setDate('Select Date');
+    // setSelectedGender('');
+    // setSelectedHO('');
+    // setSelectedSG('');
+    // setLastName('');
+    // setFirstName('');
+    // setValue('');
+    // setImage(null);
+    // setGuestCategory('');
+    // setPriority('');
+    // setVehicleType('');
+    // setVehicleNumber('');
+    // setIsVehicle(false);
+    // setIsFocus(false);
+    // setFocus(false);
+    // setNameErr(null);
+    // setDateOfVisitErr(null);
+    // setPhoneErr(null);
+    // setSingleOrGroupErr(null);
+    // setHomeOrOfficeErr(null);
+    // setGenderErr(null);
+    // setPhoneValidErr(null);
+    navigation.navigate('Invite');
   };
   let heightStyles;
   if (height > 900) {
@@ -730,11 +839,11 @@ const FillByYourSelf = ({navigation}) => {
   const [firstNameError, setFirstNameError] = useState('');
   const [lastNameError, setLastNameError] = useState('');
   const validateInput = (txt, setError) => {
-    if (/^[a-zA-Z\s]+$/.test(txt) || txt === '') {
+    if (/^[a-zA-Z\s]{1,20}$/.test(txt) || txt === '') {
       setError(''); // Clear error on valid input
       return true; // Valid input
     } else {
-      setError('Only letters are allowed.');
+      setError('20 letters only are allowed');
       return false; // Invalid input
     }
   };
@@ -748,7 +857,15 @@ const FillByYourSelf = ({navigation}) => {
     setLastName(txt);
     validateInput(txt, setLastNameError);
   };
-
+  let addNewButtonVisibility;
+  if (
+    (selectedSG === 'Group' && vehicles.length < 5) ||
+    (selectedSG === 'Single' && vehicles.length < 1)
+  ) {
+    addNewButtonVisibility = true;
+  } else {
+    addNewButtonVisibility = false;
+  }
   return (
     <>
       {isSubmitted ? (
@@ -828,21 +945,23 @@ const FillByYourSelf = ({navigation}) => {
                   <Text style={[styles.bottomtext, {marginRight: 75}]}>
                     Prefix
                   </Text>
-                  {firstNameError ? (
-                    <Text style={{color: '#B21E2B'}}>{firstNameError}</Text>
-                  ) : (
-                    <Text style={[styles.bottomtext, {marginRight: 72}]}>
-                      First Name
-                    </Text>
-                  )}
-                  {lastNameError ? (
-                    <Text style={{color: '#B21E2B'}}>{lastNameError}</Text>
-                  ) : (
-                    <Text style={styles.bottomtext}>Last Name</Text>
-                  )}
+
+                  <Text style={[styles.bottomtext, {marginRight: 72}]}>
+                    First Name
+                  </Text>
+
+                  <Text style={styles.bottomtext}>Last Name</Text>
                 </View>
+                {nameErr && <Text style={styles.errorText}>{nameErr}</Text>}
+                {firstNameError && lastNameError ? (
+                  <Text style={styles.errorText}>{firstNameError}</Text>
+                ) : firstNameError || lastNameError ? (
+                  <Text style={styles.errorText}>
+                    {firstNameError + lastNameError}
+                  </Text>
+                ) : null}
               </View>
-              {nameErr && <Text style={styles.errorText}>{nameErr}</Text>}
+
               <View style={styles.namecontainer}>
                 <Text style={styles.label}>
                   Phone <Text style={{color: 'red'}}>*</Text>
@@ -958,7 +1077,11 @@ const FillByYourSelf = ({navigation}) => {
                       style={[styles.phoneInputContainer, {paddingLeft: 15}]}
                       keyboardType="numeric"
                       value={men}
-                      onChangeText={setMen}
+                      onChangeText={text => {
+                        // Allow only numbers
+                        const numericValue = text.replace(/[^0-9]/g, '');
+                        setMen(numericValue);
+                      }}
                       selectionColor="#B21E2B"
                     />
                   </View>
@@ -971,7 +1094,11 @@ const FillByYourSelf = ({navigation}) => {
                       style={[styles.phoneInputContainer, {paddingLeft: 15}]}
                       keyboardType="numeric"
                       value={women}
-                      onChangeText={setWomen}
+                      onChangeText={text => {
+                        // Allow only numbers
+                        const numericValue = text.replace(/[^0-9]/g, '');
+                        setWomen(numericValue);
+                      }}
                       selectionColor="#B21E2B"
                     />
                   </View>
@@ -983,7 +1110,11 @@ const FillByYourSelf = ({navigation}) => {
                       style={[styles.phoneInputContainer, {paddingLeft: 15}]}
                       keyboardType="numeric"
                       value={boys}
-                      onChangeText={setBoys}
+                      onChangeText={text => {
+                        // Allow only numbers
+                        const numericValue = text.replace(/[^0-9]/g, '');
+                        setBoys(numericValue);
+                      }}
                       selectionColor="#B21E2B"
                     />
                   </View>
@@ -995,41 +1126,47 @@ const FillByYourSelf = ({navigation}) => {
                       style={[styles.phoneInputContainer, {paddingLeft: 15}]}
                       keyboardType="numeric"
                       value={girls}
-                      onChangeText={setGirls}
+                      onChangeText={text => {
+                        // Allow only numbers
+                        const numericValue = text.replace(/[^0-9]/g, '');
+                        setGirls(numericValue);
+                      }}
                       selectionColor="#B21E2B"
                     />
                   </View>
                 </View>
               ) : null}
-              <View style={styles.namecontainer}>
-                <Text style={styles.label}>
-                  Is the Guest being invited to Home or Office
-                  <Text style={{color: 'red'}}> *</Text>
-                </Text>
-                <View style={styles.radioButtonContainer}>
-                  {homeoroffice.map(option => {
-                    return (
-                      <TouchableOpacity
-                        key={option}
-                        style={styles.singleOptionContainer}
-                        onPress={() => {
-                          setSelectedHO(option);
-                          setHomeOrOfficeErr(null);
-                        }}>
-                        <View style={styles.outerCircle}>
-                          {selectedHO === option ? (
-                            <View style={styles.innerCircle} />
-                          ) : null}
-                        </View>
-                        <Text style={{marginLeft: 10}}>{option}</Text>
-                      </TouchableOpacity>
-                    );
-                  })}
+              {loggedUser.resident === true && loggedUser.employee === true ? (
+                <View style={styles.namecontainer}>
+                  <Text style={styles.label}>
+                    Is the Guest being invited to Home or Office
+                    <Text style={{color: 'red'}}> *</Text>
+                  </Text>
+                  <View style={styles.radioButtonContainer}>
+                    {homeoroffice.map(option => {
+                      return (
+                        <TouchableOpacity
+                          key={option}
+                          style={styles.singleOptionContainer}
+                          onPress={() => {
+                            setSelectedHO(option);
+                            setHomeOrOfficeErr(null);
+                          }}>
+                          <View style={styles.outerCircle}>
+                            {selectedHO === option ? (
+                              <View style={styles.innerCircle} />
+                            ) : null}
+                          </View>
+                          <Text style={{marginLeft: 10}}>{option}</Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                  {homeOrOfficeErr && (
+                    <Text style={styles.errorText}>{homeOrOfficeErr}</Text>
+                  )}
                 </View>
-                {homeOrOfficeErr && (
-                  <Text style={styles.errorText}>{homeOrOfficeErr}</Text>
-                )}
-              </View>
+              ) : null}
               <View style={styles.namecontainer}>
                 <Text style={styles.label}>
                   Select Gender <Text style={{color: 'red'}}>*</Text>
@@ -1055,10 +1192,39 @@ const FillByYourSelf = ({navigation}) => {
                   })}
                 </View>
                 {genderErr && <Text style={styles.errorText}>{genderErr}</Text>}
-                <Button
+                <View style={styles.namecontainer}>
+                  <Text style={styles.label}>Photo</Text>
+                  <View
+                    style={[
+                      styles.dropdown,
+                      {flexDirection: 'row', justifyContent: 'space-between'},
+                    ]}>
+                    <Text style={{color: 'gray', marginHorizontal: 10}}>
+                      {imageUri ? image.name : 'Select Image'}
+                    </Text>
+                    <View style={{paddingHorizontal: 10}}>
+                      {imageUri ? (
+                        <TouchableOpacity onPress={removeImage}>
+                          <Image
+                            source={require('../assets/close_icon.png')}
+                            style={{width: 20, height: 20}}
+                          />
+                        </TouchableOpacity>
+                      ) : (
+                        <TouchableOpacity onPress={selectImage}>
+                          <Image
+                            source={require('../assets/upload.png')}
+                            style={{width: 20, height: 20}}
+                          />
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  </View>
+                </View>
+                {/* <Button
                   title={imageUri ? 'Update Image' : 'Select Image'}
                   onPress={selectImage}
-                />
+                /> */}
 
                 {imageUri && (
                   <>
@@ -1066,7 +1232,7 @@ const FillByYourSelf = ({navigation}) => {
                       source={{uri: imageUri}}
                       style={{width: 100, height: 100}}
                     />
-                    <Button title="Remove Image" onPress={removeImage} />
+                    {/* <Button title="Remove Image" onPress={removeImage} /> */}
                   </>
                 )}
                 <View style={styles.namecontainer}>
@@ -1124,69 +1290,91 @@ const FillByYourSelf = ({navigation}) => {
                   <Text style={styles.label}>Vehicle Information</Text>
                   <View style={styles.vehicle}>
                     <Text>Vehicle type</Text>
+                    <Text>|</Text>
                     <Text>Vehicle Number</Text>
                   </View>
                   {vehicles.map((vehicle, index) => (
-                    <View key={index} style={styles.newvehicle}>
-                      <Picker
-                        selectedValue={vehicle.Vehicle_Type}
-                        style={styles.picker}
-                        onValueChange={value =>
-                          handleTextChange(index, 'Vehicle_Type', value)
-                        }>
-                        <Picker.Item label="Select" value="" />
-                        <Picker.Item label="2-Wheeler" value="2-Wheeler" />
-                        <Picker.Item label="Car" value="Car" />
-                        <Picker.Item label="Bus" value="Bus" />
-                        <Picker.Item label="Taxi" value="Taxi" />
-                        <Picker.Item label="School Bus" value="School Bus" />
-                        <Picker.Item label="Police Van" value="Police Van" />
-                        <Picker.Item label="Van" value="Van" />
-                        <Picker.Item label="Auto" value="Auto" />
-                        <Picker.Item label="Ambulance" value="Ambulancer" />
-                        <Picker.Item label="Truck" value="Truck" />
-                        <Picker.Item label="Tractor" value="Tractor" />
-                        <Picker.Item
-                          label="Cement Mixer"
-                          value="Cement Mixer"
+                    <>
+                      <View key={index} style={styles.newvehicle}>
+                        <Picker
+                          selectedValue={vehicle.Vehicle_Type}
+                          style={styles.picker}
+                          onValueChange={value =>
+                            handleTextChange(index, 'Vehicle_Type', value)
+                          }>
+                          <Picker.Item label="Select" value="" />
+                          <Picker.Item label="2-Wheeler" value="2-Wheeler" />
+                          <Picker.Item label="Car" value="Car" />
+                          <Picker.Item label="Bus" value="Bus" />
+                          <Picker.Item label="Taxi" value="Taxi" />
+                          <Picker.Item label="School Bus" value="School Bus" />
+                          <Picker.Item label="Police Van" value="Police Van" />
+                          <Picker.Item label="Van" value="Van" />
+                          <Picker.Item label="Auto" value="Auto" />
+                          <Picker.Item label="Ambulance" value="Ambulance" />
+                          <Picker.Item label="Truck" value="Truck" />
+                          <Picker.Item label="Tractor" value="Tractor" />
+                          <Picker.Item
+                            label="Cement Mixer"
+                            value="Cement Mixer"
+                          />
+                          <Picker.Item
+                            label="Fire Engine"
+                            value="Fire Engine"
+                          />
+                          <Picker.Item
+                            label="Transport Van"
+                            value="Transport Van"
+                          />
+                          <Picker.Item label="Bulldozer" value="Bulldozer" />
+                          <Picker.Item
+                            label="Roller Machine"
+                            value="Roller Machine"
+                          />
+                          {/* Add more vehicle types as needed */}
+                        </Picker>
+                        <TextInput
+                          style={styles.vehicleinput}
+                          placeholder="KA 01 CU 1234"
+                          placeholderTextColor="#c5c7ca"
+                          value={vehicle.Vehicle_Number}
+                          onChangeText={text =>
+                            handleTextChange(index, 'Vehicle_Number', text)
+                          }
                         />
-                        <Picker.Item label="Fire Engine" value="Fire Engine" />
-                        <Picker.Item
-                          label="Transport Van"
-                          value="Transport Van"
-                        />
-                        <Picker.Item label="Bulldozer" value="Bulldozer" />
-                        <Picker.Item
-                          label="Roller Machine"
-                          value="Roller Machine"
-                        />
-                        {/* Add more vehicle types as needed */}
-                      </Picker>
-                      <TextInput
-                        style={styles.vehicleinput}
-                        value={vehicle.Vehicle_Number}
-                        onChangeText={text =>
-                          handleTextChange(index, 'Vehicle_Number', text)
-                        }
-                      />
-                      <TouchableOpacity
-                        onPress={() => handleRemoveVehicle(index)}>
-                        <Image
-                          source={require('../assets/delete.png')}
-                          style={styles.removeButton}
-                        />
-                      </TouchableOpacity>
-                    </View>
+
+                        <TouchableOpacity
+                          onPress={() => handleRemoveVehicle(index)}>
+                          <Image
+                            source={require('../assets/delete.png')}
+                            style={styles.removeButton}
+                          />
+                        </TouchableOpacity>
+                      </View>
+                      {vehicleErrorMessages[vehicle.ID] && (
+                        <Text
+                          style={[
+                            styles.errorText,
+                            {marginTop: -10, paddingLeft: 30},
+                          ]}>
+                          {vehicleErrorMessages[vehicle.ID]}
+                        </Text>
+                      )}
+                    </>
                   ))}
-                  <TouchableOpacity
-                    style={styles.addvehicle}
-                    onPress={handleAddVehicle}>
-                    <Image
-                      source={require('../assets/add.png')}
-                      style={{width: 15, height: 15}}
-                    />
-                    <Text style={{color: 'black', fontSize: 15}}>Add New</Text>
-                  </TouchableOpacity>
+                  {addNewButtonVisibility && (
+                    <TouchableOpacity
+                      style={styles.addvehicle}
+                      onPress={handleAddVehicle}>
+                      <Image
+                        source={require('../assets/add.png')}
+                        style={{width: 15, height: 15}}
+                      />
+                      <Text style={{color: 'black', fontSize: 15}}>
+                        Add New
+                      </Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               </View>
 
@@ -1785,8 +1973,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
   },
   picker: {
-    flex: 2,
+    flex: 1,
     height: 40,
+    paddingRight: 10,
   },
   vehicleinput: {
     flex: 1,

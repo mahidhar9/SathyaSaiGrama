@@ -1,138 +1,160 @@
-import React, { useEffect, useContext, useState } from 'react';
-import { View, Text, Button, StyleSheet, Alert, TouchableOpacity, Image, Linking } from 'react-native';
-import { auth } from './firebaseConfig';
-import { sendEmailVerification } from 'firebase/auth';
+import React, {useEffect, useContext, useState} from 'react';
+import {
+  View,
+  Text,
+  Button,
+  StyleSheet,
+  Alert,
+  TouchableOpacity,
+  Image,
+  Linking,
+} from 'react-native';
+import {auth} from './firebaseConfig';
+import {sendEmailVerification} from 'firebase/auth';
 import UserContext from '../../context/UserContext';
-import { getDataWithInt } from '../components/ApiRequest';
-import { AuthContext } from './AuthProvider';
+import {getDataWithInt} from '../components/ApiRequest';
+import {AuthContext} from './AuthProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME } from "@env"
-import {openInbox} from 'react-native-email-link'
-const VerificationNotice = ({ route, navigation }) => {
-
-  const { id } = route.params
-  console.log("Id in verification notice: ", id)
+import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME} from '@env';
+import {openInbox} from 'react-native-email-link';
+const VerificationNotice = ({route, navigation}) => {
+  const {id, residentLocalVar, employeeLocalVar, testResidentLocalVar, name} =
+    route.params;
+  console.log('Id in verification notice: ', id);
   const user = auth.currentUser;
-  const { setUserEmail, setL1ID, accessToken, userType, setUserType, setLoggedUser, deviceToken } = useContext(UserContext)
-  const { setUser } = useContext(AuthContext)
-  const [departmentIds, setDepartmentIds] = useState([])
-  const {email} = route.params
-
+  const {
+    setUserEmail,
+    setL1ID,
+    accessToken,
+    userType,
+    setUserType,
+    setLoggedUser,
+    deviceToken,
+  } = useContext(UserContext);
+  const {setUser} = useContext(AuthContext);
+  const [departmentIds, setDepartmentIds] = useState([]);
+  const {email} = route.params;
 
   useEffect(() => {
-
     const fetchDataFromOffice = async () => {
-
-      console.log("inside useEffect ofVerificationNotice: ", accessToken, id);
-      const res = await getDataWithInt("All_Offices", "Approver_app_user_lookup", id, accessToken);
+      console.log('inside useEffect ofVerificationNotice: ', accessToken, id);
+      const res = await getDataWithInt(
+        'All_Offices',
+        'Approver_app_user_lookup',
+        id,
+        accessToken,
+      );
       if (res && res.data) {
-        const deptIds = res.data.map(dept => dept.ID); 
-        setDepartmentIds(deptIds)
-        setUserType("L2")
+        const deptIds = res.data.map(dept => dept.ID);
+        setDepartmentIds(deptIds);
+        setUserType('L2');
+      } else {
+        setUserType('L1');
       }
-      else {
-        setUserType("L1")
-      }
-    }
+    };
 
-    fetchDataFromOffice()
-
-  }, [])
-
+    fetchDataFromOffice();
+  }, []);
 
   useEffect(() => {
-
     const interval = setInterval(() => {
       checkEmailVerification();
     }, 5000);
 
-
-
-
-
-
-
     const updateDeviceToken = async (modified_data, id) => {
       try {
-        const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${id}`
-        console.log(url)
+        const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${id}`;
+        console.log(url);
         const response = await fetch(url, {
           method: 'PATCH',
           headers: {
-            Authorization: `Zoho-oauthtoken ${accessToken}`
+            Authorization: `Zoho-oauthtoken ${accessToken}`,
           },
-          body: JSON.stringify(modified_data)
+          body: JSON.stringify(modified_data),
         });
         return await response.json();
-      }
-      catch (err) {
+      } catch (err) {
         if (err.message === 'Network request failed')
-          Alert.alert('Network Error', 'Failed to fetch data. Please check your network connection and try again.');
+          Alert.alert(
+            'Network Error',
+            'Failed to fetch data. Please check your network connection and try again.',
+          );
         else {
-          Alert.alert("Error: ", err)
-          console.log(err)
+          Alert.alert('Error: ', err);
+          console.log(err);
         }
       }
-    }
+    };
 
-    const findDeviceToken = async (id) => {
+    const findDeviceToken = async id => {
       try {
-        const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${id}`
-        console.log(url)
+        const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${id}`;
+        console.log(url);
         const response = await fetch(url, {
           method: 'GET',
           headers: {
-            Authorization: `Zoho-oauthtoken ${accessToken}`
+            Authorization: `Zoho-oauthtoken ${accessToken}`,
           },
         });
         return await response.json();
-      }
-      catch (err) {
+      } catch (err) {
         if (err.message === 'Network request failed')
-          Alert.alert('Network Error', 'Failed to fetch data. Please check your network connection and try again.');
+          Alert.alert(
+            'Network Error',
+            'Failed to fetch data. Please check your network connection and try again.',
+          );
         else {
-          Alert.alert("Error: ", err)
-          console.log(err)
+          Alert.alert('Error: ', err);
+          console.log(err);
         }
       }
-    }
-
-
-
+    };
 
     const checkEmailVerification = async () => {
       if (user) {
         await user.reload();
         if (user.emailVerified && userType) {
-          setUserEmail(user.email)
-          setL1ID(id)
+          setUserEmail(user.email);
+          setL1ID(id);
           if (userType && departmentIds) {
-            console.log("department id in verificationNotice: ", departmentIds);
-            await AsyncStorage.setItem("existedUser", JSON.stringify({ userId: id, role: userType, email: user.email, deptIds: departmentIds }));
-            let existedUser = await AsyncStorage.getItem("existedUser");
-            existedUser = JSON.parse(existedUser)
-            console.log("Existed user in Base route useEffect:", existedUser)
+            console.log('department id in verificationNotice: ', departmentIds);
+            await AsyncStorage.setItem(
+              'existedUser',
+              JSON.stringify({
+                userId: id,
+                role: userType,
+                email: user.email,
+                deptIds: departmentIds,
+                name: name,
+                resident: residentLocalVar,
+                employee: employeeLocalVar,
+                testResident: testResidentLocalVar,
+              }),
+            );
+            let existedUser = await AsyncStorage.getItem('existedUser');
+            existedUser = JSON.parse(existedUser);
+            console.log('Existed user in Base route useEffect:', existedUser);
             setLoggedUser(existedUser);
-            const response = await findDeviceToken(id)
-            console.log("response is: ", response)
+            const response = await findDeviceToken(id);
+            console.log('response is: ', response);
             let myDeviceToken;
-            console.log("present token is: ", response.data.Device_Tokens )
-            if(!response.data.Device_Tokens){
-                console.log("first time")
-                myDeviceToken = ""+deviceToken+"||"
-            }else{
-                myDeviceToken = response.data.Device_Tokens+deviceToken+"||"
-                console.log("second time")
+            console.log('present token is: ', response.data.Device_Tokens);
+            if (!response.data.Device_Tokens) {
+              console.log('first time');
+              myDeviceToken = '' + deviceToken + '||';
+            } else {
+              myDeviceToken = response.data.Device_Tokens + deviceToken + '||';
+              console.log('second time');
             }
-            console.log("local device token is: ", myDeviceToken)
-            console.log("Response device token is : ",response)
+            console.log('local device token is: ', myDeviceToken);
+            console.log('Response device token is : ', response);
             const updateData = {
-                data: {
-                    Device_Tokens: myDeviceToken
-                }
-              }
-              const updateResponse = await updateDeviceToken(updateData, id)
-              console.log("update device token response: ", updateResponse)
+              data: {
+                Device_Tokens: myDeviceToken,
+              },
+            };
+            const updateResponse = await updateDeviceToken(updateData, id);
+            console.log('update device token response: ', updateResponse);
             clearInterval(interval);
             navigation.navigate('FooterTab');
           }
@@ -146,15 +168,17 @@ const VerificationNotice = ({ route, navigation }) => {
   const handleResendVerification = async () => {
     if (user) {
       try {
-        await sendEmailVerification(user)
+        await sendEmailVerification(user);
         Alert.alert('Verification email resent. Please check your inbox.');
       } catch (error) {
         if (error.message === 'Network request failed')
-          Alert.alert('Network Error', 'Failed to fetch data. Please check your network connection and try again.');
+          Alert.alert(
+            'Network Error',
+            'Failed to fetch data. Please check your network connection and try again.',
+          );
         if (error.code === 'auth/too-many-requests') {
           Alert.alert('Too many requests. Please try again later.');
-        }
-        else {
+        } else {
           console.error('Failed to resend verification email:', error);
           Alert.alert('Failed to resend verification email. Please try again.');
         }
@@ -162,11 +186,10 @@ const VerificationNotice = ({ route, navigation }) => {
     } else {
       Alert.alert('No user is currently signed in.');
     }
-  }
-
+  };
 
   return (
-<View
+    <View
       style={{
         flex: 1,
         alignItems: 'center',
@@ -201,7 +224,7 @@ const VerificationNotice = ({ route, navigation }) => {
           fontWeight: '400',
           lineHeight: 20,
         }}>
- to your email: {'\n'} {email}
+        to your email: {'\n'} {email}
       </Text>
       <TouchableOpacity
         style={[styles.register, styles.register1]}
