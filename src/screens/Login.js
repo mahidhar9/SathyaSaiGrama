@@ -52,12 +52,13 @@ const Login = ({navigation}) => {
     setEmployee,
     testResident,
     setTestResident,
+    departmentIds,
+    setDepartmentIds
   } = useContext(UserContext);
   let residentLocalVar = resident;
   let employeeLocalVar = employee;
   let testResidentLocalVar = testResident;
   const [currentUser, setCurrentUser] = useState(null);
-  const [departmentIds, setDepartmentIds] = useState([]);
   const [showPassword, setShowPassword] = useState(false);
   const [focusedInput, setFocusedInput] = useState(null);
   const [DialogVisible, setDialogVisible] = useState(false);
@@ -331,6 +332,7 @@ const Login = ({navigation}) => {
 
         if (user.emailVerified) {
           setL1ID(res.data[0].ID);
+          console.log("Logged user is@@@@@@@@@@@@@", res.data);
           setUserEmail(userCred.email.toLowerCase().trim());
 
           const reqUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${res.data[0].ID}/Profile_Photo/download`;
