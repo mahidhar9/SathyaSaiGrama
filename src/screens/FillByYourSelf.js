@@ -130,10 +130,16 @@ const FillByYourSelf = ({navigation}) => {
   const singleorgroup = ['Single', 'Group'];
   const homeoroffice = ['Home', 'Office'];
 
-  const handleDateChange = selectedDate => {
+  const [choosenDate, setChoosenDate] = useState(null);
+
+  const handleDateChange = (selectedDate) => {
     const formatteddate = moment(selectedDate, 'YYYY-MM-DD').format(
       'DD-MMM-YYYY',
     );
+    const cdate = moment(selectedDate, 'YYYY-MM-DD').format(
+      'YY-MM-DD',
+    );
+    setChoosenDate(cdate);
     setDate(formatteddate);
     setShowModal(!showModal); //Date Picker
     setDateOfVisitErr(null);
@@ -1016,14 +1022,14 @@ const FillByYourSelf = ({navigation}) => {
                         <DatePicker
                           mode="calendar"
                           minimumDate={startDate}
-                          maximumDate={endDate}
-                          onSelectedChange={handleDateChange}
+                          onSelectedChange={curDate => handleDateChange(curDate)}
+                          current={choosenDate? choosenDate: startDate} // Show previously selected date or startDate if no date is selected
                           options={{
                             backgroundColor: 'white',
                             textHeaderColor: '#B21E2b',
-                            textDefaultColor: '#333',
-                            selectedTextColor: '#B21E2b',
-                            mainColor: 'white',
+                            textDefaultColor: 'black',
+                            selectedTextColor: 'white',
+                            mainColor: 'black',
                             textSecondaryColor: 'black',
                             borderColor: '#B21E2B',
                           }}

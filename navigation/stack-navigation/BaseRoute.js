@@ -171,20 +171,22 @@ const BaseRoute = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  useEffect(() => {
-    const checkUserExist = async () => {
-      let existedUser = await AsyncStorage.getItem('existedUser');
-      existedUser = JSON.parse(existedUser);
-      console.log('Existed user in Base route useEffect:', existedUser);
-      if (existedUser) {
-        setLoggedUser(existedUser);
-      }
-    };
+  // useEffect(() => {
+  //   const checkUserExist = async () => {
+  //     let existedUser = await AsyncStorage.getItem('existedUser');
+  //     existedUser = JSON.parse(existedUser);
+  //     //console.log('Existed user in Base route useEffect:', existedUser);
+  //     if (existedUser) {
+  //       setLoggedUser(existedUser);
+  //     }
+  //   };
 
-    if (!loggedUser) {
-      checkUserExist();
-    }
-  }, []);
+  //   if (!loggedUser) {
+  //     checkUserExist();
+  //   }
+  // }, []);
+  
+  console.log("Existed user in base route ", loggedUser)
 
   return (
     // <>

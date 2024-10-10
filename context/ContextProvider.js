@@ -19,6 +19,9 @@ function ContextProvider({children}) {
   const [resident, setResident] = useState(false);
   const [employee, setEmployee] = useState(false);
   const [testResident, setTestResident] = useState(false);
+
+  const [departmentIds, setDepartmentIds] = useState([]);
+
   // const resident = false;
   // const employee = false;
   // const testResident = false;
@@ -82,6 +85,8 @@ function ContextProvider({children}) {
         setTestResident,
         profileImage,
         setProfileImage,
+        departmentIds,
+        setDepartmentIds
       }}>
       {children}
     </UserContext.Provider>
