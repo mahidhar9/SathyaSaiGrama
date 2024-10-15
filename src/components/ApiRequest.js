@@ -2,7 +2,6 @@ import {BASE_APP_URL, APP_OWNER_NAME, APP_LINK_NAME} from '@env';
 import {Alert} from 'react-native';
 
 export const getDataWithInt = async (reportName, criteria, value, token) => {
-  console.log("&&&&&&&&&&&&&&&&&&&&&&&&&&called")
   try {
     const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}?criteria=${criteria}==${value}`;
     console.log('url in getDataWithInt: ', url);
