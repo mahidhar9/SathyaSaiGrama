@@ -309,6 +309,7 @@ const Login = ({navigation}) => {
     );
     console.log('Whether user exis or not in login: ', res);
     if (res.code === 3000) {
+
       setDotsBlinkingLoaderEllipsis(true);
     
     await isResident(res.data[0].ID);
@@ -329,84 +330,83 @@ const Login = ({navigation}) => {
         );
         const user = userCredential.user;
 
-        if (user.emailVerified) {
-          setL1ID(res.data[0].ID);
-          setUserEmail(userCred.email.toLowerCase().trim());
+          if (user.emailVerified) {
+            setL1ID(res.data[0].ID);
+            setUserEmail(userCred.email.toLowerCase().trim());
 
-          const reqUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${res.data[0].ID}/Profile_Photo/download`;
-          const profileImgUrl = await getProfileImage(reqUrl);
-          if (profileImgUrl.length > 300) {
-            setProfileImage(profileImgUrl);
-            setCurrentUser({
-              id: res.data[0].ID,
-              email: userCred.email.toLowerCase().trim(),
-              name: res.data[0].Name_field,
-              profilePhoto: profileImgUrl,
-            });
+            const reqUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${res.data[0].ID}/Profile_Photo/download`;
+            const profileImgUrl = await getProfileImage(reqUrl);
+            if (profileImgUrl.length > 300) {
+              setProfileImage(profileImgUrl);
+              setCurrentUser({
+                id: res.data[0].ID,
+                email: userCred.email.toLowerCase().trim(),
+                name: res.data[0].Name_field,
+                profilePhoto: profileImgUrl,
+              });
+            } else {
+              setProfileImage(null);
+              setCurrentUser({
+                id: res.data[0].ID,
+                email: userCred.email.toLowerCase().trim(),
+                name: res.data[0].Name_field,
+                profilePhoto: null,
+              });
+            }
+            const response = await findDeviceToken(res.data[0].ID);
+            console.log('response is: ', response);
+            let myDeviceToken;
+            console.log('present token is: ', response.data.Device_Tokens);
+            if (!response.data.Device_Tokens) {
+              console.log('first time');
+              myDeviceToken = '' + deviceToken + '||';
+            } else {
+              myDeviceToken = response.data.Device_Tokens + deviceToken + '||';
+              console.log('second time');
+            }
+            console.log('local device token is: ', myDeviceToken);
+            console.log('Response device token is : ', response);
+            const updateData = {
+              data: {
+                Device_Tokens: myDeviceToken,
+              },
+            };
+            const updateResponse = await updateDeviceToken(
+              updateData,
+              res.data[0].ID,
+            );
+            console.log('update device token response: ', updateResponse);
           } else {
-            setProfileImage(null);
-            setCurrentUser({
-              id: res.data[0].ID,
-              email: userCred.email.toLowerCase().trim(),
-              name: res.data[0].Name_field,
-              profilePhoto: null,
-            });
+            await sendEmailVerification(auth.currentUser);
+            setLoading(false);
+            navigation.navigate('VerificationNotice', {id: res.data[0].ID});
           }
-          const response = await findDeviceToken(res.data[0].ID);
-          console.log('response is: ', response);
-          let myDeviceToken;
-          console.log('present token is: ', response.data.Device_Tokens);
-          if (!response.data.Device_Tokens) {
-            console.log('first time');
-            myDeviceToken = '' + deviceToken + '||';
-          } else {
-            myDeviceToken = response.data.Device_Tokens + deviceToken + '||';
-            console.log('second time');
-          }
-          console.log('local device token is: ', myDeviceToken);
-          console.log('Response device token is : ', response);
-          const updateData = {
-            data: {
-              Device_Tokens: myDeviceToken,
-            },
-          };
-          const updateResponse = await updateDeviceToken(
-            updateData,
-            res.data[0].ID,
-          );
-          console.log('update device token response: ', updateResponse);
-        } else {
-          await sendEmailVerification(auth.currentUser);
+        } catch (error) {
           setLoading(false);
-          navigation.navigate('VerificationNotice', {id: res.data[0].ID});
+          if (error.message === 'Network request failed')
+            Alert.alert(
+              'Network Error',
+              'Failed to fetch data. Please check your network connection and try again.',
+            );
+          else if (error.code === 'auth/invalid-email') {
+            Alert.alert('That email address is invalid!');
+          } else {
+            setDialogVisible(true);
+          }
+          console.log('Error in auth: ', error);
         }
-      } catch (error) {
+      } else {
         setLoading(false);
-        if (error.message === 'Network request failed')
-          Alert.alert(
-            'Network Error',
-            'Failed to fetch data. Please check your network connection and try again.',
-          );
-        else if (error.code === 'auth/invalid-email') {
-          Alert.alert('That email address is invalid!');
-        } else {
-          setDialogVisible(true);
-        }
-        console.log('Error in auth: ', error);
+        setDialogVisible(true);
       }
-    } else {
+    } else if (res.code === 9280) {
       setLoading(false);
       setDialogVisible(true);
+      console.log('inside whether error');
+    } else {
+      setLoading(false);
+      Alert.alert('Something went wrong. Please try again later.');
     }
-  }
-  else if(res.code === 9280) {
-    setLoading(false);
-    setDialogVisible(true);
-    console.log('inside whether error')
-  }  else {
-    setLoading(false);
-    Alert.alert('Something went wrong. Please try again later.')
-  }
   };
 
   return (
@@ -452,7 +452,7 @@ const Login = ({navigation}) => {
                           onChange(value.toLowerCase().trim())
                         }
                         autoCapitalize="none"
-                        style={{color: 'black'}}
+                        style={styles.inputBox}
                       />
                     )}
                     rules={{required: true, pattern: /^\S+@\S+$/i}}
