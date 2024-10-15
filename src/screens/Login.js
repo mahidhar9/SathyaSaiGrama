@@ -52,12 +52,13 @@ const Login = ({navigation}) => {
     setEmployee,
     testResident,
     setTestResident,
+    departmentIds,
+    setDepartmentIds
   } = useContext(UserContext);
   let residentLocalVar = resident;
   let employeeLocalVar = employee;
   let testResidentLocalVar = testResident;
   const [currentUser, setCurrentUser] = useState(null);
-  const [departmentIds, setDepartmentIds] = useState([]);
   const [showPassword, setShowPassword] = useState(false);
   const [focusedInput, setFocusedInput] = useState(null);
   const [DialogVisible, setDialogVisible] = useState(false);
