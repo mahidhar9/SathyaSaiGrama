@@ -128,7 +128,7 @@ const App = () => {
   // check whether user is changed from L2 to L1 or not
   useEffect(() => {
 
-    const checkUserChanged = async () => {
+    const checkRoleChanged = async () => {
       let changerUserType = userType;
       const res = await getDataWithInt('All_Offices', 'Approver_app_user_lookup', loggedUser.userId, accessToken);
       console.log("response is : ", res)
@@ -230,7 +230,7 @@ const App = () => {
     }
 
     if (isTokenFetched && loggedUser) {
-      checkUserChanged();
+      checkRoleChanged();
       checkIsResident();
       checkIsEmployee();
       checkIsTestResident();

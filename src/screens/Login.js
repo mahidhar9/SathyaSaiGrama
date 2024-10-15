@@ -332,7 +332,6 @@ const Login = ({navigation}) => {
 
         if (user.emailVerified) {
           setL1ID(res.data[0].ID);
-          console.log("Logged user is@@@@@@@@@@@@@", res.data);
           setUserEmail(userCred.email.toLowerCase().trim());
 
           const reqUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${res.data[0].ID}/Profile_Photo/download`;
