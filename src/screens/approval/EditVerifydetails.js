@@ -406,7 +406,6 @@ const EditVerifyDetails = ({navigation, route}) => {
                   style={styles.num}
                   value={men}
                   onChangeText={txt => setMen(Number(txt))}
-                  keyboardType='numeric'
                 />
               </View>
             </View>
@@ -419,7 +418,6 @@ const EditVerifyDetails = ({navigation, route}) => {
                   style={styles.num}
                   value={women}
                   onChangeText={txt => setWomen(Number(txt))}
-                  keyboardType='numeric'
                 />
               </View>
             </View>
@@ -432,7 +430,6 @@ const EditVerifyDetails = ({navigation, route}) => {
                   style={styles.num}
                   value={boys}
                   onChangeText={txt => setBoys(Number(txt))}
-                  keyboardType='numeric'
                 />
               </View>
             </View>
@@ -445,7 +442,6 @@ const EditVerifyDetails = ({navigation, route}) => {
                   style={styles.num}
                   value={girls}
                   onChangeText={txt => setGirls(Number(txt))}
-                  keyboardType='numeric'
                 />
               </View>
             </View>
