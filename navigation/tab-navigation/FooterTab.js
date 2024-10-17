@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Invite from '../../src/screens/Invite';
 import {ActivityIndicator, Alert} from 'react-native';
-
+import {useNavigation} from '@react-navigation/native';
 import {StyleSheet, Text, View, Image, TouchableOpacity} from 'react-native';
 import ApprovalTab from '../../src/screens/approval/ApprovalTab';
 import Profile from '../../src/screens/Profile';
@@ -37,12 +37,25 @@ const ApproveStack = createNativeStackNavigator();
 const LApprovalStack = createNativeStackNavigator();
 
 function InviteStackScreen() {
+  const navigation = useNavigation();
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      // Reset stack to the initial route (ScreenA)
+      navigation.reset({
+        index: 0,
+        routes: [{name: 'Invite'}],
+      });
+    });
+
+    return unsubscribe;
+  }, [navigation]);
   return (
-    <InviteStack.Navigator screenOptions={{headerShown: true}}>
+    <InviteStack.Navigator
+      screenOptions={{headerShown: true, unmountOnBlur: true}}>
       <InviteStack.Screen
         name="Invite"
         component={Invite}
-        options={{headerShown: false}}
+        options={{headerShown: false, animation: 'none'}}
       />
       {/* <InviteStack.Screen
                 name="VisitorFills"
@@ -67,6 +80,7 @@ function InviteStackScreen() {
             lineHeight: 30,
             alignItems: 'center',
           },
+          animation: 'fade',
         }}
       />
     </InviteStack.Navigator>

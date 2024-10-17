@@ -87,6 +87,7 @@ const FillByYourSelf = ({navigation}) => {
   } else if (loggedUser.resident === false && loggedUser.employee === true) {
     selectedHomeOffice = 'Office';
   }
+
   const [selectedHO, setSelectedHO] = useState(selectedHomeOffice);
   const [date, setDate] = useState('Select Date');
   const [showModal, setShowModal] = useState(false);
@@ -513,41 +514,46 @@ const FillByYourSelf = ({navigation}) => {
       ) {
         // setNameErr('Prefix, First Name and Last Name are required');
         // Alert.alert('Error', '20 letters Only letters are allowed in the name field ');
+        console.log('inside !validateInput');
         valid = false;
       } else {
         setNameErr(null);
       }
     }
 
-    const isDateWithinTwoMonths = selectedDate => {
-      const currentDate = new Date(); // Get current date
+    // const isDateWithinTwoMonths = selectedDate => {
+    //   const currentDate = new Date(); // Get current date
 
-      // Create a date 2 months from today
-      const twoMonthsLater = new Date();
-      twoMonthsLater.setMonth(currentDate.getDate() + 1);
+    //   // Create a date 2 months from today
+    //   const twoMonthsLater = new Date();
+    //   twoMonthsLater.setMonth(currentDate.getDate() + 1);
 
-      // Compare the selected date with the date 2 months later
-      return selectedDate <= twoMonthsLater;
-    };
+    //   // Compare the selected date with the date 2 months later
+    //   return selectedDate <= twoMonthsLater;
+    // };
     if (date === 'Select Date') {
       setDateOfVisitErr('Date of visit is required');
+      console.log('inside Select Date');
       valid = false;
     } else {
-      if (!isDateWithinTwoMonths(date)) {
-        setDateOfVisitErr('Please select a date within 2 months from today');
-        valid = false;
-      }
+      // if (!isDateWithinTwoMonths(date)) {
+      //   setDateOfVisitErr('Please select a date within 2 months from today');
+      //   console.log('inside 2 months from today');
+      //   valid = false;
+      // }
       setDateOfVisitErr(null);
     }
 
     if (!formattedValue) {
       setPhoneErr('Phone number is required');
+      console.log('inside !formattedValue');
       valid = false;
     } else {
       setPhoneErr(null);
       const parsedPhoneNumber = parsePhoneNumberFromString(formattedValue);
       if (!parsedPhoneNumber || !parsedPhoneNumber.isValid()) {
         setPhoneValidErr('Invalid phone number');
+        console.log('invalid phone number');
         valid = false;
       } else {
         setPhoneValidErr(null);
@@ -555,6 +561,7 @@ const FillByYourSelf = ({navigation}) => {
     }
 
     if (!selectedSG) {
+      console.log('inside !selectedSG', selectedSG);
       setSingleOrGroupErr('Single or Group is required');
       valid = false;
     } else {
@@ -567,13 +574,15 @@ const FillByYourSelf = ({navigation}) => {
         girlsCount === '0'
       ) {
         setSingleOrGroupErr('Total No. of people cannot be 0');
+        console.log('inside Total No. of people cannot be 0');
         valid = false;
       } else {
         setSingleOrGroupErr(null);
       }
     }
-
+    console.log('selectedHO', selectedHO);
     if (!selectedHO) {
+      console.log('inside !selectedHO', selectedHO);
       setHomeOrOfficeErr('Home or Office is required');
       valid = false;
     } else {
@@ -581,6 +590,7 @@ const FillByYourSelf = ({navigation}) => {
     }
 
     if (!selectedGender) {
+      console.log('inside !selectedGender', selectedGender);
       setGenderErr('Gender is required');
       if (selectedGender === 'Male') {
         setMen('1');
@@ -937,9 +947,13 @@ const FillByYourSelf = ({navigation}) => {
                   <Text style={styles.bottomtext}>Last Name</Text>
                 </View>
                 {nameErr && <Text style={styles.errorText}>{nameErr}</Text>}
-                {(firstNameError || lastNameError) && (
+                {firstNameError && lastNameError ? (
                   <Text style={styles.errorText}>{firstNameError}</Text>
-                )}
+                ) : firstNameError || lastNameError ? (
+                  <Text style={styles.errorText}>
+                    {firstNameError + lastNameError}
+                  </Text>
+                ) : null}
               </View>
 
               <View style={styles.namecontainer}>
@@ -1315,7 +1329,7 @@ const FillByYourSelf = ({navigation}) => {
                         </Picker>
                         <TextInput
                           style={styles.vehicleinput}
-                          placeholder="KA 01 1234"
+                          placeholder="KA 01 CU 1234"
                           placeholderTextColor="#c5c7ca"
                           value={vehicle.Vehicle_Number}
                           onChangeText={text =>

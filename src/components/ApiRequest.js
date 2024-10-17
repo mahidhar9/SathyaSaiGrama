@@ -342,3 +342,30 @@ export const patchDataWithInt = async (reportName, modified_data, token) => {
     }
   }
 };
+export const deleteDataWithID = async (reportName, id, token) => {
+  try {
+    const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}/${id}`;
+    console.log('url in deleteDataWithID: ', url);
+    const response = await fetch(url, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Zoho-oauthtoken ${token}`,
+      },
+    });
+    const res = await response.json();
+    console.log('Response in deleteDataWithID: ', res);
+    return res;
+  } catch (err) {
+    if (err.message === 'Network request failed')
+      Alert.alert(
+        'Network Error',
+        'Failed to fetch data. Please check your network connection and try again.',
+      );
+    else {
+      Alert.alert('Error: ', err);
+      console.log(err);
+    }
+  }
+};
+
+

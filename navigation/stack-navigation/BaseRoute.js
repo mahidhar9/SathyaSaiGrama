@@ -1,4 +1,4 @@
-import {ActivityIndicator, Linking, StyleSheet, Text} from 'react-native';
+import {SafeAreaView, Linking, StyleSheet, Text} from 'react-native';
 import React, {useContext, useEffect, useState} from 'react';
 import Login from '../../src/screens/Login';
 import Register from '../../src/screens/Register';
@@ -171,49 +171,53 @@ const BaseRoute = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  useEffect(() => {
-    const checkUserExist = async () => {
-      let existedUser = await AsyncStorage.getItem('existedUser');
-      existedUser = JSON.parse(existedUser);
-      console.log('Existed user in Base route useEffect:', existedUser);
-      if (existedUser) {
-        setLoggedUser(existedUser);
-      }
-    };
+  // useEffect(() => {
+  //   const checkUserExist = async () => {
+  //     let existedUser = await AsyncStorage.getItem('existedUser');
+  //     existedUser = JSON.parse(existedUser);
+  //     //console.log('Existed user in Base route useEffect:', existedUser);
+  //     if (existedUser) {
+  //       setLoggedUser(existedUser);
+  //     }
+  //   };
 
-    if (!loggedUser) {
-      checkUserExist();
-    }
-  }, []);
+  //   if (!loggedUser) {
+  //     checkUserExist();
+  //   }
+  // }, []);
+  
+  console.log("Existed user in base route ", loggedUser)
 
   return (
     // <>
     //   {loading ? (
     //     <ActivityIndicator size="large" color="#752A26" style={styles.loadingContainer} />
     //   ) : (
-    <NavigationContainer
-      linking={linking}
-      fallback={<Text>Loading...</Text>}
-      ref={RootNavigation.navigationRef}>
-      <Stack.Navigator screenOptions={{headerShown: false}}>
-        {loggedUser ? (
-          <Stack.Screen name="FooterTab" component={FooterTab} />
-        ) : (
-          <>
-            <Stack.Screen name="Login" component={Login} />
-            <Stack.Screen name="Register" component={Register} />
-            <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
-            <Stack.Screen
-              name="VerificationNotice"
-              component={VerificationNotice}
-            />
-            <Stack.Screen name="ApprovalTab" component={ApprovalTab} />
-            <Stack.Screen name="L2ApprovalTab" component={L2ApprovalTab} />
+    <SafeAreaView style={{flex: 1}}>
+      <NavigationContainer
+        linking={linking}
+        fallback={<Text>Loading...</Text>}
+        ref={RootNavigation.navigationRef}>
+        <Stack.Navigator screenOptions={{headerShown: false}}>
+          {loggedUser ? (
             <Stack.Screen name="FooterTab" component={FooterTab} />
-          </>
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
+          ) : (
+            <>
+              <Stack.Screen name="Login" component={Login} />
+              <Stack.Screen name="Register" component={Register} />
+              <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+              <Stack.Screen
+                name="VerificationNotice"
+                component={VerificationNotice}
+              />
+              <Stack.Screen name="ApprovalTab" component={ApprovalTab} />
+              <Stack.Screen name="L2ApprovalTab" component={L2ApprovalTab} />
+              <Stack.Screen name="FooterTab" component={FooterTab} />
+            </>
+          )}
+        </Stack.Navigator>
+      </NavigationContainer>
+    </SafeAreaView>
     // )}
     // </>
   );
