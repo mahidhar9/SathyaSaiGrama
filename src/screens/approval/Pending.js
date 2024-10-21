@@ -6,6 +6,7 @@ import { getDataWithIntAndString } from '../../components/ApiRequest';
 import parseDate from "../../components/ParseDate"
 import { useFocusEffect, } from '@react-navigation/native';
 import Filter from '../../components/Filter';
+import DotsBlinkingLoaderEllipsis from '../../components/DotsBlinkingLoaderEllipsis'
 
 const Pending = ({ navigation }) => {
   const { L1ID, getAccessToken, pendingDataFetched, setPendingDataFetched } = useContext(UserContext);
@@ -86,10 +87,14 @@ const Pending = ({ navigation }) => {
       <View style={{ flex: 1, paddingTop: 10, backgroundColor: "#FFFF" }}>
         {loading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#B21E2B" />
+            {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
+            {/* <RequestSkeletonScreen /> */}
+            <DotsBlinkingLoaderEllipsis/>
           </View>
         ) : ((refreshing ? (<View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#B21E2B" />
+          {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
+          {/* <RequestSkeletonScreen/> */}
+          <DotsBlinkingLoaderEllipsis/>
         </View>) : (
           <>
           <Filter  setFilteredData = {setPendingsData} ToFilterData={pendings} comingFrom={"Pending"}/>
