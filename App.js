@@ -1,9 +1,10 @@
 import BaseRoute from './navigation/stack-navigation/BaseRoute';
 import UserContext from './context/UserContext';
 import { useContext, useEffect, useState } from 'react';
-import { Appearance, AppearanceProvider } from 'react-native';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 import NetInfo from '@react-native-community/netinfo';
+
+import { StyleSheet } from 'react-native';
 
 import {
   DATABASE_ID,
@@ -11,7 +12,8 @@ import {
   APPWRITE_FUNCTION_PROJECT_ID,
   APPWRITE_API_KEY,
 } from '@env';
-import { StyleSheet, ActivityIndicator, Alert } from 'react-native';
+
+import { ActivityIndicator, Alert } from 'react-native';
 import { AuthContext, AuthProvider } from './src/auth/AuthProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SplashScreen from './src/screens/SplashScreen';
@@ -41,7 +43,7 @@ const App = () => {
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [isNetworkAvailable]);
 
   const {
     setAccessToken,
@@ -93,15 +95,18 @@ const App = () => {
 
   //UseEffect to call Appwrite and device token functions
   useEffect(() => {
+
     const fetchToken = async () => {
       await getAppWriteToken();
       const dToken = await getDeviceToken();
       setDeviceToken(dToken);
       //console.log('device token is app.js: ', dToken);
     };
-
-    fetchToken();
-  }, []);
+    console.log("network available ",  isNetworkAvailable)
+    if (isNetworkAvailable) {
+      fetchToken();
+    }
+  }, [isNetworkAvailable]);
 
   //====================================
   //To check user exists in local storage, if exists set in Context
@@ -149,10 +154,10 @@ const App = () => {
         ...prevState,
         role: changerUserType
       }));
-      
+
     }
     /////_________Check whether user is resident or not
-    const checkIsResident = async() => {
+    const checkIsResident = async () => {
       let resident;
       const res = await getDataWithInt('All_Residents', 'App_User_lookup', loggedUser.userId, accessToken);
       if (res && res.data && res.data[0].Accommodation_Approval === 'APPROVED') {
@@ -173,7 +178,7 @@ const App = () => {
     };
 
     ///___________Check whether user is employee or not
-    const checkIsEmployee = async() => {
+    const checkIsEmployee = async () => {
       let employee;
       const res = await getDataWithInt('All_Employees', 'App_User_lookup', loggedUser.userId, accessToken);
       if (res && res.data && res.data[0].Department_Approval === 'APPROVED') {
@@ -193,7 +198,7 @@ const App = () => {
     };
 
     ///_________Check whether user is test resident
-    const checkIsTestResident = async() => {
+    const checkIsTestResident = async () => {
       let testResident;
       const res = await getDataWithTwoInt('All_Residents', 'App_User_lookup', loggedUser.userId, 'Flats_lookup', '3318254000031368021', accessToken);
       if (res && res.data && res.data[0].Accommodation_Approval === 'APPROVED') {
@@ -212,7 +217,7 @@ const App = () => {
       }));
     };
 
-    const setModifyData = async() => {
+    const setModifyData = async () => {
       await AsyncStorage.setItem(
         'existedUser',
         JSON.stringify({
@@ -229,7 +234,7 @@ const App = () => {
       );
     }
 
-    if (isTokenFetched && loggedUser) {
+    if (isTokenFetched && loggedUser && !isNetworkAvailable) {
       checkRoleChanged();
       checkIsResident();
       checkIsEmployee();
@@ -241,10 +246,13 @@ const App = () => {
 
   useEffect(() => {
     if (accessToken) {
-      console.log('Access token in App useEffect: ', accessToken);
+      console.log("Access token found, stopping loading");
       setLoading(false);
+    } else {
+      console.log("Access token missing, still loading");
     }
   }, [accessToken]);
+  
 
   return (
     <PaperProvider theme={lightTheme}>

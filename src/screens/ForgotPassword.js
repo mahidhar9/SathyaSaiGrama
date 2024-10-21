@@ -8,12 +8,14 @@ import {
   KeyboardAvoidingView,
   Platform,
   Image,
+  Modal,
+  TouchableWithoutFeedback
 } from 'react-native';
 import React, {useState} from 'react';
 import {useForm, Controller} from 'react-hook-form';
 import {auth} from '../auth/firebaseConfig';
 import {openInbox} from 'react-native-email-link';
-import {sendPasswordResetEmail} from 'firebase/auth';
+import {fetchSignInMethodsForEmail, sendPasswordResetEmail} from 'firebase/auth';
 
 const ForgotPassword = ({navigation}) => {
   const {
@@ -24,36 +26,35 @@ const ForgotPassword = ({navigation}) => {
 
   const [emailSent, setemailSent] = useState(false);
 
-  const handleForgotPassword = async ({email}) => {
-    try {
-      // Attempt to send password reset email
+
+const handleForgotPassword = async ({email}) => {
+  try {
+    // Check if the user exists by checking the sign-in methods for the given email
+    console.log("Email is ", email)
+    const signInMethods = await fetchSignInMethodsForEmail(auth, email.toLowerCase().trim());
+
+    console.log("signInMethod ", signInMethods)
+
+    if (signInMethods.length === 0) {
+      // If no sign-in methods are found, the user does not exist
+     Alert.alert('User not exist', 'The email address was not found. Please check your email or create a new account.');
+    } else {
+      // If the user exists, send the password reset email
       await sendPasswordResetEmail(auth, email.toLowerCase().trim());
-
-      // Alert.alert(
-      //   'Success',
-      //   'A password reset email has been sent (if the email exists). Please log back in after resetting your password.',
-      // ),
-
-      setemailSent(true); // Updated message
-    } catch (error) {
-      // Handle password reset errors
-      console.error('Password Reset Error:', error);
-      if (error.message === 'Network request failed')
-        Alert.alert(
-          'Network Error',
-          'Failed to fetch data. Please check your network connection and try again.',
-        );
-      if (error.code === 'auth/user-not-found') {
-        Alert.alert(
-          'Info',
-          'The email address was not found. Please check your email or create a new account.',
-        );
-      } else {
-        // Handle other errors
-        Alert.alert('Error', 'Password reset failed. Please try again.');
-      }
+      setemailSent(true); // Update state to show that email has been sent
     }
-  };
+  } catch (error) {
+    // Handle network and other errors
+    if (error.message === 'Network request failed') {
+      Alert.alert('Network Error', 'Please check your connection and try again.');
+    } else {
+      Alert.alert('Error', 'An error occurred. Please try again.');
+    }
+    console.error('Password Reset Error:', error);
+  }
+};
+
+
 
   return (
     <KeyboardAvoidingView
@@ -327,7 +328,7 @@ const styles = StyleSheet.create({
     color: 'black',
     textAlign: 'center',
     marginTop: 20,
-  },
+  }
 });
 
 //Ignore
