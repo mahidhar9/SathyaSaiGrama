@@ -95,12 +95,13 @@ export const getDataWithIntAndString = async (
   token,
 ) => {
   try {
-    const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}?criteria=${criteria1}==[${value1}]%26%26${criteria2}=="${value2}"`;
+    const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}?criteria=${criteria1}=${encodeURIComponent(value1)}&&${criteria2}=${encodeURIComponent(value2)}`;
     console.log('url : ', url);
     const response = await fetch(url, {
       method: 'GET',
       headers: {
         Authorization: `Zoho-oauthtoken ${token}`,
+        'Content-Type': 'application/json',
       },
       params: {
         criteria: `${criteria1}==${value1}&&${criteria2}=="${value2}"`,
@@ -134,7 +135,7 @@ export const getL2Data = async (
   token,
 ) => {
   try {
-    const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}?criteria=${criteria1}==[${value1}]%26%26${criteria2}=="${value2}"%26%26${criteria3}=="${value3}"%26%26${criteria4}!=${value4}`;
+    const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}?criteria=${encodeURIComponent(criteria1)}==${encodeURIComponent(`[${value1}]`)}%26%26${encodeURIComponent(criteria2)}==${encodeURIComponent(`"${value2}"`)}%26%26${encodeURIComponent(criteria3)}==${encodeURIComponent(`"${value3}"`)}%26%26${encodeURIComponent(criteria4)}!=${encodeURIComponent(value4)}`;
     console.log('url : ', url);
     const response = await fetch(url, {
       method: 'GET',
@@ -367,5 +368,6 @@ export const deleteDataWithID = async (reportName, id, token) => {
     }
   }
 };
+
 
 
