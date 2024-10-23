@@ -109,10 +109,9 @@ const Invite = ({navigation}) => {
     console.log(link_id);
     return link_id;
   };
-  console.log(L1ID);
+
   const postss = async () => {
     const UniqueNumber = await generateUniqueLinkID();
-    console.log(UniqueNumber);
 
     const formData = {
       data: {
@@ -158,7 +157,6 @@ const Invite = ({navigation}) => {
   //================
   //To Share the generated URL
   const onShare = async selected => {
-    console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
     try {
       if (selected !== null) {
         setLoading(true); // Start loading of activity indicator untill all sharing apps appear
