@@ -1045,7 +1045,7 @@ const FillByYourSelf = ({navigation}) => {
                   <Text style={styles.errorText}>{dateOfVisitErr}</Text>
                 )}
                 <Modal
-                  animationType="slide"
+                  animationType="none"
                   transparent={true}
                   visible={showModal}
                   onRequestClose={() => setShowModal(false)}>
@@ -1054,6 +1054,7 @@ const FillByYourSelf = ({navigation}) => {
                     <TouchableWithoutFeedback>
                       <View style={styles.modalView}>
                         <CalendarList
+                        style={{width:'90%'}}
                           current={date === 'Select Date' ? minDate : date}
                           minDate={minDate}
                           maxDate={maxDate}
@@ -2203,6 +2204,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 50,
     width: '95%',
+    height:'60%',
     padding: 35,
     alignItems: 'center',
     elevation: 5,
