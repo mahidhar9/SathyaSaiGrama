@@ -138,12 +138,7 @@ const ForgotPassword = ({ navigation }) => {
                   <View style={styles.modalView}>
                     <Text style={styles.titletext}>Email is not registered</Text>
                     <Text style={styles.subtext}>
-                      The given email address is not registered. Please check your email and retry, or{' '}
-                      <Text
-                        style={styles.linkText}
-                      >
-                        Register
-                      </Text>
+                      The given email address is not registered. Please check your email and retry, or Register
                     </Text>
 
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8, gap: 30 }}>
