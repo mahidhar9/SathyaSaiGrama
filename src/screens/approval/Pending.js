@@ -33,7 +33,6 @@ const Pending = ({navigation}) => {
       'PENDING APPROVAL',
       getAccessToken(),
     );
-    console.log('#######Pending data are #################', result);
     const all_pendings = result.data;
     if (result.data === undefined) {
       setPendings(null);
@@ -75,7 +74,6 @@ const Pending = ({navigation}) => {
     );
     const all_pendings = result.data;
     // sorting the pendings data by date
-    console.log('Refresh is called', result);
     if (result.data === undefined) {
       setPendings(null);
       setPendingsData(null);

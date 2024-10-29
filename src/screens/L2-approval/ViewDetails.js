@@ -12,17 +12,17 @@ import {
   ImageBackground,
   Dimensions,
 } from 'react-native';
-import React, {useContext, useEffect, useState, useRef} from 'react';
-import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME} from '@env';
+import React, { useContext, useEffect, useState, useRef } from 'react';
+import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME } from '@env';
 import UserContext from '../../../context/UserContext';
-import {encode} from 'base64-arraybuffer';
+import { encode } from 'base64-arraybuffer';
 import LinearGradient from 'react-native-linear-gradient';
 import QRCode from 'react-native-qrcode-svg';
-import {captureRef} from 'react-native-view-shot';
+import { captureRef } from 'react-native-view-shot';
 import RNFS from 'react-native-fs';
 import Dialog from 'react-native-dialog';
 
-const {height} = Dimensions.get('window');
+const { height } = Dimensions.get('window');
 
 export const updateRecord = async (reportName, id, modified_data, token) => {
   try {
@@ -49,10 +49,10 @@ export const updateRecord = async (reportName, id, modified_data, token) => {
   }
 };
 
-const ViewDetails = ({navigation, route}) => {
-  const {stringified} = route.params;
+const ViewDetails = ({ navigation, route }) => {
+  const { stringified } = route.params;
   console.log('stringified', stringified);
-  let {user} = route.params;
+  let { user } = route.params;
 
   // console.log('user outside stringified', user);
 
@@ -95,6 +95,8 @@ const ViewDetails = ({navigation, route}) => {
   const viewRef = useRef();
   const [code, setCode] = useState('');
   const [codeReload, setcodeReload] = useState(false);
+  const [isCodeGenerated, setIsCodeGenerated] = useState(false);
+
   const codeGenrator = () => {
     const newCode = Math.floor(
       100000 + Math.random() * (999999 - 100001 + 1),
@@ -107,15 +109,10 @@ const ViewDetails = ({navigation, route}) => {
     navigation.navigate('L2Pending');
   }
 
-
-  
   const onL2ApprovedPressOk = () => {
     setL2approvedalreadydialogVisible(false);
     navigation.navigate('L2Denied');
   }
-
-
-  
 
   const [approvingLoading, setapprovingLoading] = useState(false);
   const [deniedLoading, setdeniedLoading] = useState(false);
@@ -148,15 +145,14 @@ const ViewDetails = ({navigation, route}) => {
 
   const PasscodeUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Passcode`;
 
-  const payload = {
-    data: {
-      Passcode: code,
-    },
-  };
 
   const PasscodeData = async () => {
-    setcodeReload(false);
-    console.log('in PasscodeData function');
+    setIsCodeGenerated(!isCodeGenerated)
+    const payload = {
+      data: {
+        Passcode: code,
+      },
+    };
     try {
       const passcodeResponse = await fetch(PasscodeUrl, {
         method: 'POST',
@@ -172,8 +168,6 @@ const ViewDetails = ({navigation, route}) => {
 
       if (responseData.code === 3002) {
         console.log('Post of code was un-sucessfull');
-        codeGenrator();
-        // PasscodeData();
         setcodeReload(true);
         console.log('code is:' + code);
       } else if (responseData.code === 3000) {
@@ -219,7 +213,7 @@ const ViewDetails = ({navigation, route}) => {
       updateData,
       accessToken,
     );
-    console.log('Data is updated: ',response);
+    console.log('Data is updated: ', response);
     if (response.data && response.code === 3000) {
       if (status === 'PENDING APPROVAL') {
         setL2PendingDataFetched(false);
@@ -231,17 +225,17 @@ const ViewDetails = ({navigation, route}) => {
       PasscodeData();
       // Alert.alert('Visitor Approved');
       // navigation.navigate('L2Approved');
-    } 
-    else if(response.error[0].alert_message[0] === "L2 is already approved." || response.error[0].alert_message[0] === "Record cannot be edited after L2 Approved"){
+    }
+    else if (response.error[0].alert_message[0] === "L2 is already approved." || response.error[0].alert_message[0] === "Record cannot be edited after L2 Approved") {
       setL2approvedalreadydialogVisible(true);
       setapprovingLoading(false);
       setErrorMessage(response.error[0].alert_message[0]);
     }
-   else if(response.error[0].alert_message[0] === "You cannot approve the L1 Denied requests"){
+    else if (response.error[0].alert_message[0] === "You cannot approve the L1 Denied requests") {
       setDialogVisible(true);
       setapprovingLoading(false);
     }
- else {
+    else {
       Alert.alert('Error in approving: ', response.code);
     }
   };
@@ -272,53 +266,34 @@ const ViewDetails = ({navigation, route}) => {
     const PasscodeDeleteUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Passcode_Report`;
 
     const deletePayload = {
-      criteria:`Passcode==\"${user.Generated_Passcode}\"`,
+      criteria: `Passcode==\"${user.Generated_Passcode}\"`,
       result: {
         "message": true,
         "tasks": true
       }
     };
+    console.log(deletePayload)
+    try {
+      const deletePasscodeResponse = await fetch(PasscodeDeleteUrl, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Zoho-oauthtoken ${accessToken}`,
 
-console.log(deletePayload)
-
-
-   
-      try {
-        const deletePasscodeResponse = await fetch(PasscodeDeleteUrl, {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Zoho-oauthtoken ${accessToken}`,
-           
-          },
-         body: JSON.stringify(deletePayload),
-        });
-        if (deletePasscodeResponse.ok) {
-          const responseData = await deletePasscodeResponse.json();
-          console.log('Passcode deleted successfully:', responseData);
-        } else {
-          const errorData = await deletePasscodeResponse.json();
-          console.error('Error deleting passcode:', errorData);
-          // Handle error based on errorData (e.g., display error message, retry, etc.)
-        }
-      } catch (error) {
-        console.error('Error in deleting passcode:', error);
-        // Handle unexpected errors (e.g., network issues, server errors)
+        },
+        body: JSON.stringify(deletePayload),
+      });
+      if (deletePasscodeResponse.ok) {
+        const responseData = await deletePasscodeResponse.json();
+        console.log('Passcode deleted successfully:', responseData);
+      } else {
+        const errorData = await deletePasscodeResponse.json();
+        console.error('Error deleting passcode:', errorData);
+        // Handle error based on errorData (e.g., display error message, retry, etc.)
       }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    } catch (error) {
+      console.error('Error in deleting passcode:', error);
+      // Handle unexpected errors (e.g., network issues, server errors)
+    }
 
     if (response.data) {
       if (status === 'PENDING APPROVAL') {
@@ -450,9 +425,9 @@ console.log(deletePayload)
     }
   };
 
-  // useEffect(()=>{
-  //     codeGenrator();
-  // }, []);
+  useEffect(()=>{
+      codeGenrator();
+  }, [isCodeGenerated]);
 
   useEffect(() => {
     if (codeReload === true) {
@@ -460,22 +435,10 @@ console.log(deletePayload)
     }
   }, [codeReload]);
 
-
-
-
-
-
-
-
-
-
-  
-
   //zIndex:1
-
   return (
     <>
-      <SafeAreaView style={{flex: 1, backgroundColor: '#EEEEEE', zIndex: 1}}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#EEEEEE', zIndex: 1 }}>
         {/* <View style={styles.header}>
       <View style={styles.headerContainer}>
         <Text style={styles.headertxt}>Visitor details</Text>
@@ -503,29 +466,29 @@ console.log(deletePayload)
             </View>
           ) : null} */}
           {user?.L2_Approval_Status === 'PENDING APPROVAL' ? (
-            <View style={[styles.container, {marginTop: 20}]}>
-               {(approvingLoading || deniedLoading) ? (<View>{approvingLoading ? (
-            <View style={heightStyles.ApproveActivityIndicatorContainer}>
-              <Text style={[heightStyles.ActivityIndicatorText, {color:'white'}]}>Approving</Text>
-              <ActivityIndicator
-                size="large"
-                color="#006400"
-                style={heightStyles.ActivityIndicator}
-              />
-            </View>
-          ) :  null}
-        {deniedLoading ? (
-            <View style={heightStyles.RejectActivityIndicatorContainer}>
-              <Text style={heightStyles.ActivityIndicatorText} >Rejecting</Text>
-              <ActivityIndicator
-                size="large"
-                color="red"
-                style={heightStyles.ActivityIndicator}
-              />
-            </View>
-          ) : null} 
-          </View>) :
-             <>{DialogVisible ? (<Text style={heightStyles.canNotApproveTxt}>Cannot approve at the moment</Text>): (<><View style={[styles.left, { width: '50%' }]}>
+            <View style={[styles.container, { marginTop: 20 }]}>
+              {(approvingLoading || deniedLoading) ? (<View>{approvingLoading ? (
+                <View style={heightStyles.ApproveActivityIndicatorContainer}>
+                  <Text style={[heightStyles.ActivityIndicatorText, { color: 'white' }]}>Approving</Text>
+                  <ActivityIndicator
+                    size="large"
+                    color="#006400"
+                    style={heightStyles.ActivityIndicator}
+                  />
+                </View>
+              ) : null}
+                {deniedLoading ? (
+                  <View style={heightStyles.RejectActivityIndicatorContainer}>
+                    <Text style={heightStyles.ActivityIndicatorText} >Rejecting</Text>
+                    <ActivityIndicator
+                      size="large"
+                      color="red"
+                      style={heightStyles.ActivityIndicator}
+                    />
+                  </View>
+                ) : null}
+              </View>) :
+                <>{DialogVisible ? (<Text style={heightStyles.canNotApproveTxt}>Cannot approve at the moment</Text>) : (<><View style={[styles.left, { width: '50%' }]}>
                   <TouchableOpacity style={[styles.btnAccept, heightStyles.apprejBtnPosition]} onPress={onApprove}>
                     <Text style={styles.btntxt}>Approve</Text>
                   </TouchableOpacity>
@@ -533,48 +496,48 @@ console.log(deletePayload)
                     <TouchableOpacity style={styles.btnReject} onPress={onReject}>
                       <Text style={styles.rejectBtnTxt}>Reject</Text>
                     </TouchableOpacity>
-                  </View></>)}</> 
-            
-          }</View>
+                  </View></>)}</>
+
+              }</View>
           ) : user?.L2_Approval_Status === 'APPROVED' ? (
             <View>
-            {deniedLoading ? (
-              <View style={heightStyles.RejectActivityIndicatorContainer}>
-                <Text style={heightStyles.ActivityIndicatorText} >Rejecting</Text>
-                <ActivityIndicator
-                  size="large"
-                  color="red"
-                  style={heightStyles.ActivityIndicator}
-                />
-              </View>
-            ) : <View style={{width: '100%', padding: 10, marginLeft: '30%'}}>
-            <TouchableOpacity style={[styles.btnReject]} onPress={onReject}>
-              <Text style={[styles.rejectBtnTxt]}>Reject</Text>
-            </TouchableOpacity>
-          </View>}
-          </View>
-            
+              {deniedLoading ? (
+                <View style={heightStyles.RejectActivityIndicatorContainer}>
+                  <Text style={heightStyles.ActivityIndicatorText} >Rejecting</Text>
+                  <ActivityIndicator
+                    size="large"
+                    color="red"
+                    style={heightStyles.ActivityIndicator}
+                  />
+                </View>
+              ) : <View style={{ width: '100%', padding: 10, marginLeft: '30%' }}>
+                <TouchableOpacity style={[styles.btnReject]} onPress={onReject}>
+                  <Text style={[styles.rejectBtnTxt]}>Reject</Text>
+                </TouchableOpacity>
+              </View>}
+            </View>
+
           ) : user?.L2_Approval_Status === 'DENIED' ? (
-<View>
-            {approvingLoading ? (
-              <View style={heightStyles.ApproveActivityIndicatorContainer}>
-                <Text style={[heightStyles.ActivityIndicatorText, {color:'white'}]}>Approving</Text>
-                <ActivityIndicator
-                  size="large"
-                  color="#006400"
-                  style={heightStyles.ActivityIndicator}
-                />
-              </View>
-            ) : <View style={{width: '100%', padding: 10, marginLeft: '15%'}}>
-            <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
-              <Text style={styles.btntxt}>Approve</Text>
-            </TouchableOpacity>
-          </View>}
-          </View>
+            <View>
+              {approvingLoading ? (
+                <View style={heightStyles.ApproveActivityIndicatorContainer}>
+                  <Text style={[heightStyles.ActivityIndicatorText, { color: 'white' }]}>Approving</Text>
+                  <ActivityIndicator
+                    size="large"
+                    color="#006400"
+                    style={heightStyles.ActivityIndicator}
+                  />
+                </View>
+              ) : <View style={{ width: '100%', padding: 10, marginLeft: '15%' }}>
+                <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
+                  <Text style={styles.btntxt}>Approve</Text>
+                </TouchableOpacity>
+              </View>}
+            </View>
 
           ) : null}
 
-          <View style={[styles.container, {marginTop: 20}]}>
+          <View style={[styles.container, { marginTop: 20 }]}>
             <View style={styles.left}>
               <Text style={styles.label}>Name</Text>
             </View>
@@ -584,7 +547,7 @@ console.log(deletePayload)
               </Text>
             </View>
           </View>
-          <View style={[styles.container, {marginTop: 20}]}>
+          <View style={[styles.container, { marginTop: 20 }]}>
             <View style={styles.left}>
               <Text style={styles.label}>Phone</Text>
             </View>
@@ -592,7 +555,7 @@ console.log(deletePayload)
               <Text style={styles.value}>{user.Phone_Number}</Text>
             </View>
           </View>
-          <View style={[styles.container, {marginTop: 20}]}>
+          <View style={[styles.container, { marginTop: 20 }]}>
             <View style={styles.left}>
               <Text style={styles.label}>Single or Group Visit</Text>
             </View>
@@ -600,7 +563,7 @@ console.log(deletePayload)
               <Text style={styles.value}>{user.Single_or_Group_Visit}</Text>
             </View>
           </View>
-          <View style={[styles.container, {marginTop: 20}]}>
+          <View style={[styles.container, { marginTop: 20 }]}>
             <View style={styles.left}>
               <Text style={styles.label}>Date of Visit</Text>
             </View>
@@ -608,7 +571,7 @@ console.log(deletePayload)
               <Text style={styles.value}>{user.Date_of_Visit}</Text>
             </View>
           </View>
-          <View style={[styles.container, {marginTop: 20}]}>
+          <View style={[styles.container, { marginTop: 20 }]}>
             <View style={styles.left}>
               <Text style={styles.label}>Referrer</Text>
             </View>
@@ -618,7 +581,7 @@ console.log(deletePayload)
               </Text>
             </View>
           </View>
-          <View style={[styles.container, {marginTop: 20}]}>
+          <View style={[styles.container, { marginTop: 20 }]}>
             <View style={styles.left}>
               <Text style={styles.label}>Guest Category</Text>
             </View>
@@ -626,7 +589,7 @@ console.log(deletePayload)
               <Text style={styles.value}>{user.Guest_Category}</Text>
             </View>
           </View>
-          <View style={[styles.container, {marginTop: 20}]}>
+          <View style={[styles.container, { marginTop: 20 }]}>
             <View style={styles.left}>
               <Text style={styles.label}>Priority</Text>
             </View>
@@ -634,7 +597,7 @@ console.log(deletePayload)
               <Text style={styles.value}>{user.Priority}</Text>
             </View>
           </View>
-          <View style={[styles.container, {marginTop: 20}]}>
+          <View style={[styles.container, { marginTop: 20 }]}>
             <View style={styles.left}>
               <Text style={styles.label}>Remarks</Text>
             </View>
@@ -642,7 +605,7 @@ console.log(deletePayload)
               <Text style={styles.value}>{user.Remarks}</Text>
             </View>
           </View>
-          <View style={[styles.container, {marginTop: 20}]}>
+          <View style={[styles.container, { marginTop: 20 }]}>
             <View style={styles.left}>
               <Text style={styles.label}>Gender</Text>
             </View>
@@ -650,7 +613,7 @@ console.log(deletePayload)
               <Text style={styles.value}>{user.Gender}</Text>
             </View>
           </View>
-          <View style={[styles.container, {marginTop: 20}]}>
+          <View style={[styles.container, { marginTop: 20 }]}>
             <View style={styles.left}>
               <Text style={styles.label}>Photo</Text>
             </View>
@@ -660,14 +623,14 @@ console.log(deletePayload)
               ) : (
                 photo && (
                   <Image
-                    source={{uri: photo}}
-                    style={{width: '98%', height: 200}}
+                    source={{ uri: photo }}
+                    style={{ width: '98%', height: 200 }}
                   />
                 )
               )}
             </View>
           </View>
-          <View style={[styles.container, {marginTop: 20}]}>
+          <View style={[styles.container, { marginTop: 20 }]}>
             <View style={styles.left}>
               <Text style={styles.label}>Referrer</Text>
             </View>
@@ -680,7 +643,7 @@ console.log(deletePayload)
               </Text>
             </View>
           </View>
-          <View style={[styles.container, {marginTop: 20}]}>
+          <View style={[styles.container, { marginTop: 20 }]}>
             <View style={styles.left}>
               <Text style={styles.label}>Department</Text>
             </View>
@@ -688,7 +651,7 @@ console.log(deletePayload)
               <Text style={styles.value}>{user.Department.Department}</Text>
             </View>
           </View>
-          <View style={[styles.container, {marginTop: 20}]}>
+          <View style={[styles.container, { marginTop: 20 }]}>
             <View style={styles.left}>
               <Text style={styles.label}>Number of Men</Text>
             </View>
@@ -696,7 +659,7 @@ console.log(deletePayload)
               <Text style={styles.value}>{user.Number_of_Men}</Text>
             </View>
           </View>
-          <View style={[styles.container, {marginTop: 20}]}>
+          <View style={[styles.container, { marginTop: 20 }]}>
             <View style={styles.left}>
               <Text style={styles.label}>Number of Women</Text>
             </View>
@@ -704,7 +667,7 @@ console.log(deletePayload)
               <Text style={styles.value}>{user.Number_of_Women}</Text>
             </View>
           </View>
-          <View style={[styles.container, {marginTop: 20}]}>
+          <View style={[styles.container, { marginTop: 20 }]}>
             <View style={styles.left}>
               <Text style={styles.label}>Number of Boys</Text>
             </View>
@@ -712,7 +675,7 @@ console.log(deletePayload)
               <Text style={styles.value}>{user.Number_of_Boys}</Text>
             </View>
           </View>
-          <View style={[styles.container, {marginTop: 20}]}>
+          <View style={[styles.container, { marginTop: 20 }]}>
             <View style={styles.left}>
               <Text style={styles.label}>Number of Girls</Text>
             </View>
@@ -720,19 +683,19 @@ console.log(deletePayload)
               <Text style={styles.value}>{user.Number_of_Girls}</Text>
             </View>
           </View>
-          <View style={[styles.container, {marginTop: 20}]}>
+          <View style={[styles.container, { marginTop: 20 }]}>
             <View style={styles.left}>
               <Text style={styles.label}>Vehicle Information</Text>
             </View>
             <View style={styles.right}>
               {user?.Vehicle_Information?.length > 0
                 ? user.Vehicle_Information.map((vehicle, index) => (
-                    <Text key={index}>{vehicle.zc_display_value}</Text>
-                  ))
+                  <Text key={index}>{vehicle.zc_display_value}</Text>
+                ))
                 : null}
             </View>
           </View>
-          <View style={[styles.container, {marginTop: 20, marginBottom: 40}]}>
+          <View style={[styles.container, { marginTop: 20, marginBottom: 40 }]}>
             <View style={styles.left}>
               <Text style={styles.label}>
                 Is the guest being invited to your Home or Office
@@ -746,7 +709,7 @@ console.log(deletePayload)
       </SafeAreaView>
       <View style={[heightStyles.hidden]}>
         <View ref={viewRef} style={[heightStyles.container]}>
-          <View style={{flex: 1}}>
+          <View style={{ flex: 1 }}>
             <View style={[heightStyles.qrCodeContainer]}>
               <Text style={[heightStyles.title]}>
                 {user.Referrer_App_User_lookup.Name_field}
@@ -777,10 +740,10 @@ console.log(deletePayload)
                     {' '}
                     Karnataka 562101,
                   </Text>
-                  <View style={{flex: 1}}></View>
+                  <View style={{ flex: 1 }}></View>
                 </View>
               </View>
-              <View style={{flex: 0.7}}>
+              <View style={{ flex: 0.7 }}>
                 <ImageBackground
                   style={[heightStyles.BottomImage]}
                   source={require('../../../src/assets/ashramQrScreen.jpg')}>
@@ -802,35 +765,35 @@ console.log(deletePayload)
           </View>
         </View>
       </View>
-           
-     <Dialog.Container visible={DialogVisible} contentStyle={styles.canNotApproveDialogue}>
-      <Image source={require('../../../src/assets/Denied.png')}
-    
 
-         style={{ width: '20%', height: '30%' , alignSelf:'center',top:-85}} // adjust as needed
-      
-      />
-      <Dialog.Title style={styles.canNotApproveTitle}>Cannot Approve at this time</Dialog.Title>
-      <Dialog.Description style={styles.canNotApproveTxT}>L1 approver has either denied the visitor or something has gone wrong.</Dialog.Description>
-      <Dialog.Button label="Ok" onPress={onPressOk} />
-      
+      <Dialog.Container visible={DialogVisible} contentStyle={styles.canNotApproveDialogue}>
+        <Image source={require('../../../src/assets/Denied.png')}
+
+
+          style={{ width: '20%', height: '30%', alignSelf: 'center', top: -85 }} // adjust as needed
+
+        />
+        <Dialog.Title style={styles.canNotApproveTitle}>Cannot Approve at this time</Dialog.Title>
+        <Dialog.Description style={styles.canNotApproveTxT}>L1 approver has either denied the visitor or something has gone wrong.</Dialog.Description>
+        <Dialog.Button label="Ok" onPress={onPressOk} />
+
       </Dialog.Container>
 
 
       <Dialog.Container visible={L2approvedalreadydialogVisible} contentStyle={styles.canNotApproveDialogue}>
-      <Image source={require('../../../src/assets/Denied.png')}
-    
+        <Image source={require('../../../src/assets/Denied.png')}
 
-    style={{ width: '20%', height: '30%' , alignSelf:'center',top:-85}} // adjust as needed
- 
- />
-      <Dialog.Title style={styles.canNotApproveTitle}>L2 approved already</Dialog.Title>
-      <Dialog.Description style={styles.canNotApproveTxT}>The visitor is already L2 approved</Dialog.Description>
-      <Dialog.Button label="Ok" onPress={onL2ApprovedPressOk} />
-      
+
+          style={{ width: '20%', height: '30%', alignSelf: 'center', top: -85 }} // adjust as needed
+
+        />
+        <Dialog.Title style={styles.canNotApproveTitle}>L2 approved already</Dialog.Title>
+        <Dialog.Description style={styles.canNotApproveTxT}>The visitor is already L2 approved</Dialog.Description>
+        <Dialog.Button label="Ok" onPress={onL2ApprovedPressOk} />
+
       </Dialog.Container>
 
-     
+
     </>
   );
 };
@@ -839,16 +802,16 @@ export default ViewDetails;
 
 const mediumScreen = StyleSheet.create({
 
-  canNotApproveTxt:{
+  canNotApproveTxt: {
     color: '#B21E2B',
     fontWeight: 'bold',
     marginLeft: '20%',
-    
-   },
+
+  },
 
 
 
-  apprejBtnPosition:{
+  apprejBtnPosition: {
     marginLeft: '36%'
   },
 
@@ -1014,15 +977,15 @@ const mediumScreen = StyleSheet.create({
 });
 
 const smallScreen = StyleSheet.create({
-  canNotApproveTxt:{
+  canNotApproveTxt: {
     color: '#B21E2B',
     fontWeight: 'bold',
     marginLeft: '25%',
-    
-   },
+
+  },
 
 
-  apprejBtnPosition:{
+  apprejBtnPosition: {
     marginLeft: '42%'
   },
 
@@ -1183,19 +1146,19 @@ const smallScreen = StyleSheet.create({
 
 const normalScreen = StyleSheet.create({
 
-  canNotApproveTxt:{
+  canNotApproveTxt: {
     color: '#B21E2B',
     fontWeight: 'bold',
     marginLeft: '25%',
-    
-   },
+
+  },
 
 
-  apprejBtnPosition:{
+  apprejBtnPosition: {
     marginLeft: '45%'
   },
 
-ApproveActivityIndicatorContainer: {
+  ApproveActivityIndicatorContainer: {
     top: 10,
     backgroundColor: '#9FE2BF',
     zIndex: 1,
@@ -1402,7 +1365,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     ...Platform.select({
       ios: {
-        shadowOffset: {width: 2, height: 2},
+        shadowOffset: { width: 2, height: 2 },
         shadowColor: '#333',
         shadowOpacity: 0.3,
         shadowRadius: 4,
@@ -1450,24 +1413,24 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter',
     fontWeight: '700',
   },
-  canNotApproveDialogue:{
+  canNotApproveDialogue: {
     borderRadius: 30,
     backgroundColor: '#FFE2E5',
     height: 225,
-  
-    },
-  
-    canNotApproveTitle:{
-   alignSelf:'center',
-    fontWeight:'bold',
-    color:'#B21E2B',
-    bottom:-70,
-    },
 
-    canNotApproveTxT:{
-      color:'black',
-      bottom:-70,
-    }
+  },
+
+  canNotApproveTitle: {
+    alignSelf: 'center',
+    fontWeight: 'bold',
+    color: '#B21E2B',
+    bottom: -70,
+  },
+
+  canNotApproveTxT: {
+    color: 'black',
+    bottom: -70,
+  }
 
 
 

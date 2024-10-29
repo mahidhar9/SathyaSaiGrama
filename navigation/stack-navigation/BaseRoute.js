@@ -35,7 +35,7 @@ function buildDeepLinkFromNotificationData(data) {
   //   console.log('Not raw Json');
   // }
   // data = JSON.parse(dataString);
-  console.log(data);
+  // console.log(data);
   // const data = dataString;
   const navigationId = data?.navigationId;
   console.log(data.navigationId);
@@ -186,7 +186,7 @@ const BaseRoute = () => {
   //   }
   // }, []);
   
-  console.log("Existed user in base route ", loggedUser)
+  // console.log("Existed user in base route ", loggedUser)
 
   return (
     // <>

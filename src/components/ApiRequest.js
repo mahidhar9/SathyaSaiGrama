@@ -15,7 +15,7 @@ export const getDataWithInt = async (reportName, criteria, value, token) => {
       },
     });
     const res = await response.json();
-    console.log('Response in getDataWithInt: ', res);
+    // console.log('Response in getDataWithInt: ', res);
     return res;
   } catch (err) {
     if (err.message === 'Network request failed')
@@ -71,7 +71,7 @@ export const getDataWithString = async (reportName, criteria, value, token) => {
       },
     });
     const res = await response.json();
-    console.log('Response in getDataWithString: ', res);
+    // console.log('Response in getDataWithString: ', res);
     return res;
   } catch (err) {
     if (err.message === 'Network request failed')
@@ -146,7 +146,6 @@ export const getL2Data = async (
       },
     });
     const res = await response.json();
-    console.log('Response in getL2Data: ', res);
     return res;
   } catch (err) {
     if (err.message === 'Network request failed')
@@ -353,7 +352,7 @@ export const deleteDataWithID = async (reportName, id, token) => {
       },
     });
     const res = await response.json();
-    console.log('Response in deleteDataWithID: ', res);
+    // console.log('Response in deleteDataWithID: ', res);
     return res;
   } catch (err) {
     if (err.message === 'Network request failed')

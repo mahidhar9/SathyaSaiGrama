@@ -138,24 +138,32 @@ const ForgotPassword = ({ navigation }) => {
                   <View style={styles.modalView}>
                     <Text style={styles.titletext}>Email is not registered</Text>
                     <Text style={styles.subtext}>
-                      The given email address was not found. Please check your email and retry, or{' '}
+                      The given email address is not registered. Please check your email and retry, or{' '}
                       <Text
                         style={styles.linkText}
-                        onPress={() => {
-                          setIsForgetVisible(false)
-                          navigation.navigate('Register')
-                        }}
                       >
                         Register
                       </Text>
                     </Text>
 
-                    <TouchableOpacity
-                      style={[styles.HomeButton, { backgroundColor: '#B21E2B' }]}
-                      onPress={()=> setIsForgetVisible(false)}
-                    >
-                      <Text style={{ color: "white" }}>Ok</Text>
-                    </TouchableOpacity>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8, gap: 30 }}>
+                      <TouchableOpacity
+                        style={[styles.HomeButton, { backgroundColor: '#B21E2B' }]}
+                        onPress={() => {
+                          setIsForgetVisible(false)
+                          navigation.navigate('Register')
+                        }}
+                      >
+                        <Text style={[styles.wewe, styles.wewe1]}>Register</Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        style={[styles.HomeButton, { backgroundColor: '#fff', borderColor: '#B21E2B', borderWidth: 2 }]}
+                        onPress={() => setIsForgetVisible(false)}
+                      >
+                        <Text style={[styles.wewe, styles.wewe2]}>Cancel</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 </TouchableWithoutFeedback>
               </View>
@@ -385,6 +393,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 22,
   },
+  wewe: {
+    fontFamily: 'Inter',
+    fontSize: 14,
+    fontStyle: 'normal',
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  wewe1: {
+    color: '#fff',
+  },
+  wewe2: {
+    color: '#B21E2B',
+  },
   modalView: {
     margin: 20,
     backgroundColor: 'white',
@@ -413,7 +434,6 @@ const styles = StyleSheet.create({
   HomeButton: {
     height: 40,
     width: 100,
-    backgroundColor: '#752A26',
     borderRadius: 12,
     marginTop: 30,
     justifyContent: 'center',
