@@ -111,19 +111,12 @@ const Pending = ({navigation}) => {
             {/* <RequestSkeletonScreen /> */}
             <DotsBlinkingLoaderEllipsis/>
           </View>
-<<<<<<< HEAD
-        ) : ((refreshing ? (<View style={styles.loadingContainer}>
-          {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
-          {/* <RequestSkeletonScreen/> */}
-          <DotsBlinkingLoaderEllipsis/>
-        </View>) : (
-=======
         ) : refreshing ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#B21E2B" />
+            {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
+            <DotsBlinkingLoaderEllipsis/>
           </View>
         ) : (
->>>>>>> 0100e5ddf35d09c91668a3b046260e56172fc465
           <>
             <Filter
               setFilteredData={setPendingsData}

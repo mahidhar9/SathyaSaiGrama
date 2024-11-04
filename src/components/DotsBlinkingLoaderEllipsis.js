@@ -41,7 +41,7 @@ export default function DotsBlinkingLoaderEllipsis() {
         scales.forEach((_, index) => {
             const timeout = setTimeout(() => {
                 startAnimation(index);
-            }, index * 500);
+            }, index * 400);
             return () => clearTimeout(timeout);
         });
     }, [scales]);

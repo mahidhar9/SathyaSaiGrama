@@ -1471,9 +1471,9 @@ const FillByYourSelf = ({navigation}) => {
               <View style={[heightStyles.codeBackdrop]}>
                 <Text style={[heightStyles.code]}>{code}</Text>
                 <View style={[heightStyles.BottomtextContainer]}>
-                  <Text style={[heightStyles.dateOfArrivalText]}>{date}</Text>
+                  <Text style={[heightStyles.dateOfArrivalText]}>{convertDateFormat(date)}</Text>
                   <Text style={[heightStyles.Bottomtext]}>
-                    Sri Sathya Sai Grama -
+                    Sathya Sai Grama -
                   </Text>
                   <Text style={[heightStyles.Bottomtext]}>
                     Muddenahalli Rd,
