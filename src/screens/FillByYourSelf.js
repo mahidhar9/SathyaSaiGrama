@@ -1431,7 +1431,7 @@ const FillByYourSelf = ({navigation}) => {
                         style={{width: 15, height: 15}}
                       />
                       <Text style={{color: 'black', fontSize: 15}}>
-                        Add New
+                        Add Vehicle Information
                       </Text>
                     </TouchableOpacity>
                   )}
