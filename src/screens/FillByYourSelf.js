@@ -36,7 +36,8 @@ import axios from 'axios';
 import SentForApproval from './SentForApproval';
 import {updateRecord} from './approval/VerifyDetails';
 import {isJSDocCommentContainingNode} from 'typescript';
-
+import dayjs from 'dayjs';
+import {CalendarList} from 'react-native-calendars';
 LogBox.ignoreLogs(['Warnings...']);
 LogBox.ignoreAllLogs();
 const FillByYourSelf = ({navigation}) => {
@@ -90,32 +91,56 @@ const FillByYourSelf = ({navigation}) => {
 
   const [selectedHO, setSelectedHO] = useState(selectedHomeOffice);
   const [date, setDate] = useState('Select Date');
+
   const [showModal, setShowModal] = useState(false);
   const L1ID = loggedUser.userId;
   console.log('L1ID', L1ID);
-  const today = new Date();
+  const minDate = dayjs().format('YYYY-MM-DD');
+  const maxDate = dayjs().add(6, 'month').format('YYYY-MM-DD');
 
-  const startDate = getFormatedDate(
-    today.setDate(today.getDate()),
-    'YYYY/MM/DD',
-  );
-  const addDaysToDate = (dateString, daysToAdd) => {
-    // Convert the input string (YYYY/MM/DD) into a Date object
-    const [year, month, day] = dateString.split('/'); // Split the string by '/'
-    const date = new Date(year, month - 1, day); // Month is 0-indexed in JavaScript
+  const startMonth = dayjs(minDate).month();
+  const endMonth = dayjs(maxDate).month();
+  const [visitingMonth, setVisitingMonth] = useState(startMonth);
 
-    // Add the specified number of days (60 days in this case)
-    date.setDate(date.getDate() + daysToAdd);
-
-    // Format the new date back to 'YYYY/MM/DD'
-    const newYear = date.getFullYear();
-    const newMonth = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed, so add 1
-    const newDay = String(date.getDate()).padStart(2, '0');
-
-    return `${newYear}/${newMonth}/${newDay}`;
+  const convertDateFormat = date => {
+    return date === 'Select Date'
+      ? 'Select Date'
+      : dayjs(date).format('DD-MMM-YYYY');
   };
-  const endDate = addDaysToDate(startDate, 60);
-  console.log('endDate', endDate);
+  const onDayPress = day => {
+    if (day.dateString >= minDate && day.dateString <= maxDate) {
+      setDate(day.dateString);
+      setShowModal(false); // Close calendar after selecting a date
+      setDateOfVisitErr(null); // Clear any error
+      const monthNumber = dayjs(day.dateString).month();
+      setVisitingMonth(monthNumber); // Update the visiting month
+      console.log('Visiting month (number format):', monthNumber); // Log the visiting month
+    }
+
+    // const today = new Date();
+
+    // const startDate = getFormatedDate(
+    //   today.setDate(today.getDate()),
+    //   'YYYY/MM/DD',
+    // );
+    // const addDaysToDate = (dateString, daysToAdd) => {
+    //   // Convert the input string (YYYY/MM/DD) into a Date object
+    //   const [year, month, day] = dateString.split('/'); // Split the string by '/'
+    //   const date = new Date(year, month - 1, day); // Month is 0-indexed in JavaScript
+
+    //   // Add the specified number of days (60 days in this case)
+    //   date.setDate(date.getDate() + daysToAdd);
+
+    //   // Format the new date back to 'YYYY/MM/DD'
+    //   const newYear = date.getFullYear();
+    //   const newMonth = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed, so add 1
+    //   const newDay = String(date.getDate()).padStart(2, '0');
+
+    //   return `${newYear}/${newMonth}/${newDay}`;
+    // };
+  };
+  // const endDate = addDaysToDate(startDate, 60);
+  // console.log('endDate', endDate);
   const approvalToVisitorID = useRef(null);
   const viewRef = useRef();
   const [code, setCode] = useState('');
@@ -130,14 +155,28 @@ const FillByYourSelf = ({navigation}) => {
   const singleorgroup = ['Single', 'Group'];
   const homeoroffice = ['Home', 'Office'];
 
-  const handleDateChange = selectedDate => {
-    const formatteddate = moment(selectedDate, 'YYYY-MM-DD').format(
-      'DD-MMM-YYYY',
-    );
-    setDate(formatteddate);
-    setShowModal(!showModal); //Date Picker
-    setDateOfVisitErr(null);
-  };
+  // const handleDateChange = selectedDate => {
+  //   const formatteddate = moment(selectedDate, 'YYYY-MM-DD').format(
+  //     'DD-MMM-YYYY',
+  //   );
+  //   setDate(formatteddate);
+  //   setShowModal(!showModal); //Date Picker
+  //   setDateOfVisitErr(null);
+  // };
+
+  let pastScrollRange = 0;
+  let futureScrollRange = 6;
+  let MonthNumberCount = visitingMonth;
+  console.log('Count', MonthNumberCount);
+  console.log('Visiting month:', visitingMonth); // Log the visiting month state
+  pastScrollRange =
+    MonthNumberCount >= startMonth
+      ? MonthNumberCount - startMonth
+      : MonthNumberCount + 12 - startMonth;
+  futureScrollRange =
+    endMonth >= MonthNumberCount
+      ? endMonth - MonthNumberCount
+      : endMonth + 12 - MonthNumberCount;
 
   const prefixValues = [
     {label: 'Mr.', value: 'Mr.'},
@@ -299,7 +338,7 @@ const FillByYourSelf = ({navigation}) => {
         Department: DepartmentID,
         Phone_Number: formattedValue,
         Priority: priority,
-        Date_of_Visit: date,
+        Date_of_Visit: convertDateFormat(date),
         Gender: selectedGender,
         Guest_Category: guestCategory,
         Number_of_Men: menCount,
@@ -998,7 +1037,7 @@ const FillByYourSelf = ({navigation}) => {
                       styles.phoneInputContainer,
                       {paddingLeft: 12, color: '#71727A'},
                     ]}
-                    value={date}
+                    value={convertDateFormat(date)}
                     editable={false}
                   />
                 </TouchableOpacity>
@@ -1006,14 +1045,40 @@ const FillByYourSelf = ({navigation}) => {
                   <Text style={styles.errorText}>{dateOfVisitErr}</Text>
                 )}
                 <Modal
-                  animationType="slide"
+                  animationType="none"
                   transparent={true}
                   visible={showModal}
                   onRequestClose={() => setShowModal(false)}>
                   <TouchableWithoutFeedback onPress={() => setShowModal(false)}>
                     <View style={styles.centeredView}>
+                    <TouchableWithoutFeedback>
                       <View style={styles.modalView}>
-                        <DatePicker
+                        <CalendarList
+                        style={{width:'90%'}}
+                          current={date === 'Select Date' ? minDate : date}
+                          minDate={minDate}
+                          maxDate={maxDate}
+                          pastScrollRange={pastScrollRange}
+                          futureScrollRange={futureScrollRange}
+                          scrollEnabled={true}
+                          onDayPress={onDayPress}
+                          markedDates={{
+                            [date]: {
+                              selected: true,
+                              selectedColor: '#B21E2B',
+                            },
+                          }}
+                          theme={{
+                            textSectionTitleColor: '#000',
+                            selectedDayBackgroundColor: '#B21E2B',
+                            todayTextColor: '#FFBE65',
+                            dayTextColor: '#2d4150',
+                            agendaKnobColor: '#B21E2B',
+                            arrowColor: '#FFBE65',
+                          }}
+                          showScrollIndicator={true}
+                        />
+                        {/* <DatePicker
                           mode="calendar"
                           minimumDate={startDate}
                           maximumDate={endDate}
@@ -1027,8 +1092,9 @@ const FillByYourSelf = ({navigation}) => {
                             textSecondaryColor: 'black',
                             borderColor: '#B21E2B',
                           }}
-                        />
+                        /> */}
                       </View>
+                      </TouchableWithoutFeedback>
                     </View>
                   </TouchableWithoutFeedback>
                 </Modal>
@@ -1365,7 +1431,7 @@ const FillByYourSelf = ({navigation}) => {
                         style={{width: 15, height: 15}}
                       />
                       <Text style={{color: 'black', fontSize: 15}}>
-                        Add New
+                        Add Vehicle Information
                       </Text>
                     </TouchableOpacity>
                   )}
@@ -1405,9 +1471,9 @@ const FillByYourSelf = ({navigation}) => {
               <View style={[heightStyles.codeBackdrop]}>
                 <Text style={[heightStyles.code]}>{code}</Text>
                 <View style={[heightStyles.BottomtextContainer]}>
-                  <Text style={[heightStyles.dateOfArrivalText]}>{date}</Text>
+                  <Text style={[heightStyles.dateOfArrivalText]}>{convertDateFormat(date)}</Text>
                   <Text style={[heightStyles.Bottomtext]}>
-                    Sri Sathya Sai Grama -
+                    Sathya Sai Grama -
                   </Text>
                   <Text style={[heightStyles.Bottomtext]}>
                     Muddenahalli Rd,
@@ -2138,6 +2204,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 50,
     width: '95%',
+    height:'60%',
     padding: 35,
     alignItems: 'center',
     elevation: 5,

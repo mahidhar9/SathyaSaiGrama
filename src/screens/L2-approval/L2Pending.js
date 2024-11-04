@@ -6,6 +6,7 @@ import L2ApprovalComponent from './L2ApprovalComponent';
 import parseDate from '../../components/ParseDate';
 import { useFocusEffect, } from '@react-navigation/native';
 import Filter from '../../components/Filter';
+import DotsBlinkingLoaderEllipsis from '../../components/DotsBlinkingLoaderEllipsis'
 
 const L2Pending = ({ navigation }) => {
 
@@ -87,10 +88,12 @@ const L2Pending = ({ navigation }) => {
     <><View style={{ flex: 1, paddingTop: 10, backgroundColor: "#FFF" }}>
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#B21E2B" />
+          {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
+          <DotsBlinkingLoaderEllipsis/>
         </View>
       ) : ((refreshing ? (<View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#B21E2B" />
+        {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
+        <DotsBlinkingLoaderEllipsis/>
       </View>) : (
         <>
           <Filter setFilteredData={setL2PendingsData} ToFilterData={L2Pendings} comingFrom={"L2Pending"}/>
