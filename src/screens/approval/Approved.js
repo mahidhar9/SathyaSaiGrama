@@ -6,6 +6,7 @@ import UserContext from '../../../context/UserContext';
 import { getDataWithIntAndString } from '../../components/ApiRequest';
 import parseDate from "../../components/ParseDate"
 import Filter from '../../components/Filter';
+import DotsBlinkingLoaderEllipsis from '../../components/DotsBlinkingLoaderEllipsis'
 
 const Approved = ({ navigation }) => {
   const { L1ID, getAccessToken, approveDataFetched, setApproveDataFetched } = useContext(UserContext);
@@ -80,10 +81,14 @@ const Approved = ({ navigation }) => {
     <><View style={{ flex: 1, paddingTop: 10, backgroundColor: "#FFFF" }}>
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#B21E2B" />
+          {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
+          {/* <RequestSkeletonScreen/> */}
+          <DotsBlinkingLoaderEllipsis/>
         </View>
       ) : ((refreshing ? (<View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#B21E2B" />
+        {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
+        {/* <RequestSkeletonScreen/> */}
+        <DotsBlinkingLoaderEllipsis/>
       </View>) : (
         <>
           <Filter setFilteredData={setApprovedsData} ToFilterData={approveds}  comingFrom={"Approved"}/>

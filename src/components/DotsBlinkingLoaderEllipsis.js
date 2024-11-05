@@ -11,12 +11,12 @@ export default function DotsBlinkingLoaderEllipsis() {
                 Animated.sequence([
                     Animated.timing(scales[index], {
                         toValue: 0.3,
-                        duration: 700,
+                        duration: 400,
                         useNativeDriver: true,
                     }),
                     Animated.timing(scales[index], {
                         toValue: 0.1,
-                        duration: 700,
+                        duration: 400,
                         useNativeDriver: true,
                     }),
                 ])
@@ -26,12 +26,12 @@ export default function DotsBlinkingLoaderEllipsis() {
                 Animated.sequence([
                     Animated.timing(colors[index], {
                         toValue: 1,
-                        duration: 700,
+                        duration: 400,
                         useNativeDriver: true, 
                     }),
                     Animated.timing(colors[index], {
                         toValue: 0,
-                        duration: 700,
+                        duration: 400,
                         useNativeDriver: true,
                     }),
                 ])
@@ -41,7 +41,7 @@ export default function DotsBlinkingLoaderEllipsis() {
         scales.forEach((_, index) => {
             const timeout = setTimeout(() => {
                 startAnimation(index);
-            }, index * 500);
+            }, index * 400);
             return () => clearTimeout(timeout);
         });
     }, [scales]);

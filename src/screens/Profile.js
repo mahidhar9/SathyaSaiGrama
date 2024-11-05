@@ -40,7 +40,7 @@ import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME} from '@env';
 import Toast from 'react-native-toast-message';
 import {launchImageLibrary, launchCamera} from 'react-native-image-picker';
 import {PERMISSIONS, request} from 'react-native-permissions';
-
+import MyProfileSkeletonLoader from '../components/MyProfileSkeletonScreen'
 const Profile = ({navigation}) => {
   const {
     getAccessToken,
@@ -60,6 +60,8 @@ const Profile = ({navigation}) => {
   const [profileImageModalVisible, setProfileImageModalVisible] =
     useState(false);
   const [loading, setLoading] = useState(false);
+  // const [skeletonLoader, setSkeletonLoader] = useState(false);
+
   const [focusedInput, setFocusedInput] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
@@ -208,6 +210,8 @@ const Profile = ({navigation}) => {
 
   const toMyprofile = async () => {
     setLoading(true);
+    // setSkeletonLoader(false);
+
     console.log('Email from context: ', userEmail);
     console.log(getAccessToken());
     const resFromUser = await getDataWithString(
@@ -249,7 +253,9 @@ const Profile = ({navigation}) => {
       );
       console.log('resfromfamilyrelation: ', resFromFamilyMember.data);
       if (resFromFamilyMember.data) {
-        setLoading(false);
+        //  setLoading(false);
+        // setSkeletonLoader(false);
+
         if (resFromEmployee.data)
           navigation.navigate('MyProfile', {
             userInfo: resFromUser.data,
@@ -277,8 +283,11 @@ const Profile = ({navigation}) => {
             flatid: resFromFlat.data[0].ID,
             dapartmentExists: false,
           });
+          setLoading(false);
       } else {
-        setLoading(false);
+        // setLoading(false);
+      //  setSkeletonLoader(false);
+
         if (resFromEmployee.data)
           navigation.navigate('MyProfile', {
             userInfo: resFromUser.data,
@@ -302,6 +311,7 @@ const Profile = ({navigation}) => {
             flatExists: true,
             dapartmentExists: false,
           });
+          setLoading(false);
       }
     } else {
       const resFromFamilyMemberRoom = await getDataWithInt(
@@ -311,7 +321,8 @@ const Profile = ({navigation}) => {
         getAccessToken(),
       );
       console.log('resfromfamilyrelation: ', resFromFamilyMemberRoom.data);
-      setLoading(false);
+      //  setLoading(false);
+      // setSkeletonLoader(false);
 
       if (resFromEmployee.data) {
         if (resFromFamilyMemberRoom.data) {
@@ -359,6 +370,7 @@ const Profile = ({navigation}) => {
           });
         }
       }
+      setLoading(false);
     }
   };
 
@@ -549,9 +561,10 @@ const Profile = ({navigation}) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {loading ? (
+      {loading ?  (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#B21E2B" />
+          {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
+          <MyProfileSkeletonLoader />
         </View>
       ) : isLogOutIndicator ? (
         

@@ -6,6 +6,7 @@ import L2ApprovalComponent from './L2ApprovalComponent';
 import parseDate from '../../components/ParseDate';
 import { useFocusEffect, } from '@react-navigation/native';
 import Filter from '../../components/Filter';
+import DotsBlinkingLoaderEllipsis from '../../components/DotsBlinkingLoaderEllipsis'
 
 const L2Denied = ({ navigation }) => {
 
@@ -80,10 +81,12 @@ const L2Denied = ({ navigation }) => {
     <><View style={{ flex: 1, paddingTop: 10 , backgroundColor: '#FFF'}}>
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#B21E2B" />
+          {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
+          <DotsBlinkingLoaderEllipsis/>
         </View>
       ) : ((refreshing ? (<View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#B21E2B" />
+        {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
+        <DotsBlinkingLoaderEllipsis/>
       </View>) : (
         <>
           <Filter setFilteredData={setL2DeniedsData} ToFilterData={L2Denieds}  comingFrom={"L2Denied"}/>
