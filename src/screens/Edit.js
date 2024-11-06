@@ -22,6 +22,8 @@ import PhoneInput from 'react-native-phone-number-input';
 
 import {parsePhoneNumberFromString} from 'libphonenumber-js';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 const Edit = ({route, navigation}) => {
   const formType = route.params?.formType;
   const userdata = route.params?.userdata;
@@ -76,7 +78,7 @@ const Edit = ({route, navigation}) => {
   ];
 
   // const { formType, userdata, vehicledata } = route.params;
-  const {L1ID, getAccessToken} = useContext(UserContext);
+  const {L1ID, getAccessToken, loggedUser, setLoggedUser} = useContext(UserContext);
   const {
     control,
     handleSubmit,
@@ -193,6 +195,22 @@ const Edit = ({route, navigation}) => {
     if (resFromUserUpdate.result[0].code === 3000) {
       setLoading(false);
       console.log(basicInfo);
+
+      console.log("Data to be set in AsyncStorage: ", data); // Log the data before setting
+      const data = {
+        userId: loggedUser.userId,
+        role: loggedUser.role,
+        email: loggedUser.email,
+        deptIds: loggedUser.deptIds,
+        name: basicInfo.name,
+        profilePhoto: loggedUser.profilePhoto,
+        resident: loggedUser.resident,
+        employee: loggedUser.employee,
+        testResident: loggedUser.testResident,
+      };
+      await AsyncStorage.setItem('existedUser', JSON.stringify(data));
+      setLoggedUser(data)
+
       setFormattedValue('');
       navigation.navigate('MyProfile', {
         userInfo: [{...userdata, ...updateddata}],
