@@ -370,7 +370,7 @@ const Register = ({navigation}) => {
 
             <View
               style={[
-                styles.passBorder,
+                styles.confirmPassBorder,
                 focusedInput === 'confirmPassword' && styles.inputFocused,
               ]}>
               <Controller
@@ -556,12 +556,15 @@ const styles = StyleSheet.create({
     paddingEnd: 4,
     alignItems: 'center',
     height: 48,
-    width: '90%',
+    width: '91%',
     fontFamily: 'Inter',
     fontSize: 14,
     fontStyle: 'normal',
     fontWeight: '400',
   },
+
+
+  
   passBorder: {
     borderRadius: 12,
     borderWidth: 1,
@@ -573,7 +576,28 @@ const styles = StyleSheet.create({
     height: 48,
     alignSelf: 'center',
     marginBottom: 8,
+    left:-2,
+    width: '98%',
   },
+ 
+  confirmPassBorder: {
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#C5C6CC',
+    gap: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingEnd: 18,
+    height: 48,
+    alignSelf: 'center',
+    marginBottom: 8,
+    left:-2,
+    bottom: -10,
+    width: '98%',
+
+  },
+
+
   label: {
     color: '#2F3036',
     alignSelf: 'stretch',
@@ -593,6 +617,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#C5C6CC',
     paddingHorizontal: 12,
+    height: 48,
+    width: '98%',
+    justifyContent: 'center',
   },
   inputFocused: {
     borderColor: '#B21E2B',
