@@ -172,7 +172,7 @@ const VerifyDetails = ({ navigation, route }) => {
 
   const generateQR = async (passcodeData) => {
     try {
-      const qrUrl = `https://screenshot-for-visitor.onrender.com/generate-image?name=${user.Referrer_App_User_lookup.Name_field}&&passcode=${passcodeData}&&date=${user.Date_of_Visit}`;
+      const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${user.Referrer_App_User_lookup.Name_field}&&passcode=${passcodeData}&&date=${user.Date_of_Visit}`;
       const res = await fetch(qrUrl);
       console.log('URL - ', qrUrl);
       console.log("res from fetch img : ", res)

@@ -194,7 +194,7 @@ const FillByYourSelf = ({ navigation }) => {
 
   const generateQR = async (passcodeData) => {
     try {
-      const qrUrl = `https://screenshot-for-visitor.onrender.com/generate-image?name=${loggedUser.name}&&passcode=${passcodeData}&&date=${date}`;
+      const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${loggedUser.name}&&passcode=${passcodeData}&&date=${date}`;
       const res = await fetch(qrUrl);
       console.log('URL - ', qrUrl);
       console.log("res from fetch img : ", res)
