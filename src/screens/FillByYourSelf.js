@@ -286,7 +286,7 @@ const FillByYourSelf = ({ navigation }) => {
     }
   };
 
-  const passcodeGenrator = async () => {
+  const passcodeGenerator = async () => {
     let generatedPasscode;
     while (true) {
       const newCode = Math.floor(100000 + Math.random() * (999999 - 100001 + 1),).toString();
@@ -751,7 +751,7 @@ const FillByYourSelf = ({ navigation }) => {
         const responseFromVisitorDetails = await postToVisitorDetails();
         console.log('responseFromVisitorDetails', responseFromVisitorDetails);
         if (loggedUser.role === 'L2') {
-          await passcodeGenrator();
+          await passcodeGenerator();
           setIsSubmitted(false);
           navigation.navigate('Invite');
         } else if (loggedUser.role === 'L1') {

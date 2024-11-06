@@ -264,7 +264,7 @@ const VerifyDetails = ({ navigation, route }) => {
     }
   };
 
-  const passcodeGenrator = async () => {
+  const passcodeGenerator = async () => {
     let generatedPasscode;
     while (true) {
       const newCode = Math.floor(100000 + Math.random() * (999999 - 100001 + 1),).toString();
@@ -326,7 +326,7 @@ const VerifyDetails = ({ navigation, route }) => {
           L2_Approval_Status: 'APPROVED',
         };
         setapprovingLoading(true);
-        await passcodeGenrator();
+        await passcodeGenerator();
       } else {
         updateField = {
           Referrer_Approval: 'APPROVED',

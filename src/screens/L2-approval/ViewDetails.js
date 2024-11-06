@@ -234,7 +234,7 @@ const ViewDetails = ({ navigation, route }) => {
   };
 
 
-  const passcodeGenrator = async () => {
+  const passcodeGenerator = async () => {
     let generatedPasscode;
     while (true) {
       const newCode = Math.floor(100000 + Math.random() * (999999 - 100001 + 1),).toString();
@@ -306,7 +306,7 @@ const ViewDetails = ({ navigation, route }) => {
         setL2DeniedDataFetched(false);
         setL2ApproveDataFetched(false);
       }
-      await passcodeGenrator();
+      await passcodeGenerator();
       setapprovingLoading(false);
       Alert.alert('Visitor Approved');
       navigation.navigate('L2Approved');
