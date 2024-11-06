@@ -22,6 +22,8 @@ import PhoneInput from 'react-native-phone-number-input';
 
 import {parsePhoneNumberFromString} from 'libphonenumber-js';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 const Edit = ({route, navigation}) => {
   const formType = route.params?.formType;
   const userdata = route.params?.userdata;
@@ -76,7 +78,7 @@ const Edit = ({route, navigation}) => {
   ];
 
   // const { formType, userdata, vehicledata } = route.params;
-  const {L1ID, getAccessToken} = useContext(UserContext);
+  const {L1ID, getAccessToken, loggedUser, setLoggedUser} = useContext(UserContext);
   const {
     control,
     handleSubmit,
@@ -150,35 +152,13 @@ const Edit = ({route, navigation}) => {
   }, [formattedValue]);
 
   const saveDataFromBasicInfo = async basicInfo => {
+    console.log("basic info: ", basicInfo)
     setSubmitFlag(true);
 
-    // Perform validation synchronously and store result locally
-    let localPhoneErr = null;
-    let localPhoneValidErr = null;
-
-    if (!formattedValue) {
-      localPhoneErr = 'Phone number is required';
-    } else {
-      const parsedPhoneNumber = parsePhoneNumberFromString(formattedValue);
-      if (!parsedPhoneNumber || !parsedPhoneNumber.isValid()) {
-        localPhoneValidErr = 'Invalid phone number';
-      }
-    }
-
-    // Log the errors for debugging
-    console.log('Phone Error:', localPhoneErr);
-    console.log('Phone Valid Error:', localPhoneValidErr);
-
-    // Set the errors in state so they can be displayed in the UI
-    setPhoneErr(localPhoneErr);
-    setPhoneValidErr(localPhoneValidErr);
-
-    // Stop submission if there are errors
-    if (localPhoneErr || localPhoneValidErr) {
-      console.log('Validation failed. Aborting submission.');
+    if(phoneErr || phoneValidErr){
+      setFormattedValue("");
       return;
     }
-
     setLoading(true);
     console.log('Phone number is: ', formattedValue);
 
@@ -198,6 +178,7 @@ const Edit = ({route, navigation}) => {
         Gender: basicInfo.gender,
       };
     }
+    console.log("object------------- ", updateddata)
 
     const user = {
       criteria: `ID==${L1ID}`,
@@ -209,10 +190,27 @@ const Edit = ({route, navigation}) => {
       user,
       getAccessToken(),
     );
+    console.log(" (((((((((((((((((( ", resFromUserUpdate)
 
     if (resFromUserUpdate.result[0].code === 3000) {
       setLoading(false);
       console.log(basicInfo);
+
+      console.log("Data to be set in AsyncStorage: ", data); // Log the data before setting
+      const data = {
+        userId: loggedUser.userId,
+        role: loggedUser.role,
+        email: loggedUser.email,
+        deptIds: loggedUser.deptIds,
+        name: basicInfo.name,
+        profilePhoto: loggedUser.profilePhoto,
+        resident: loggedUser.resident,
+        employee: loggedUser.employee,
+        testResident: loggedUser.testResident,
+      };
+      await AsyncStorage.setItem('existedUser', JSON.stringify(data));
+      setLoggedUser(data)
+
       setFormattedValue('');
       navigation.navigate('MyProfile', {
         userInfo: [{...userdata, ...updateddata}],

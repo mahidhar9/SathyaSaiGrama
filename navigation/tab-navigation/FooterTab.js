@@ -211,58 +211,6 @@ const L2ApprovalStack = ({navigation}) => {
     useContext(UserContext);
   const {setUser} = useContext(AuthContext);
 
-  console.log('Logged user in L2Approval stack in FooterTab', loggedUser);
-
-  const fetchDataFromOffice = async () => {
-    const res = await getDataWithInt(
-      'All_Offices',
-      'Approver_app_user_lookup',
-      loggedUser.userId,
-      accessToken,
-    );
-    if (res && res.data) {
-      const deptIds = res.data.map(dept => dept.ID);
-      await AsyncStorage.removeItem('existedUser');
-      setUserType('L2');
-      await AsyncStorage.setItem(
-        'existedUser',
-        JSON.stringify({
-          userId: loggedUser.userId,
-          role: 'L2',
-          email: userEmail,
-          deptIds: deptIds,
-        }),
-      );
-    } else {
-      await AsyncStorage.removeItem('existedUser');
-      setUserType('L1');
-      await AsyncStorage.setItem(
-        'existedUser',
-        JSON.stringify({
-          userId: loggedUser.userId,
-          role: 'L1',
-          email: userEmail,
-          deptIds: deptIds,
-        }),
-      );
-    }
-
-    let exist = await AsyncStorage.getItem('existedUser');
-    exist = JSON.parse(exist);
-    if (exist && userType && userType != exist.role) {
-      Alert.alert('Your account has been deleted!');
-      setUser(null);
-      await AsyncStorage.removeItem('existedUser');
-      setTimeout(() => {
-        RNRestart.Restart();
-      }, 1000);
-    }
-    console.log('Re-cheking is completed in L1 request');
-  };
-
-  useEffect(() => {
-    fetchDataFromOffice();
-  }, []);
 
   return (
     <ApproveStack.Navigator>

@@ -34,7 +34,6 @@ const Pending = ({navigation}) => {
       'PENDING APPROVAL',
       getAccessToken(),
     );
-    console.log('#######Pending data are #################', result);
     const all_pendings = result.data;
     if (result.data === undefined) {
       setPendings(null);
@@ -44,13 +43,13 @@ const Pending = ({navigation}) => {
     }
     // sorting the pendings data by date
     else {
-      all_pendings.sort((a, b) => {
-        // Parse the date strings into Date objects
-        const dateA = new parseDate(a.Date_of_Visit);
-        const dateB = new parseDate(b.Date_of_Visit);
-        // Compare the Date objects
-        return dateB - dateA;
-      });
+      // all_pendings.sort((a, b) => {
+      //   // Parse the date strings into Date objects
+      //   const dateA = new parseDate(a.Date_of_Visit);
+      //   const dateB = new parseDate(b.Date_of_Visit);
+      //   // Compare the Date objects
+      //   return dateB - dateA;
+      // });
       setPendings(all_pendings);
       setPendingsData(all_pendings);
       setPendingDataFetched(true);
@@ -76,20 +75,19 @@ const Pending = ({navigation}) => {
     );
     const all_pendings = result.data;
     // sorting the pendings data by date
-    console.log('Refresh is called', result);
     if (result.data === undefined) {
       setPendings(null);
       setPendingsData(null);
       setRefreshing(false);
       setLoading(false);
     } else {
-      all_pendings.sort((a, b) => {
-        // Parse the date strings into Date objects
-        const dateA = new parseDate(a.Date_of_Visit);
-        const dateB = new parseDate(b.Date_of_Visit);
-        // Compare the Date objects
-        return dateB - dateA;
-      });
+      // all_pendings.sort((a, b) => {
+      //   // Parse the date strings into Date objects
+      //   const dateA = new parseDate(a.Date_of_Visit);
+      //   const dateB = new parseDate(b.Date_of_Visit);
+      //   // Compare the Date objects
+      //   return dateB - dateA;
+      // });
       setPendings(all_pendings);
       setPendingsData(all_pendings);
       setRefreshing(false);
