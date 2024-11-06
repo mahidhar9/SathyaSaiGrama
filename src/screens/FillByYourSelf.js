@@ -33,8 +33,10 @@ import UserContext from '../../context/UserContext';
 import { Dropdown } from 'react-native-element-dropdown';
 import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME } from '@env';
 import moment from 'moment';
+
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { launchImageLibrary } from 'react-native-image-picker';
+
 
 import SentForApproval from './SentForApproval';
 
@@ -133,11 +135,11 @@ const FillByYourSelf = ({ navigation }) => {
   const onDayPress = day => {
     if (day.dateString >= minDate && day.dateString <= maxDate) {
       setDate(day.dateString);
-      setShowModal(false); // Close calendar after selecting a date
-      setDateOfVisitErr(null); // Clear any error
+      setShowModal(false); 
+      setDateOfVisitErr(null); 
       const monthNumber = dayjs(day.dateString).month();
-      setVisitingMonth(monthNumber); // Update the visiting month
-      console.log('Visiting month (number format):', monthNumber); // Log the visiting month
+      setVisitingMonth(monthNumber);
+      console.log('Visiting month :', monthNumber); 
     }
 
     // const today = new Date();
@@ -185,8 +187,6 @@ const FillByYourSelf = ({ navigation }) => {
   let pastScrollRange = 0;
   let futureScrollRange = 6;
   let MonthNumberCount = visitingMonth;
-  console.log('Count', MonthNumberCount);
-  console.log('Visiting month:', visitingMonth); // Log the visiting month state
   pastScrollRange =
     MonthNumberCount >= startMonth
       ? MonthNumberCount - startMonth
@@ -1088,14 +1088,20 @@ const FillByYourSelf = ({ navigation }) => {
                       <View style={styles.centeredView}>
                         <TouchableWithoutFeedback>
                           <View style={styles.modalView}>
+                          <Pressable 
+                         onResponderStart={() => setShowModal(false)}
+                         >
+                           <Image
+                                source={require('../assets/close_icon.png')}
+                                style={[styles.closeButton]}
+                              />
+                         </Pressable>
                             <CalendarList
-                              style={{width: '90%'}}
                               current={date === 'Select Date' ? minDate : date}
                               minDate={minDate}
                               maxDate={maxDate}
                               pastScrollRange={pastScrollRange}
                               futureScrollRange={futureScrollRange}
-                              scrollEnabled={true}
                               onDayPress={onDayPress}
                               markedDates={{
                                 [date]: {
@@ -1107,9 +1113,10 @@ const FillByYourSelf = ({ navigation }) => {
                                 textSectionTitleColor: '#000',
                                 selectedDayBackgroundColor: '#B21E2B',
                                 todayTextColor: '#FFBE65',
-                                dayTextColor: '#2d4150',
+                                calendarBackground: '#ECECEC',
                                 agendaKnobColor: '#B21E2B',
-                                arrowColor: '#FFBE65',
+                                calendarWidth: 430,
+                                borderRadius: 90,
                               }}
                               showScrollIndicator={true}
                             />
@@ -2259,13 +2266,21 @@ const styles = StyleSheet.create({
   },
   modalView: {
     margin: 20,
-    backgroundColor: 'white',
-    borderRadius: 50,
-    width: '95%',
+    backgroundColor: '#ECECEC',
+    borderRadius: 30,
+    width: '100%',
     height: '60%',
-    padding: 35,
+    padding: 9,
     alignItems: 'center',
     elevation: 5,
+    borderColor: '#B21E2B',
+    borderWidth: 2,
+    overflow: 'hidden',
+  },
+  closeButton: {
+    height: 30,
+    width: 30,
+    left: 175,
   },
 
   HomeorOffice: {
