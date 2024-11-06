@@ -207,7 +207,7 @@ const Login = ({navigation}) => {
         console.log('login data saved into local storage');
         let existedUser = await AsyncStorage.getItem('existedUser');
         existedUser = JSON.parse(existedUser);
-        console.log('Existed user in Base route useEffect:', existedUser);
+        console.log('Existed user in Login useEffect:', existedUser);
         setLoggedUser(existedUser);
         setLoading(false);
         navigation.navigate('FooterTab');

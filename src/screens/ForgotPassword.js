@@ -8,52 +8,60 @@ import {
   KeyboardAvoidingView,
   Platform,
   Image,
+  Modal,
+  TouchableWithoutFeedback
 } from 'react-native';
-import React, {useState} from 'react';
-import {useForm, Controller} from 'react-hook-form';
-import {auth} from '../auth/firebaseConfig';
-import {openInbox} from 'react-native-email-link';
-import {sendPasswordResetEmail} from 'firebase/auth';
+import React, { useState } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { auth } from '../auth/firebaseConfig';
+import { openInbox } from 'react-native-email-link';
+import { fetchSignInMethodsForEmail, sendPasswordResetEmail } from 'firebase/auth';
 
-const ForgotPassword = ({navigation}) => {
+const ForgotPassword = ({ navigation }) => {
   const {
     control,
     handleSubmit,
-    formState: {errors},
+    formState: { errors },
   } = useForm();
 
   const [emailSent, setemailSent] = useState(false);
 
-  const handleForgotPassword = async ({email}) => {
+  const [isForgetVisible, setIsForgetVisible] = useState(false);
+
+
+  const handleForgotPassword = async ({ email }) => {
     try {
-      // Attempt to send password reset email
-      await sendPasswordResetEmail(auth, email.toLowerCase().trim());
+      // Check if the user exists by checking the sign-in methods for the given email
+      console.log("Email is ", email)
+      const signInMethods = await fetchSignInMethodsForEmail(auth, email.toLowerCase().trim());
 
-      // Alert.alert(
-      //   'Success',
-      //   'A password reset email has been sent (if the email exists). Please log back in after resetting your password.',
-      // ),
+      console.log("signInMethod ", signInMethods)
 
-      setemailSent(true); // Updated message
-    } catch (error) {
-      // Handle password reset errors
-      console.error('Password Reset Error:', error);
-      if (error.message === 'Network request failed')
-        Alert.alert(
-          'Network Error',
-          'Failed to fetch data. Please check your network connection and try again.',
-        );
-      if (error.code === 'auth/user-not-found') {
-        Alert.alert(
-          'Info',
-          'The email address was not found. Please check your email or create a new account.',
-        );
+      if (signInMethods.length === 0) {
+        // If no sign-in methods are found, the user does not exist
+        setIsForgetVisible(true);
+        //Alert.alert('Emai id is not registered', 'The given email address not found. Please check your email and retry or .');
       } else {
-        // Handle other errors
-        Alert.alert('Error', 'Password reset failed. Please try again.');
+        // If the user exists, send the password reset email
+        await sendPasswordResetEmail(auth, email.toLowerCase().trim());
+        setemailSent(true); // Update state to show that email has been sent
       }
+    } catch (error) {
+      // Handle network and other errors
+      if (error.message === 'Network request failed') {
+        Alert.alert('Network Error', 'Please check your connection and try again.');
+      } else {
+        Alert.alert('Error', 'An error occurred. Please try again.');
+      }
+      console.error('Password Reset Error:', error);
     }
   };
+
+  const handleForgetModal = () => {
+    setIsForgetVisible(!isForgetVisible);
+  };
+
+
 
   return (
     <KeyboardAvoidingView
@@ -67,7 +75,7 @@ const ForgotPassword = ({navigation}) => {
             name="email"
             control={control}
             defaultValue=""
-            render={({field: {onChange, value}}) => (
+            render={({ field: { onChange, value } }) => (
               <TextInput
                 placeholder="Email for Password Reset"
                 style={styles.inputBox}
@@ -75,7 +83,7 @@ const ForgotPassword = ({navigation}) => {
                 onChangeText={onChange}
               />
             )}
-            rules={{required: true, pattern: /^\S+@\S+$/i}}
+            rules={{ required: true, pattern: /^\S+@\S+$/i }}
           />
           {errors.email?.type === 'required' && (
             <Text style={styles.textError}>Email is required</Text>
@@ -90,7 +98,7 @@ const ForgotPassword = ({navigation}) => {
             <Text style={styles.registerTitle}>Send</Text>
           </TouchableOpacity>
 
-          <View style={[styles.redirect, {marginTop: '5%'}]}>
+          <View style={[styles.redirect, { marginTop: '5%' }]}>
             <Text
               style={{
                 color: '#71727A',
@@ -117,12 +125,51 @@ const ForgotPassword = ({navigation}) => {
               </Text>
             </TouchableOpacity>
           </View>
+          <Modal
+            animationType="fade"
+            transparent={true}
+            visible={isForgetVisible}
+            onRequestClose={() => setIsForgetVisible(!isForgetVisible)}
+          >
+            {/* Background container with reduced opacity */}
+            <TouchableWithoutFeedback onPress={handleForgetModal}>
+              <View style={styles.modalBackground}>
+                <TouchableWithoutFeedback>
+                  <View style={styles.modalView}>
+                    <Text style={styles.titletext}>Email is not registered</Text>
+                    <Text style={styles.subtext}>
+                      The given email address is not registered. Please check your email and retry, or Register
+                    </Text>
+
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8, gap: 30 }}>
+                      <TouchableOpacity
+                        style={[styles.HomeButton, { backgroundColor: '#B21E2B' }]}
+                        onPress={() => {
+                          setIsForgetVisible(false)
+                          navigation.navigate('Register')
+                        }}
+                      >
+                        <Text style={[styles.wewe, styles.wewe1]}>Register</Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        style={[styles.HomeButton, { backgroundColor: '#fff', borderColor: '#B21E2B', borderWidth: 2 }]}
+                        onPress={() => setIsForgetVisible(false)}
+                      >
+                        <Text style={[styles.wewe, styles.wewe2]}>Cancel</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </TouchableWithoutFeedback>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
         </View>
       ) : (
         <>
-          <View style={{margin: 30}}>
+          <View style={{ margin: 30 }}>
             <Image
-              style={{width: '20%', marginTop: 150, alignSelf: 'center'}}
+              style={{ width: '20%', marginTop: 150, alignSelf: 'center' }}
               resizeMode="contain"
               source={require('../../src/assets/imagekey.png')}
             />
@@ -150,13 +197,13 @@ const ForgotPassword = ({navigation}) => {
             style={[
               styles.register,
               styles.register1,
-              {alignSelf: 'center'},
-              {marginTop: 0},
+              { alignSelf: 'center' },
+              { marginTop: 0 },
             ]}
             onPress={() => {
               openInbox();
             }}>
-            <Text style={[styles.registerTitle, {color: 'white'}]}>
+            <Text style={[styles.registerTitle, { color: 'white' }]}>
               Open Email App
             </Text>
           </TouchableOpacity>
@@ -178,8 +225,8 @@ const ForgotPassword = ({navigation}) => {
           <View
             style={[
               styles.redirect,
-              {marginTop: '25%'},
-              {alignSelf: 'center'},
+              { marginTop: '25%' },
+              { alignSelf: 'center' },
             ]}>
             <Text
               style={{
@@ -207,7 +254,7 @@ const ForgotPassword = ({navigation}) => {
               </Text>
             </TouchableOpacity>
           </View>
-          <View style={[styles.redirect, {alignSelf: 'center'}]}>
+          <View style={[styles.redirect, { alignSelf: 'center' }]}>
             <Text
               style={{
                 color: '#71727A',
@@ -285,7 +332,7 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: {
         shadowColor: '#000',
-        shadowOffset: {width: 0, height: 4},
+        shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.25,
         shadowRadius: 5,
       },
@@ -328,6 +375,74 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
   },
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: "3%",
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',  // This adds a semi-transparent dark overlay
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  wewe: {
+    fontFamily: 'Inter',
+    fontSize: 14,
+    fontStyle: 'normal',
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  wewe1: {
+    color: '#fff',
+  },
+  wewe2: {
+    color: '#B21E2B',
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    width: '100%',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  titletext: {
+    fontSize: 20,
+    marginBottom: 10,
+    color: "black",
+    fontWeight: "bold"
+  },
+  subtext: {
+    fontSize: 16,
+    lineHeight: 20,  // Same line height
+    color: '#71727A',
+
+  },
+  HomeButton: {
+    height: 40,
+    width: 100,
+    borderRadius: 12,
+    marginTop: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  linkText: {
+    color: '#B21E2B',  // Hyperlink color
+    textDecorationLine: 'underline',  // Underline for hyperlink appearance
+    fontWeight: '600',  // Bold for emphasis
+    fontSize: 14,       // Same as subtext
+    lineHeight: 20,     // Same as subtext for alignment
+  },
+
+
 });
 
 //Ignore
