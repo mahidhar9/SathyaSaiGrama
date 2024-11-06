@@ -364,6 +364,17 @@ console.log(deletePayload)
       // }
 
       let base64Data = '';
+      if(Platform.OS === 'ios'){
+        if (uri.startsWith('file://')) {
+          base64Data = await RNFS.readFile(uri, 'base64');
+        } else if (!uri.startsWith('file://')) {
+          base64Data =  await RNFS.readFile(`file://${uri}`, 'base64');
+        }
+        else{ 
+          throw new Error(`Unexpected URI format: ${uri}`);
+      }
+      }
+      else{
       if (uri.startsWith('data:image/png;base64,')) {
         base64Data = uri.split('data:image/png;base64,')[1];
       } else if (uri.startsWith('file://')) {
@@ -371,7 +382,7 @@ console.log(deletePayload)
       } else {
         throw new Error(`Unexpected URI format: ${uri}`);
       }
-
+    }
       console.log('extracted base 64 data:', base64Data.length);
 
       if (!base64Data) {

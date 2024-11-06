@@ -15,6 +15,7 @@ import {
   Image,
   ImageBackground,
   Dimensions,
+  Platform,
 } from 'react-native';
 
 import {
@@ -22,7 +23,7 @@ import {
   TouchableOpacity,
 } from 'react-native-gesture-handler';
 import {encode} from 'base64-arraybuffer';
-import RNFS from 'react-native-fs';
+import RNFS from 'react-native-fs'; 
 import {Picker} from '@react-native-picker/picker';
 import DatePicker from 'react-native-modern-datepicker';
 import {getToday, getFormatedDate} from 'react-native-modern-datepicker';
@@ -773,6 +774,17 @@ const FillByYourSelf = ({navigation}) => {
       // }
 
       let base64Data = '';
+      if(Platform.OS === 'ios'){
+        if (uri.startsWith('file://')) {
+          base64Data = await RNFS.readFile(uri, 'base64');
+        } else if (!uri.startsWith('file://')) {
+          base64Data =  await RNFS.readFile(`file://${uri}`, 'base64');
+        }
+        else{ 
+          throw new Error(`Unexpected URI format: ${uri}`);
+      }
+      }
+      else{
       if (uri.startsWith('data:image/png;base64,')) {
         base64Data = uri.split('data:image/png;base64,')[1];
       } else if (uri.startsWith('file://')) {
@@ -780,6 +792,7 @@ const FillByYourSelf = ({navigation}) => {
       } else {
         throw new Error(`Unexpected URI format: ${uri}`);
       }
+    }
 
       console.log('extracted base 64 data:', base64Data.length);
 

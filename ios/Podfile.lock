@@ -1353,7 +1353,7 @@ PODS:
     - RNFBApp
   - RNFS (2.20.0):
     - React-Core
-  - RNGestureHandler (2.18.1):
+  - RNGestureHandler (2.20.2):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1837,7 +1837,7 @@ SPEC CHECKSUMS:
   RNFBDynamicLinks: fc7795ad3b313cf90abae0fab320f77d25db4486
   RNFBMessaging: 85f661b9f16e2b081e6809ef63d3daa4458b9042
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
-  RNGestureHandler: efed690b8493a00b99654043daeb1335276ac4a2
+  RNGestureHandler: a8e61b93b4c5c44e6cd797cdaba43126ec36acaa
   RNNotifee: 8e2d3df3f0e9ce8f5d1fe4c967431138190b6175
   RNPermissions: 294531ede5a64d1528463e88fffef05675842042
   RNReanimated: 45553a3ae29a75a76269595f8554d07d4090e392
