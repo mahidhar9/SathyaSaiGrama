@@ -9,17 +9,12 @@ import {
   View,
   ActivityIndicator,
   Alert,
-  ImageBackground,
   Dimensions,
 } from 'react-native';
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME } from '@env';
 import UserContext from '../../../context/UserContext';
 import { encode } from 'base64-arraybuffer';
-import LinearGradient from 'react-native-linear-gradient';
-import QRCode from 'react-native-qrcode-svg';
-import { captureRef } from 'react-native-view-shot';
-import RNFS from 'react-native-fs';
 import Dialog from 'react-native-dialog';
 
 const { height } = Dimensions.get('window');
@@ -92,17 +87,6 @@ const ViewDetails = ({ navigation, route }) => {
   const [loading, setLoading] = useState(true);
 
   const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Photo/download`;
-  const viewRef = useRef();
-  const [code, setCode] = useState('');
-  const [codeReload, setcodeReload] = useState(false);
-  const [isCodeGenerated, setIsCodeGenerated] = useState(false);
-
-  const codeGenrator = () => {
-    const newCode = Math.floor(
-      100000 + Math.random() * (999999 - 100001 + 1),
-    ).toString();
-    setCode(newCode);
-  };
 
   const onPressOk = () => {
     setDialogVisible(false);
@@ -119,6 +103,7 @@ const ViewDetails = ({ navigation, route }) => {
   const [DialogVisible, setDialogVisible] = useState(false);
   const [L2approvedalreadydialogVisible, setL2approvedalreadydialogVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
   const getImage = async () => {
     try {
       const response = await fetch(url, {
@@ -143,47 +128,6 @@ const ViewDetails = ({ navigation, route }) => {
     }
   };
 
-  const PasscodeUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Passcode`;
-
-
-  const PasscodeData = async () => {
-    setIsCodeGenerated(!isCodeGenerated)
-    const payload = {
-      data: {
-        Passcode: code,
-      },
-    };
-    try {
-      const passcodeResponse = await fetch(PasscodeUrl, {
-        method: 'POST',
-        body: JSON.stringify(payload),
-        headers: {
-          Authorization: `Zoho-oauthtoken ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      const responseData = await passcodeResponse.json();
-
-      console.log('here is the passcode response' + responseData.code);
-
-      if (responseData.code === 3002) {
-        console.log('Post of code was un-sucessfull');
-        setcodeReload(true);
-        console.log('code is:' + code);
-      } else if (responseData.code === 3000) {
-        console.log('code posted successfully to Zoho.');
-        ScreenshotQR();
-        setcodeReload(false);
-      }
-      console.log('Code reload is' + codeReload);
-
-      console.log('Passcode data:' + passcodeResponse);
-    } catch (error) {
-      return false;
-    }
-
-    return codeExsits;
-  };
 
   useEffect(() => {
     const fetchImage = async () => {
@@ -194,6 +138,147 @@ const ViewDetails = ({ navigation, route }) => {
     fetchImage();
   }, []);
 
+
+  const generateQR = async (passcodeData) => {
+    try {
+      const qrUrl = `https://screenshot-for-visitor.onrender.com/generate-image?name=${user.Referrer_App_User_lookup.Name_field}&&passcode=${passcodeData}&&date=${user.Date_of_Visit}`;
+      const res = await fetch(qrUrl);
+      console.log('URL - ', qrUrl);
+      console.log("res from fetch img : ", res)
+
+      if (!res.ok) {
+        console.error('Error fetching image:', res.statusText);
+        return;
+      }
+
+      // Convert response to a Blob
+      const imageBlob = await res.blob();
+
+      // Convert Blob to base64 using a Promise
+      const base64Data = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const result = reader.result.split(',')[1]; // Extract the base64 part only
+          resolve(result);
+        };
+        reader.onerror = (error) => {
+          console.error('Error reading blob:', error);
+          reject(error);
+        };
+        reader.readAsDataURL(imageBlob);
+      });
+
+      if (!base64Data) {
+        throw new Error('Failed to extract base64 data from Blob');
+      }
+
+      // Prepare data to send as form data
+      const postData = new FormData();
+      postData.append('file', {
+        uri: `data:image/png;base64,${base64Data}`,
+        name: 'qrcode.png',
+        type: 'image/png',
+      });
+
+      // First PATCH request to Zoho
+      const payload = {
+        data: {
+          Generated_Passcode: passcodeData,
+        },
+      };
+
+      const url1 = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}`;
+      console.log(url1);
+      const response1 = await fetch(url1, {
+        method: 'PATCH',
+        body: JSON.stringify(payload),
+        headers: {
+          Authorization: `Zoho-oauthtoken ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      console.log('Posting to Zoho....');
+      if (response1.ok) {
+        console.log('Code posted successfully to Zoho.');
+        console.log('Response for the code is:', response1);
+      } else {
+        console.log('Failed to post code to Zoho:', response1.status, response1.statusText);
+      }
+
+      // POST request to upload image to Zoho
+      const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Generated_QR_Code/upload`;
+      console.log(url);
+      const response = await fetch(url, {
+        method: 'POST',
+        body: postData,
+        headers: {
+          Authorization: `Zoho-oauthtoken ${accessToken}`,
+          'Cache-Control': 'no-cache', // Prevent caching
+          Pragma: 'no-cache', // Prevent caching in older HTTP/1.0 proxies
+          Expires: '0',
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      console.log('Posting image to Zoho....');
+
+      if (response.ok) {
+        console.log('Image uploaded successfully to Zoho.', response);
+        return;
+      } else {
+        console.log('Failed to upload image to Zoho: ', response.status,);
+        return;
+      }
+    } catch (error) {
+      console.error('Error capturing and uploading QR code:', error);
+    }
+  };
+
+
+  const passcodeGenrator = async () => {
+    let generatedPasscode;
+    while (true) {
+      const newCode = Math.floor(100000 + Math.random() * (999999 - 100001 + 1),).toString();
+      const codeurl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Passcode_Report?criteria=Passcode==${newCode}`
+      const response = await fetch(codeurl, {
+        method: 'GET',
+        headers: {
+          Authorization: `Zoho-oauthtoken ${accessToken}`,
+        },
+        params: {
+          criteria: `Passcode==${newCode}`,
+        },
+      });
+
+      if (response.ok) {
+        continue;
+      }
+      generatedPasscode = newCode
+      break;
+    }
+
+    const payload = {
+      data: {
+        Passcode: generatedPasscode,
+      },
+    };
+
+    const PasscodeUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Passcode`;
+    const passcodeResponse = await fetch(PasscodeUrl, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: {
+        Authorization: `Zoho-oauthtoken ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const responseData = await passcodeResponse.json();
+    console.log("response of posting passcode to zoho : ", responseData);
+
+    await generateQR(generatedPasscode);
+    return;
+  };
+
   const onApprove = async () => {
     setapprovingLoading(true);
     const status = user.L2_Approval_Status;
@@ -203,7 +288,6 @@ const ViewDetails = ({ navigation, route }) => {
     };
 
     const updateData = {
-      //criteria: `ID==${user.ID}`,
       data: updateField,
     };
 
@@ -222,9 +306,10 @@ const ViewDetails = ({ navigation, route }) => {
         setL2DeniedDataFetched(false);
         setL2ApproveDataFetched(false);
       }
-      PasscodeData();
-      // Alert.alert('Visitor Approved');
-      // navigation.navigate('L2Approved');
+      await passcodeGenrator();
+      setapprovingLoading(false);
+      Alert.alert('Visitor Approved');
+      navigation.navigate('L2Approved');
     }
     else if (response.error[0].alert_message[0] === "L2 is already approved." || response.error[0].alert_message[0] === "Record cannot be edited after L2 Approved") {
       setL2approvedalreadydialogVisible(true);
@@ -312,12 +397,8 @@ const ViewDetails = ({ navigation, route }) => {
     }
   };
 
-  console.log('User in View details of L2 : ', user);
-  console.log('Screen Height:', height);
-
   let heightStyles;
   if (height > 900) {
-
     heightStyles = normalScreen;
   } else if (height > 750) {
     heightStyles = mediumScreen;
@@ -325,117 +406,6 @@ const ViewDetails = ({ navigation, route }) => {
     heightStyles = smallScreen;
   }
 
-  const ScreenshotQR = async () => {
-    try {
-      console.log('capturing view.......');
-      const uri = await captureRef(viewRef, {
-        format: 'png',
-        quality: 0.8,
-      });
-
-      console.log('view captured Uri:', uri);
-
-      // if (!uri){throw new Error('failed to capture, uri is undefined or null');
-      // }
-
-      let base64Data = '';
-      if (uri.startsWith('data:image/png;base64,')) {
-        base64Data = uri.split('data:image/png;base64,')[1];
-      } else if (uri.startsWith('file://')) {
-        base64Data = await RNFS.readFile(uri, 'base64');
-      } else {
-        throw new Error(`Unexpected URI format: ${uri}`);
-      }
-
-      console.log('extracted base 64 data:', base64Data.length);
-
-      if (!base64Data) {
-        throw new Error('failed to extract base64 Data from URI');
-      }
-
-      const postData = new FormData();
-      postData.append('file', {
-        uri: `data:image/png;base64, ${base64Data}`,
-        name: 'qrcode.png',
-        type: 'image/png',
-      });
-
-      const payload = {
-        data: {
-          Generated_Passcode: code,
-        },
-      };
-
-      const url1 = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}`;
-      console.log(url1);
-      const response1 = await fetch(
-        url1,
-        {
-          method: 'PATCH',
-          body: JSON.stringify(payload),
-          headers: {
-            Authorization: `Zoho-oauthtoken ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-        },
-        console.log('posting to zoho....'),
-      );
-      if (response1.ok) {
-        console.log('code posted successfully to Zoho.');
-        console.log('response for the code is:', response1);
-      } else {
-        console.log(
-          'Failed to post code to Zoho:',
-          response1.status,
-          response1.statusText,
-          response1.ok,
-        );
-      }
-
-      const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Generated_QR_Code/upload`;
-      console.log(url);
-      const response = await fetch(
-        url,
-        {
-          method: 'POST',
-          body: postData,
-          headers: {
-            Authorization: `Zoho-oauthtoken ${accessToken}`,
-            'Content-Type': 'multipart/form-data',
-          },
-        },
-        console.log('posting to zoho....'),
-      );
-
-      if (response.ok) {
-        console.log('Image uploaded successfully to Zoho.', response);
-        console.log('inside function of chainging screens');
-        Alert.alert('Visitor Approved');
-        navigation.navigate('L2Approved');
-        setapprovingLoading(false);
-      } else {
-        console.log(
-          'Failed to upload image to Zoho:',
-          response.status,
-          response.statusText,
-        );
-      }
-    } catch (error) {
-      console.error('Error capturing and uploading QR code:', error);
-    }
-  };
-
-  useEffect(()=>{
-      codeGenrator();
-  }, [isCodeGenerated]);
-
-  useEffect(() => {
-    if (codeReload === true) {
-      PasscodeData();
-    }
-  }, [codeReload]);
-
-  //zIndex:1
   return (
     <>
       <SafeAreaView style={{ flex: 1, backgroundColor: '#EEEEEE', zIndex: 1 }}>
@@ -707,65 +677,6 @@ const ViewDetails = ({ navigation, route }) => {
           </View>
         </ScrollView>
       </SafeAreaView>
-      <View style={[heightStyles.hidden]}>
-        <View ref={viewRef} style={[heightStyles.container]}>
-          <View style={{ flex: 1 }}>
-            <View style={[heightStyles.qrCodeContainer]}>
-              <Text style={[heightStyles.title]}>
-                {user.Referrer_App_User_lookup.Name_field}
-              </Text>
-              <Text style={[heightStyles.title2]}>has invited you</Text>
-              <Text style={[heightStyles.text]}>
-                Show this QR code or OTP to the guard at the gate
-              </Text>
-              {code ? (
-                <QRCode value={code} size={160} />
-              ) : (
-                <Text>Genrating Qr code....</Text>
-              )}
-              <Text style={[heightStyles.middleText]}>---OR---</Text>
-              <View style={[heightStyles.codeBackdrop]}>
-                <Text style={[heightStyles.code]}>{code}</Text>
-                <View style={[heightStyles.BottomtextContainer]}>
-                  <Text style={[heightStyles.dateOfArrivalText]}>
-                    {user.Date_of_Visit}
-                  </Text>
-                  <Text style={[heightStyles.Bottomtext]}>
-                    Sri Sathya Sai Grama -
-                  </Text>
-                  <Text style={[heightStyles.Bottomtext]}>
-                    Muddenahalli Rd,
-                  </Text>
-                  <Text style={[heightStyles.Bottomtext]}>
-                    {' '}
-                    Karnataka 562101,
-                  </Text>
-                  <View style={{ flex: 1 }}></View>
-                </View>
-              </View>
-              <View style={{ flex: 0.7 }}>
-                <ImageBackground
-                  style={[heightStyles.BottomImage]}
-                  source={require('../../../src/assets/ashramQrScreen.jpg')}>
-                  <LinearGradient
-                    colors={['rgba(255,255,255,1)', 'rgba(255,255,255,0)']}
-                    style={[heightStyles.gradient, heightStyles.topGradient]}
-                  />
-                  <LinearGradient
-                    colors={['rgba(255,255,255,0)', 'rgba(255,255,255,1)']}
-                    style={[heightStyles.gradient, heightStyles.bottomGradient]}
-                  />
-                </ImageBackground>
-
-                <ImageBackground
-                  style={[heightStyles.BottomLogoImage]}
-                  source={require('../../../src/assets/SSG_OWOF.png')}></ImageBackground>
-              </View>
-            </View>
-          </View>
-        </View>
-      </View>
-
       <Dialog.Container visible={DialogVisible} contentStyle={styles.canNotApproveDialogue}>
         <Image source={require('../../../src/assets/Denied.png')}
 

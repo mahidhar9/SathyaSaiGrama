@@ -26,13 +26,13 @@ const Denied = ({ navigation }) => {
       setLoading(false);
     }
     else {
-      all_denieds.sort((a, b) => {
-        // Parse the date strings into Date objects
-        const dateA = new parseDate(a.Date_of_Visit);
-        const dateB = new parseDate(b.Date_of_Visit);
-        // Compare the Date objects
-        return dateB - dateA;
-      });
+      // all_denieds.sort((a, b) => {
+      //   // Parse the date strings into Date objects
+      //   const dateA = new parseDate(a.Date_of_Visit);
+      //   const dateB = new parseDate(b.Date_of_Visit);
+      //   // Compare the Date objects
+      //   return dateB - dateA;
+      // });
       setDenieds(all_denieds);
       setDeniedsData(all_denieds);
       setLoading(false);
@@ -58,13 +58,13 @@ const Denied = ({ navigation }) => {
 
 
     } else {
-      all_denieds.sort((a, b) => {
-        // Parse the date strings into Date objects
-        const dateA = new parseDate(a.Date_of_Visit);
-        const dateB = new parseDate(b.Date_of_Visit);
-        // Compare the Date objects
-        return dateB - dateA;
-      });
+      // all_denieds.sort((a, b) => {
+      //   // Parse the date strings into Date objects
+      //   const dateA = new parseDate(a.Date_of_Visit);
+      //   const dateB = new parseDate(b.Date_of_Visit);
+      //   // Compare the Date objects
+      //   return dateB - dateA;
+      // });
       setDenieds(all_denieds);
       setDeniedsData(all_denieds);
       setRefreshing(false);

@@ -42,13 +42,13 @@ const Pending = ({navigation}) => {
     }
     // sorting the pendings data by date
     else {
-      all_pendings.sort((a, b) => {
-        // Parse the date strings into Date objects
-        const dateA = new parseDate(a.Date_of_Visit);
-        const dateB = new parseDate(b.Date_of_Visit);
-        // Compare the Date objects
-        return dateB - dateA;
-      });
+      // all_pendings.sort((a, b) => {
+      //   // Parse the date strings into Date objects
+      //   const dateA = new parseDate(a.Date_of_Visit);
+      //   const dateB = new parseDate(b.Date_of_Visit);
+      //   // Compare the Date objects
+      //   return dateB - dateA;
+      // });
       setPendings(all_pendings);
       setPendingsData(all_pendings);
       setPendingDataFetched(true);
@@ -80,13 +80,13 @@ const Pending = ({navigation}) => {
       setRefreshing(false);
       setLoading(false);
     } else {
-      all_pendings.sort((a, b) => {
-        // Parse the date strings into Date objects
-        const dateA = new parseDate(a.Date_of_Visit);
-        const dateB = new parseDate(b.Date_of_Visit);
-        // Compare the Date objects
-        return dateB - dateA;
-      });
+      // all_pendings.sort((a, b) => {
+      //   // Parse the date strings into Date objects
+      //   const dateA = new parseDate(a.Date_of_Visit);
+      //   const dateB = new parseDate(b.Date_of_Visit);
+      //   // Compare the Date objects
+      //   return dateB - dateA;
+      // });
       setPendings(all_pendings);
       setPendingsData(all_pendings);
       setRefreshing(false);

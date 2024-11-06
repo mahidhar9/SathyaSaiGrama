@@ -150,35 +150,13 @@ const Edit = ({route, navigation}) => {
   }, [formattedValue]);
 
   const saveDataFromBasicInfo = async basicInfo => {
+    console.log("basic info: ", basicInfo)
     setSubmitFlag(true);
 
-    // Perform validation synchronously and store result locally
-    let localPhoneErr = null;
-    let localPhoneValidErr = null;
-
-    if (!formattedValue) {
-      localPhoneErr = 'Phone number is required';
-    } else {
-      const parsedPhoneNumber = parsePhoneNumberFromString(formattedValue);
-      if (!parsedPhoneNumber || !parsedPhoneNumber.isValid()) {
-        localPhoneValidErr = 'Invalid phone number';
-      }
-    }
-
-    // Log the errors for debugging
-    console.log('Phone Error:', localPhoneErr);
-    console.log('Phone Valid Error:', localPhoneValidErr);
-
-    // Set the errors in state so they can be displayed in the UI
-    setPhoneErr(localPhoneErr);
-    setPhoneValidErr(localPhoneValidErr);
-
-    // Stop submission if there are errors
-    if (localPhoneErr || localPhoneValidErr) {
-      console.log('Validation failed. Aborting submission.');
+    if(phoneErr || phoneValidErr){
+      setFormattedValue("");
       return;
     }
-
     setLoading(true);
     console.log('Phone number is: ', formattedValue);
 
@@ -198,6 +176,7 @@ const Edit = ({route, navigation}) => {
         Gender: basicInfo.gender,
       };
     }
+    console.log("object------------- ", updateddata)
 
     const user = {
       criteria: `ID==${L1ID}`,
@@ -209,6 +188,7 @@ const Edit = ({route, navigation}) => {
       user,
       getAccessToken(),
     );
+    console.log(" (((((((((((((((((( ", resFromUserUpdate)
 
     if (resFromUserUpdate.result[0].code === 3000) {
       setLoading(false);
