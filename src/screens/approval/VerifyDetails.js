@@ -17,7 +17,7 @@ import React, {
   useState,
   useCallback,
 } from 'react';
-import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME } from '@env';
+import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME, SECRET_KEY } from '@env';
 
 import UserContext from '../../../context/UserContext';
 import { encode } from 'base64-arraybuffer';
@@ -172,7 +172,7 @@ const VerifyDetails = ({ navigation, route }) => {
 
   const generateQR = async (passcodeData) => {
     try {
-      const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${user.Referrer_App_User_lookup.Name_field}&&passcode=${passcodeData}&&date=${user.Date_of_Visit}`;
+      const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${user.Referrer_App_User_lookup.Name_field}&&passcode=${passcodeData}&&date=${user.Date_of_Visit}&&key=${SECRET_KEY}`;
       const res = await fetch(qrUrl);
       console.log('URL - ', qrUrl);
       console.log("res from fetch img : ", res)

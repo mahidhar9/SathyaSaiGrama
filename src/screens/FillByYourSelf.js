@@ -21,7 +21,7 @@ import PhoneInput from 'react-native-phone-number-input';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import UserContext from '../../context/UserContext';
 import { Dropdown } from 'react-native-element-dropdown';
-import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME } from '@env';
+import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME, SECRET_KEY } from '@env';
 import moment from 'moment';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { launchImageLibrary } from 'react-native-image-picker';
@@ -194,7 +194,7 @@ const FillByYourSelf = ({ navigation }) => {
 
   const generateQR = async (passcodeData) => {
     try {
-      const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${loggedUser.name}&&passcode=${passcodeData}&&date=${date}`;
+      const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${loggedUser.name}&&passcode=${passcodeData}&&date=${date}&&key=${SECRET_KEY}`;
       const res = await fetch(qrUrl);
       console.log('URL - ', qrUrl);
       console.log("res from fetch img : ", res)
