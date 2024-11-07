@@ -252,7 +252,7 @@ const FillByYourSelf = ({ navigation }) => {
 
   const generateQR = async (passcodeData) => {
     try {
-      const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${loggedUser.name}&&passcode=${passcodeData}&&date=${date}`;
+      const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${loggedUser.name}&&passcode=${passcodeData}&&date=${convertDateFormat(date)}`;
       const res = await fetch(qrUrl);
       console.log('URL - ', qrUrl);
       console.log("res from fetch img : ", res)
@@ -1511,66 +1511,6 @@ const FillByYourSelf = ({ navigation }) => {
           </GestureHandlerRootView>
         </SafeAreaView>
       )}
-
-      <View style={[heightStyles.hidden]}>
-        {/* <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
-                <Text style={styles.btntxt}>Approve</Text>
-              </TouchableOpacity> */}
-        <View ref={viewRef} style={[heightStyles.container]}>
-          <View style={{flex: 1}}>
-            <View style={[heightStyles.qrCodeContainer]}>
-              <Text style={[heightStyles.title]}>{loggedUser.name}</Text>
-              <Text style={[heightStyles.title2]}>has invited you</Text>
-              <Text style={[heightStyles.text]}>
-                Show this QR code or OTP to the guard at the gate
-              </Text>
-              {code ? (
-                <QRCode value={code} size={160} />
-              ) : (
-                <Text>Genrating Qr code....</Text>
-              )}
-              <Text style={[heightStyles.middleText]}>---OR---</Text>
-              <View style={[heightStyles.codeBackdrop]}>
-                <Text style={[heightStyles.code]}>{code}</Text>
-                <View style={[heightStyles.BottomtextContainer]}>
-                  <Text style={[heightStyles.dateOfArrivalText]}>
-                    {convertDateFormat(date)}
-                  </Text>
-                  <Text style={[heightStyles.Bottomtext]}>
-                    Sathya Sai Grama -
-                  </Text>
-                  <Text style={[heightStyles.Bottomtext]}>
-                    Muddenahalli Rd,
-                  </Text>
-                  <Text style={[heightStyles.Bottomtext]}>
-                    {' '}
-                    Karnataka 562101,
-                  </Text>
-                  <View style={{flex: 1}}></View>
-                </View>
-              </View>
-              <View style={{flex: 0.7}}>
-                <ImageBackground
-                  style={[heightStyles.BottomImage]}
-                  source={require('../../src/assets/ashramQrScreen.jpg')}>
-                  <LinearGradient
-                    colors={['rgba(255,255,255,1)', 'rgba(255,255,255,0)']}
-                    style={[heightStyles.gradient, heightStyles.topGradient]}
-                  />
-                  <LinearGradient
-                    colors={['rgba(255,255,255,0)', 'rgba(255,255,255,1)']}
-                    style={[heightStyles.gradient, heightStyles.bottomGradient]}
-                  />
-                </ImageBackground>
-
-                <ImageBackground
-                  style={[heightStyles.BottomLogoImage]}
-                  source={require('../../src/assets/SSG_OWOF.png')}></ImageBackground>
-              </View>
-            </View>
-          </View>
-        </View>
-      </View>
 
     </>
   );
