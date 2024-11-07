@@ -481,7 +481,7 @@ const VerifyDetails = ({ navigation, route }) => {
         url: `file://${path}`,
       });
     } catch (error) {
-      Alert.alert('Error', error.message);
+      Alert.alert('','The file is not shared.' );
     }
   };
 

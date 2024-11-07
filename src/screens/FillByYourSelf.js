@@ -6,7 +6,8 @@ import {
   StyleSheet,
   Alert,
   Modal,
-  TouchableOpacity,
+  // TouchableOpacity,
+  Pressable,
   ScrollView,
   LogBox,
   TouchableWithoutFeedback,
@@ -14,7 +15,16 @@ import {
   Image,
   Dimensions,
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+
+
+import {
+  GestureHandlerRootView,
+  TouchableOpacity,
+} from 'react-native-gesture-handler';
+import {encode} from 'base64-arraybuffer';
+import RNFS from 'react-native-fs';
+import {Picker} from '@react-native-picker/picker';
+
 import DatePicker from 'react-native-modern-datepicker';
 import { getToday, getFormatedDate } from 'react-native-modern-datepicker';
 import PhoneInput from 'react-native-phone-number-input';
@@ -23,10 +33,17 @@ import UserContext from '../../context/UserContext';
 import { Dropdown } from 'react-native-element-dropdown';
 import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME, SECRET_KEY } from '@env';
 import moment from 'moment';
+
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { launchImageLibrary } from 'react-native-image-picker';
 
+
 import SentForApproval from './SentForApproval';
+
+import {updateRecord} from './approval/VerifyDetails';
+import {isJSDocCommentContainingNode} from 'typescript';
+import dayjs from 'dayjs';
+import {CalendarList} from 'react-native-calendars';
 
 LogBox.ignoreLogs(['Warnings...']);
 LogBox.ignoreAllLogs();
@@ -97,31 +114,60 @@ const FillByYourSelf = ({ navigation }) => {
 
 
   const [date, setDate] = useState('Select Date');
+
   const [showModal, setShowModal] = useState(false);
   const L1ID = loggedUser.userId;
-  const today = new Date();
 
-  const startDate = getFormatedDate(
-    today.setDate(today.getDate()),
-    'YYYY/MM/DD',
-  );
-  const addDaysToDate = (dateString, daysToAdd) => {
-    // Convert the input string (YYYY/MM/DD) into a Date object
-    const [year, month, day] = dateString.split('/'); // Split the string by '/'
-    const date = new Date(year, month - 1, day); // Month is 0-indexed in JavaScript
+  console.log('L1ID', L1ID);
+  const minDate = dayjs().format('YYYY-MM-DD');
+  const maxDate = dayjs().add(6, 'month').format('YYYY-MM-DD');
 
-    // Add the specified number of days (60 days in this case)
-    date.setDate(date.getDate() + daysToAdd);
 
-    // Format the new date back to 'YYYY/MM/DD' 
-    const newYear = date.getFullYear();
-    const newMonth = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed, so add 1
-    const newDay = String(date.getDate()).padStart(2, '0');
+  const startMonth = dayjs(minDate).month();
+  const endMonth = dayjs(maxDate).month();
+  const [visitingMonth, setVisitingMonth] = useState(startMonth);
 
-    return `${newYear}/${newMonth}/${newDay}`;
+  const convertDateFormat = date => {
+    return date === 'Select Date'
+      ? 'Select Date'
+      : dayjs(date).format('DD-MMM-YYYY');
   };
-  const endDate = addDaysToDate(startDate, 60);
-  console.log('endDate', endDate);
+  const onDayPress = day => {
+    if (day.dateString >= minDate && day.dateString <= maxDate) {
+      setDate(day.dateString);
+      setShowModal(false); 
+      setDateOfVisitErr(null); 
+      const monthNumber = dayjs(day.dateString).month();
+      setVisitingMonth(monthNumber);
+      console.log('Visiting month :', monthNumber); 
+    }
+
+    // const today = new Date();
+
+
+    // const startDate = getFormatedDate(
+    //   today.setDate(today.getDate()),
+    //   'YYYY/MM/DD',
+    // );
+    // const addDaysToDate = (dateString, daysToAdd) => {
+    //   // Convert the input string (YYYY/MM/DD) into a Date object
+    //   const [year, month, day] = dateString.split('/'); // Split the string by '/'
+    //   const date = new Date(year, month - 1, day); // Month is 0-indexed in JavaScript
+
+
+    //   // Add the specified number of days (60 days in this case)
+    //   date.setDate(date.getDate() + daysToAdd);
+
+    //   // Format the new date back to 'YYYY/MM/DD'
+    //   const newYear = date.getFullYear();
+    //   const newMonth = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed, so add 1
+    //   const newDay = String(date.getDate()).padStart(2, '0');
+
+    //   return `${newYear}/${newMonth}/${newDay}`;
+    // };
+  };
+  // const endDate = addDaysToDate(startDate, 60);
+  // console.log('endDate', endDate);
   const approvalToVisitorID = useRef(null);
   const viewRef = useRef();
 
@@ -129,14 +175,26 @@ const FillByYourSelf = ({ navigation }) => {
   const singleorgroup = ['Single', 'Group'];
   const homeoroffice = ['Home', 'Office'];
 
-  const handleDateChange = selectedDate => {
-    const formatteddate = moment(selectedDate, 'YYYY-MM-DD').format(
-      'DD-MMM-YYYY',
-    );
-    setDate(formatteddate);
-    setShowModal(!showModal); //Date Picker
-    setDateOfVisitErr(null);
-  };
+  // const handleDateChange = selectedDate => {
+  //   const formatteddate = moment(selectedDate, 'YYYY-MM-DD').format(
+  //     'DD-MMM-YYYY',
+  //   );
+  //   setDate(formatteddate);
+  //   setShowModal(!showModal); //Date Picker
+  //   setDateOfVisitErr(null);
+  // };
+
+  let pastScrollRange = 0;
+  let futureScrollRange = 6;
+  let MonthNumberCount = visitingMonth;
+  pastScrollRange =
+    MonthNumberCount >= startMonth
+      ? MonthNumberCount - startMonth
+      : MonthNumberCount + 12 - startMonth;
+  futureScrollRange =
+    endMonth >= MonthNumberCount
+      ? endMonth - MonthNumberCount
+      : endMonth + 12 - MonthNumberCount;
 
   const prefixValues = [
     { label: 'Mr.', value: 'Mr.' },
@@ -394,7 +452,7 @@ const FillByYourSelf = ({ navigation }) => {
         Department: DepartmentID,
         Phone_Number: formattedValue,
         Priority: priority,
-        Date_of_Visit: date,
+        Date_of_Visit: convertDateFormat(date),
         Gender: selectedGender,
         Guest_Category: guestCategory,
         Number_of_Men: menCount,
@@ -841,154 +899,228 @@ const FillByYourSelf = ({ navigation }) => {
         <SentForApproval style={{ zIndex: 1 }} />
       ) : (
         <SafeAreaView style={styles.container}>
-          <ScrollView style={{ paddingStart: 8 }}>
-            <View>
-              <View style={styles.namecontainer}>
-                <Text style={[styles.label, { marginTop: 20 }]}>
-                  Name <Text style={{ color: 'red' }}>*</Text>
-                </Text>
-                <View
-                  style={{
-                    flex: 1,
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                  }}>
-                  <Dropdown
-                    style={[styles.dropdown, { width: '25%' }]}
-                    placeholderStyle={styles.placeholderStyle}
-                    selectedTextStyle={styles.selectedTextStyle}
-                    inputSearchStyle={styles.inputSearchStyle}
-                    iconStyle={styles.iconStyle}
-                    data={prefixValues}
-                    maxHeight={300}
-                    labelField="label"
-                    valueField="value"
-                    placeholder={!isFocus ? 'Select' : '...'}
-                    searchPlaceholder="Search..."
-                    value={prefix}
-                    onFocus={() => setIsFocus(true)}
-                    onBlur={() => setIsFocus(false)}
-                    onChange={item => {
+          <GestureHandlerRootView>
+            <ScrollView style={{paddingStart: 8}}>
+              <View>
+                <View style={styles.namecontainer}>
+                  <Text style={[styles.label, {marginTop: 20}]}>
+                    Name <Text style={{color: 'red'}}>*</Text>
+                  </Text>
+                  <View
+                    style={{
+                      flex: 1,
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                    }}>
+                    <Dropdown
+                      style={[styles.dropdown, {width: '25%'}]}
+                      placeholderStyle={styles.placeholderStyle}
+                      selectedTextStyle={styles.selectedTextStyle}
+                      inputSearchStyle={styles.inputSearchStyle}
+                      iconStyle={styles.iconStyle}
+                      data={prefixValues}
+                      maxHeight={300}
+                      labelField="label"
+                      valueField="value"
+                      placeholder={!isFocus ? 'Select' : '...'}
+                      searchPlaceholder="Search..."
+                      value={prefix}
+                      onFocus={() => setIsFocus(true)}
+                      onBlur={() => setIsFocus(false)}
+                      onChange={item => {
+                        if (submitFlag) {
+                          validateForm();
+                        }
+                        setPrefix(item.value);
+                        setIsFocus(false);
+                      }}
+                    />
+
+                    <TextInput
+                      style={[
+                        styles.dropdown,
+                        {width: '32%', color: '#71727A'},
+                        styles.input,
+                      ]}
+                      value={firstName}
+                      onChangeText={txt => {
+                        handleFirstNameChange(txt);
+                        if (firstName) {
+                          setFirstName(txt);
+                        }
+                      }}
+                      selectionColor={'#B21E2B'}
+                    />
+
+                    <TextInput
+                      style={[
+                        styles.dropdown,
+                        {width: '30%', color: '#71727A'},
+                      ]}
+                      value={lastName}
+                      onChangeText={txt => {
+                        handleLastNameChange(txt);
+                        if (submitFlag && lastName) {
+                          setLastName(txt);
+                          validateForm();
+                        }
+                      }}
+                      selectionColor={'#B21E2B'}
+                    />
+                  </View>
+                  <View
+                    style={{
+                      flex: 1,
+                      flexDirection: 'row',
+                    }}>
+                    <Text style={[styles.bottomtext, {marginRight: 75}]}>
+                      Prefix
+                    </Text>
+
+                    <Text style={[styles.bottomtext, {marginRight: 72}]}>
+                      First Name
+                    </Text>
+
+                    <Text style={styles.bottomtext}>Last Name</Text>
+                  </View>
+                  {nameErr && <Text style={styles.errorText}>{nameErr}</Text>}
+                  {firstNameError && lastNameError ? (
+                    <Text style={styles.errorText}>{firstNameError}</Text>
+                  ) : firstNameError || lastNameError ? (
+                    <Text style={styles.errorText}>
+                      {firstNameError + lastNameError}
+                    </Text>
+                  ) : null}
+                </View>
+
+                <View style={styles.namecontainer}>
+                  <Text style={styles.label}>
+                    Phone <Text style={{color: 'red'}}>*</Text>
+                  </Text>
+                  <PhoneInput
+                    defaultValue={value}
+                    defaultCode="IN"
+                    layout="first"
+                    containerStyle={styles.phoneInputContainer}
+                    textContainerStyle={styles.textContainer}
+                    flagButtonStyle={styles.flagButton}
+                    codeTextStyle={styles.codeText}
+                    onChangeText={text => {
+                      setPhoneNumber(text);
                       if (submitFlag) {
                         validateForm();
                       }
-                      setPrefix(item.value);
-                      setIsFocus(false);
                     }}
-                  />
-
-                  <TextInput
-                    style={[
-                      styles.dropdown,
-                      { width: '32%', color: '#71727A' },
-                      styles.input,
-                    ]}
-                    value={firstName}
-                    onChangeText={txt => {
-                      handleFirstNameChange(txt);
-                      if (firstName) {
-                        setFirstName(txt);
-                      }
+                    onChangeFormattedText={text => {
+                      setFormattedValue(text);
                     }}
-                    selectionColor={'#B21E2B'}
+                    countryPickerProps={{withAlphaFilter: true}}
+                    disabled={false}
+                    withDarkTheme
+                    withShadow
                   />
-
-                  <TextInput
-                    style={[styles.dropdown, { width: '30%', color: '#71727A' }]}
-                    value={lastName}
-                    onChangeText={txt => {
-                      handleLastNameChange(txt);
-                      if (submitFlag && lastName) {
-                        setLastName(txt);
-                        validateForm();
-                      }
-                    }}
-                    selectionColor={'#B21E2B'}
-                  />
+                  {phoneErr && <Text style={styles.errorText}>{phoneErr}</Text>}
+                  {phoneValidErr && (
+                    <Text style={styles.errorText}>{phoneValidErr}</Text>
+                  )}
                 </View>
-                <View
-                  style={{
-                    flex: 1,
-                    flexDirection: 'row',
-                  }}>
-                  <Text style={[styles.bottomtext, { marginRight: 75 }]}>
-                    Prefix
+                <View style={styles.namecontainer}>
+                  <Text style={styles.label}>
+                    Date of Visit <Text style={{color: 'red'}}>*</Text>
                   </Text>
-
-                  <Text style={[styles.bottomtext, { marginRight: 72 }]}>
-                    First Name
-                  </Text>
-
-                  <Text style={styles.bottomtext}>Last Name</Text>
-                </View>
-                {nameErr && <Text style={styles.errorText}>{nameErr}</Text>}
-                {firstNameError && lastNameError ? (
-                  <Text style={styles.errorText}>{firstNameError}</Text>
-                ) : firstNameError || lastNameError ? (
-                  <Text style={styles.errorText}>
-                    {firstNameError + lastNameError}
-                  </Text>
-                ) : null}
-              </View>
-
-              <View style={styles.namecontainer}>
-                <Text style={styles.label}>
-                  Phone <Text style={{ color: 'red' }}>*</Text>
-                </Text>
-
-                <PhoneInput
-                  defaultValue={value}
-                  defaultCode="IN"
-                  layout="first"
-                  containerStyle={styles.phoneInputContainer}
-                  textContainerStyle={styles.textContainer}
-                  flagButtonStyle={styles.flagButton}
-                  codeTextStyle={styles.codeText}
-                  onChangeText={text => {
-                    setPhoneNumber(text);
-                    if (submitFlag) {
-                      validateForm();
-                    }
-                  }}
-                  onChangeFormattedText={text => {
-                    setFormattedValue(text);
-                  }}
-                  countryPickerProps={{ withAlphaFilter: true }}
-                  disabled={false}
-                  withDarkTheme
-                  withShadow
-                />
-                {phoneErr && <Text style={styles.errorText}>{phoneErr}</Text>}
-                {phoneValidErr && (
-                  <Text style={styles.errorText}>{phoneValidErr}</Text>
-                )}
-              </View>
-              <View style={styles.namecontainer}>
-                <Text style={styles.label}>
-                  Date of Visit <Text style={{ color: 'red' }}>*</Text>
-                </Text>
-                <TouchableOpacity onPress={() => setShowModal(true)}>
-                  <TextInput
-                    style={[
-                      styles.phoneInputContainer,
-                      { paddingLeft: 12, color: '#71727A' },
-                    ]}
-                    value={date}
-                    editable={false}
-                  />
-                </TouchableOpacity>
-                {dateOfVisitErr && (
-                  <Text style={styles.errorText}>{dateOfVisitErr}</Text>
-                )}
-                <Modal
-                  animationType="slide"
-                  transparent={true}
-                  visible={showModal}
-                  onRequestClose={() => setShowModal(false)}>
-                  <TouchableWithoutFeedback onPress={() => setShowModal(false)}>
-                    <View style={styles.centeredView}>
-                      <View style={styles.modalView}>
-                        <DatePicker
+                  {Platform.OS === 'ios' ? (
+                    <TouchableOpacity
+                      onPress={() => {
+                        console.log('clicked on date of visit field input');
+                        setShowModal(true);
+                      }}>
+                      <TextInput
+                        style={[
+                          styles.phoneInputContainer,
+                          {paddingLeft: 12, color: '#71727A'},
+                        ]}
+                        value={convertDateFormat(date)}
+                        editable={false}
+                      />
+                    </TouchableOpacity>
+                  ) : (
+                    <Pressable
+                      onPress={() => {
+                        console.log('clicked on date of visit field input');
+                        setShowModal(true);
+                      }}>
+                      <TextInput
+                        style={[
+                          styles.phoneInputContainer,
+                          {paddingLeft: 12, color: '#71727A'},
+                        ]}
+                        value={convertDateFormat(date)}
+                        editable={false}
+                      />
+                    </Pressable>
+                  )}
+                  {/* <TouchableWithoutFeedback
+                    onPress={() => {
+                      console.log('clicked on date of visit field input');
+                      setShowModal(true);
+                    }}>
+                    <TextInput
+                      style={[
+                        styles.phoneInputContainer,
+                        {paddingLeft: 12, color: '#71727A'},
+                      ]}
+                      value={convertDateFormat(date)}
+                      editable={false}
+                    />
+                  </TouchableWithoutFeedback> */}
+                  {dateOfVisitErr && (
+                    <Text style={styles.errorText}>{dateOfVisitErr}</Text>
+                  )}
+                  <Modal
+                    animationType="none"
+                    transparent={true}
+                    visible={showModal}
+                    onRequestClose={() => setShowModal(false)}>
+                    <TouchableWithoutFeedback
+                      onPress={() => {
+                        setShowModal(false);
+                      }}>
+                      <View style={styles.centeredView}>
+                        <TouchableWithoutFeedback>
+                          <View style={styles.modalView}>
+                          <Pressable 
+                         onResponderStart={() => setShowModal(false)}
+                         >
+                           <Image
+                                source={require('../assets/close_icon.png')}
+                                style={[styles.closeButton]}
+                              />
+                         </Pressable>
+                            <CalendarList
+                              current={date === 'Select Date' ? minDate : date}
+                              minDate={minDate}
+                              maxDate={maxDate}
+                              pastScrollRange={pastScrollRange}
+                              futureScrollRange={futureScrollRange}
+                              onDayPress={onDayPress}
+                              markedDates={{
+                                [date]: {
+                                  selected: true,
+                                  selectedColor: '#B21E2B',
+                                },
+                              }}
+                              theme={{
+                                textSectionTitleColor: '#000',
+                                selectedDayBackgroundColor: '#B21E2B',
+                                todayTextColor: '#FFBE65',
+                                calendarBackground: '#ECECEC',
+                                agendaKnobColor: '#B21E2B',
+                                calendarWidth: 430,
+                                borderRadius: 90,
+                              }}
+                              showScrollIndicator={true}
+                            />
+                            {/* <DatePicker
                           mode="calendar"
                           minimumDate={startDate}
                           maximumDate={endDate}
@@ -1002,127 +1134,159 @@ const FillByYourSelf = ({ navigation }) => {
                             textSecondaryColor: 'black',
                             borderColor: '#B21E2B',
                           }}
-                        />
+                        /> */}
+                          </View>
+                        </TouchableWithoutFeedback>
                       </View>
-                    </View>
-                  </TouchableWithoutFeedback>
-                </Modal>
-              </View>
-              <View style={styles.namecontainer}>
-                <Text style={styles.label}>
-                  Single or Group Visit <Text style={{ color: 'red' }}>*</Text>
-                </Text>
-                <View style={styles.radioButtonContainer}>
-                  {singleorgroup.map(optionss => {
-                    return (
-                      <TouchableOpacity
-                        key={optionss}
-                        style={styles.singleOptionContainer}
-                        onPress={() => {
-                          setSelectedSG(optionss);
-                          setSingleOrGroupErr(null);
-                        }}>
-                        <View style={styles.outerCircle}>
-                          {selectedSG === optionss ? (
-                            <View style={styles.innerCircle} />
-                          ) : null}
-                        </View>
-                        <Text style={{ marginLeft: 10 }}>{optionss}</Text>
-                      </TouchableOpacity>
-                    );
-                  })}
+                    </TouchableWithoutFeedback>
+                  </Modal>
                 </View>
-                {singleOrGroupErr && (
-                  <Text style={styles.errorText}>{singleOrGroupErr}</Text>
-                )}
-              </View>
-              {selectedSG === 'Group' ? (
-                <View>
-                  <View style={styles.namecontainer}>
-                    <Text style={styles.label}>
-                      Number of Men <Text style={{ color: 'red' }}>*</Text>
-                    </Text>
-                    <TextInput
-                      style={[styles.phoneInputContainer, { paddingLeft: 15 }]}
-                      keyboardType="numeric"
-                      value={men}
-                      onChangeText={text => {
-                        // Allow only numbers
-                        const numericValue = text.replace(/[^0-9]/g, '');
-                        setMen(numericValue);
-                      }}
-                      selectionColor="#B21E2B"
-                    />
-                  </View>
-
-                  <View style={styles.namecontainer}>
-                    <Text style={styles.label}>
-                      Number of Women <Text style={{ color: 'red' }}>*</Text>
-                    </Text>
-                    <TextInput
-                      style={[styles.phoneInputContainer, { paddingLeft: 15 }]}
-                      keyboardType="numeric"
-                      value={women}
-                      onChangeText={text => {
-                        // Allow only numbers
-                        const numericValue = text.replace(/[^0-9]/g, '');
-                        setWomen(numericValue);
-                      }}
-                      selectionColor="#B21E2B"
-                    />
-                  </View>
-                  <View style={styles.namecontainer}>
-                    <Text style={styles.label}>
-                      Number of Boys <Text style={{ color: 'red' }}>*</Text>
-                    </Text>
-                    <TextInput
-                      style={[styles.phoneInputContainer, { paddingLeft: 15 }]}
-                      keyboardType="numeric"
-                      value={boys}
-                      onChangeText={text => {
-                        // Allow only numbers
-                        const numericValue = text.replace(/[^0-9]/g, '');
-                        setBoys(numericValue);
-                      }}
-                      selectionColor="#B21E2B"
-                    />
-                  </View>
-                  <View style={styles.namecontainer}>
-                    <Text style={styles.label}>
-                      Number of Girls <Text style={{ color: 'red' }}>*</Text>
-                    </Text>
-                    <TextInput
-                      style={[styles.phoneInputContainer, { paddingLeft: 15 }]}
-                      keyboardType="numeric"
-                      value={girls}
-                      onChangeText={text => {
-                        // Allow only numbers
-                        const numericValue = text.replace(/[^0-9]/g, '');
-                        setGirls(numericValue);
-                      }}
-                      selectionColor="#B21E2B"
-                    />
-                  </View>
-                </View>
-              ) : null}
-              {loggedUser.resident === true && loggedUser.employee === true ? (
                 <View style={styles.namecontainer}>
                   <Text style={styles.label}>
-                    Is the Guest being invited to Home or Office
-                    <Text style={{ color: 'red' }}> *</Text>
+                    Single or Group Visit <Text style={{color: 'red'}}>*</Text>
                   </Text>
                   <View style={styles.radioButtonContainer}>
-                    {homeoroffice.map(option => {
+                    {singleorgroup.map(optionss => {
+                      return (
+                        <TouchableOpacity
+                          key={optionss}
+                          style={styles.singleOptionContainer}
+                          onPress={() => {
+                            setSelectedSG(optionss);
+                            setSingleOrGroupErr(null);
+                          }}>
+                          <View style={styles.outerCircle}>
+                            {selectedSG === optionss ? (
+                              <View style={styles.innerCircle} />
+                            ) : null}
+                          </View>
+                          <Text style={{marginLeft: 10}}>{optionss}</Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                  {singleOrGroupErr && (
+                    <Text style={styles.errorText}>{singleOrGroupErr}</Text>
+                  )}
+                </View>
+                {selectedSG === 'Group' ? (
+                  <View>
+                    <View style={styles.namecontainer}>
+                      <Text style={styles.label}>
+                        Number of Men <Text style={{color: 'red'}}>*</Text>
+                      </Text>
+                      <TextInput
+                        style={[styles.phoneInputContainer, {paddingLeft: 15}]}
+                        keyboardType="numeric"
+                        value={men}
+                        onChangeText={text => {
+                          // Allow only numbers
+                          const numericValue = text.replace(/[^0-9]/g, '');
+                          setMen(numericValue);
+                        }}
+                        selectionColor="#B21E2B"
+                      />
+                    </View>
+                    <View style={styles.namecontainer}>
+                      <Text style={styles.label}>
+                        Number of Women <Text style={{color: 'red'}}>*</Text>
+                      </Text>
+                      <TextInput
+                        style={[styles.phoneInputContainer, {paddingLeft: 15}]}
+                        keyboardType="numeric"
+                        value={women}
+                        onChangeText={text => {
+                          // Allow only numbers
+                          const numericValue = text.replace(/[^0-9]/g, '');
+                          setWomen(numericValue);
+                        }}
+                        selectionColor="#B21E2B"
+                      />
+                    </View>
+                    <View style={styles.namecontainer}>
+                      <Text style={styles.label}>
+                        Number of Boys <Text style={{color: 'red'}}>*</Text>
+                      </Text>
+                      <TextInput
+                        style={[styles.phoneInputContainer, {paddingLeft: 15}]}
+                        keyboardType="numeric"
+                        value={boys}
+                        onChangeText={text => {
+                          // Allow only numbers
+                          const numericValue = text.replace(/[^0-9]/g, '');
+                          setBoys(numericValue);
+                        }}
+                        selectionColor="#B21E2B"
+                      />
+                    </View>
+                    <View style={styles.namecontainer}>
+                      <Text style={styles.label}>
+                        Number of Girls <Text style={{color: 'red'}}>*</Text>
+                      </Text>
+                      <TextInput
+                        style={[styles.phoneInputContainer, {paddingLeft: 15}]}
+                        keyboardType="numeric"
+                        value={girls}
+                        onChangeText={text => {
+                          // Allow only numbers
+                          const numericValue = text.replace(/[^0-9]/g, '');
+                          setGirls(numericValue);
+                        }}
+                        selectionColor="#B21E2B"
+                      />
+                    </View>
+                  </View>
+                ) : null}
+                {loggedUser.resident === true &&
+                loggedUser.employee === true ? (
+                  <View style={styles.namecontainer}>
+                    <Text style={styles.label}>
+                      Is the Guest being invited to Home or Office
+                      <Text style={{color: 'red'}}> *</Text>
+                    </Text>
+                    <View style={styles.radioButtonContainer}>
+                      {homeoroffice.map(option => {
+                        return (
+                          <TouchableOpacity
+                            key={option}
+                            style={styles.singleOptionContainer}
+                            onPress={() => {
+                              setSelectedHO(option);
+                              setHomeOrOfficeErr(null);
+                            }}>
+                            <View style={styles.outerCircle}>
+                              {selectedHO === option ? (
+                                <View style={styles.innerCircle} />
+                              ) : null}
+                            </View>
+                            <Text style={{marginLeft: 10}}>{option}</Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                    {homeOrOfficeErr && (
+                      <Text style={styles.errorText}>{homeOrOfficeErr}</Text>
+                    )}
+                  </View>
+                ) : null}
+                <View style={styles.namecontainer}>
+                  <Text style={styles.label}>
+
+                    Select Gender <Text style={{color: 'red'}}>*</Text>
+
+                  </Text>
+                  <View style={styles.radioButtonContainer}>
+                    {options.map(option => {
                       return (
                         <TouchableOpacity
                           key={option}
                           style={styles.singleOptionContainer}
                           onPress={() => {
-                            setSelectedHO(option);
-                            setHomeOrOfficeErr(null);
+                            setSelectedGender(option);
+                            setGenderErr(null);
                           }}>
                           <View style={styles.outerCircle}>
-                            {selectedHO === option ? (
+                            {selectedGender === option ? (
                               <View style={styles.innerCircle} />
                             ) : null}
                           </View>
@@ -1131,234 +1295,223 @@ const FillByYourSelf = ({ navigation }) => {
                       );
                     })}
                   </View>
-                  {homeOrOfficeErr && (
-                    <Text style={styles.errorText}>{homeOrOfficeErr}</Text>
+                  {genderErr && (
+                    <Text style={styles.errorText}>{genderErr}</Text>
                   )}
-                </View>
-              ) : null}
-              <View style={styles.namecontainer}>
-                <Text style={styles.label}>
-                  Select Gender <Text style={{ color: 'red' }}>*</Text>
-                </Text>
-                <View style={styles.radioButtonContainer}>
-                  {options.map(option => {
-                    return (
-                      <TouchableOpacity
-                        key={option}
-                        style={styles.singleOptionContainer}
-                        onPress={() => {
-                          setSelectedGender(option);
-                          setGenderErr(null);
-                        }}>
-                        <View style={styles.outerCircle}>
-                          {selectedGender === option ? (
-                            <View style={styles.innerCircle} />
-                          ) : null}
-                        </View>
-                        <Text style={{ marginLeft: 10 }}>{option}</Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-                {genderErr && <Text style={styles.errorText}>{genderErr}</Text>}
-                <View style={styles.namecontainer}>
-                  <Text style={styles.label}>Photo</Text>
-                  <View
-                    style={[
-                      styles.dropdown,
-                      { flexDirection: 'row', justifyContent: 'space-between' },
-                    ]}>
-                    <Text style={{ color: 'gray', marginHorizontal: 10 }}>
-                      {imageUri ? image.name : 'Select Image'}
-                    </Text>
-                    <View style={{ paddingHorizontal: 10 }}>
-                      {imageUri ? (
-                        <TouchableOpacity onPress={removeImage}>
-                          <Image
-                            source={require('../assets/close_icon.png')}
-                            style={{ width: 20, height: 20 }}
-                          />
-                        </TouchableOpacity>
-                      ) : (
-                        <TouchableOpacity onPress={selectImage}>
-                          <Image
-                            source={require('../assets/upload.png')}
-                            style={{ width: 20, height: 20 }}
-                          />
-                        </TouchableOpacity>
-                      )}
+
+                  <View style={styles.namecontainer}>
+                    <Text style={styles.label}>Photo</Text>
+                    <View
+                      style={[
+                        styles.dropdown,
+                        {flexDirection: 'row', justifyContent: 'space-between'},
+                      ]}>
+                      <Text style={{color: 'gray', marginHorizontal: 10}}>
+                        {imageUri ? image.name : 'Select Image'}
+                      </Text>
+                      <View style={{paddingHorizontal: 10}}>
+                        {imageUri ? (
+                          <TouchableOpacity onPress={removeImage}>
+                            <Image
+                              source={require('../assets/close_icon.png')}
+                              style={{width: 20, height: 20}}
+                            />
+                          </TouchableOpacity>
+                        ) : (
+                          <TouchableOpacity onPress={selectImage}>
+                            <Image
+                              source={require('../assets/upload.png')}
+                              style={{width: 20, height: 20}}
+                            />
+                          </TouchableOpacity>
+                        )}
+                      </View>
+
                     </View>
                   </View>
-                </View>
-                {/* <Button
+                  {/* <Button
                   title={imageUri ? 'Update Image' : 'Select Image'}
                   onPress={selectImage}
                 /> */}
 
-                {imageUri && (
-                  <>
-                    <Image
-                      source={{ uri: imageUri }}
-                      style={{ width: 100, height: 100 }}
-                    />
-                    {/* <Button title="Remove Image" onPress={removeImage} /> */}
-                  </>
-                )}
-                <View style={styles.namecontainer}>
-                  <Text style={styles.label}>Guest Category</Text>
-                  <Dropdown
-                    style={[
-                      styles.dropdown,
-                      { width: '95%', paddingLeft: 12, color: '#71727a' },
-                    ]}
-                    placeholderStyle={styles.placeholderStyle}
-                    selectedTextStyle={styles.selectedTextStyle}
-                    inputSearchStyle={styles.inputSearchStyle}
-                    iconStyle={styles.iconStyle}
-                    data={guestCategoryValues}
-                    maxHeight={300}
-                    labelField="label"
-                    valueField="value"
-                    placeholder={!isFocus ? 'Select' : '...'}
-                    value={guestCategory}
-                    onFocus={() => setIsFocus(true)}
-                    onBlur={() => setIsFocus(false)}
-                    onChange={item => {
-                      setGuestCategory(item.value);
-                      setIsFocus(false);
-                    }}
-                  />
-                </View>
-                <View style={styles.namecontainer}>
-                  <Text style={styles.label}>Priority</Text>
-                  <Dropdown
-                    style={[
-                      styles.dropdown,
-                      { width: '95%', paddingLeft: 12, color: '#71727a' },
-                    ]}
-                    placeholderStyle={styles.placeholderStyle}
-                    selectedTextStyle={styles.selectedTextStyle}
-                    inputSearchStyle={styles.inputSearchStyle}
-                    iconStyle={styles.iconStyle}
-                    data={priorityValues}
-                    maxHeight={300}
-                    labelField="label"
-                    valueField="value"
-                    placeholder={!focus ? 'Select' : '...'}
-                    value={priority}
-                    onFocus={() => setFocus(true)}
-                    onBlur={() => setFocus(false)}
-                    onChange={item => {
-                      setPriority(item.value);
-                      setFocus(false);
-                    }}
-                  />
-                </View>
 
-                <View style={styles.namecontainer}>
-                  <Text style={styles.label}>Vehicle Information</Text>
-                  <View style={styles.vehicle}>
-                    <Text>Vehicle type</Text>
-                    <Text>|</Text>
-                    <Text>Vehicle Number</Text>
-                  </View>
-                  {vehicles.map((vehicle, index) => (
+                  {imageUri && (
                     <>
-                      <View key={index} style={styles.newvehicle}>
-                        <Picker
-                          selectedValue={vehicle.Vehicle_Type}
-                          style={styles.picker}
-                          onValueChange={value =>
-                            handleTextChange(index, 'Vehicle_Type', value)
-                          }>
-                          <Picker.Item label="Select" value="" />
-                          <Picker.Item label="2-Wheeler" value="2-Wheeler" />
-                          <Picker.Item label="Car" value="Car" />
-                          <Picker.Item label="Bus" value="Bus" />
-                          <Picker.Item label="Taxi" value="Taxi" />
-                          <Picker.Item label="School Bus" value="School Bus" />
-                          <Picker.Item label="Police Van" value="Police Van" />
-                          <Picker.Item label="Van" value="Van" />
-                          <Picker.Item label="Auto" value="Auto" />
-                          <Picker.Item label="Ambulance" value="Ambulance" />
-                          <Picker.Item label="Truck" value="Truck" />
-                          <Picker.Item label="Tractor" value="Tractor" />
-                          <Picker.Item
-                            label="Cement Mixer"
-                            value="Cement Mixer"
-                          />
-                          <Picker.Item
-                            label="Fire Engine"
-                            value="Fire Engine"
-                          />
-                          <Picker.Item
-                            label="Transport Van"
-                            value="Transport Van"
-                          />
-                          <Picker.Item label="Bulldozer" value="Bulldozer" />
-                          <Picker.Item
-                            label="Roller Machine"
-                            value="Roller Machine"
-                          />
-                          {/* Add more vehicle types as needed */}
-                        </Picker>
-                        <TextInput
-                          style={styles.vehicleinput}
-                          placeholder="KA 01 CU 1234"
-                          placeholderTextColor="#c5c7ca"
-                          value={vehicle.Vehicle_Number}
-                          onChangeText={text =>
-                            handleTextChange(index, 'Vehicle_Number', text)
-                          }
-                        />
-
-                        <TouchableOpacity
-                          onPress={() => handleRemoveVehicle(index)}>
-                          <Image
-                            source={require('../assets/delete.png')}
-                            style={styles.removeButton}
-                          />
-                        </TouchableOpacity>
-                      </View>
-                      {vehicleErrorMessages[vehicle.ID] && (
-                        <Text
-                          style={[
-                            styles.errorText,
-                            { marginTop: -10, paddingLeft: 30 },
-                          ]}>
-                          {vehicleErrorMessages[vehicle.ID]}
-                        </Text>
-                      )}
-                    </>
-                  ))}
-                  {addNewButtonVisibility && (
-                    <TouchableOpacity
-                      style={styles.addvehicle}
-                      onPress={handleAddVehicle}>
                       <Image
-                        source={require('../assets/add.png')}
-                        style={{ width: 15, height: 15 }}
+                        source={{uri: imageUri}}
+                        style={{width: 100, height: 100}}
                       />
-                      <Text style={{ color: 'black', fontSize: 15 }}>
-                        Add New
-                      </Text>
-                    </TouchableOpacity>
+                      {/* <Button title="Remove Image" onPress={removeImage} /> */}
+                    </>
                   )}
+                  <View style={styles.namecontainer}>
+                    <Text style={styles.label}>Guest Category</Text>
+                    <Dropdown
+                      style={[
+                        styles.dropdown,
+                        {width: '95%', paddingLeft: 12, color: '#71727a'},
+                      ]}
+                      placeholderStyle={styles.placeholderStyle}
+                      selectedTextStyle={styles.selectedTextStyle}
+                      inputSearchStyle={styles.inputSearchStyle}
+                      iconStyle={styles.iconStyle}
+                      data={guestCategoryValues}
+                      maxHeight={300}
+                      labelField="label"
+                      valueField="value"
+                      placeholder={!isFocus ? 'Select' : '...'}
+                      value={guestCategory}
+                      onFocus={() => setIsFocus(true)}
+                      onBlur={() => setIsFocus(false)}
+                      onChange={item => {
+                        setGuestCategory(item.value);
+                        setIsFocus(false);
+                      }}
+                    />
+                  </View>
+                  <View style={styles.namecontainer}>
+                    <Text style={styles.label}>Priority</Text>
+                    <Dropdown
+                      style={[
+                        styles.dropdown,
+                        {width: '95%', paddingLeft: 12, color: '#71727a'},
+                      ]}
+                      placeholderStyle={styles.placeholderStyle}
+                      selectedTextStyle={styles.selectedTextStyle}
+                      inputSearchStyle={styles.inputSearchStyle}
+                      iconStyle={styles.iconStyle}
+                      data={priorityValues}
+                      maxHeight={300}
+                      labelField="label"
+                      valueField="value"
+                      placeholder={!focus ? 'Select' : '...'}
+                      value={priority}
+                      onFocus={() => setFocus(true)}
+                      onBlur={() => setFocus(false)}
+                      onChange={item => {
+                        setPriority(item.value);
+                        setFocus(false);
+                      }}
+                    />
+
+                  </View>
+
+                  <View style={styles.namecontainer}>
+                    <Text style={styles.label}>Vehicle Information</Text>
+                    <View style={styles.vehicle}>
+                      <Text>Vehicle type</Text>
+                      <Text>|</Text>
+                      <Text>Vehicle Number</Text>
+                    </View>
+                    {vehicles.map((vehicle, index) => (
+                      <>
+                        <View key={index} style={styles.newvehicle}>
+                          <Picker
+                            selectedValue={vehicle.Vehicle_Type}
+                            style={styles.picker}
+                            onValueChange={value =>
+                              handleTextChange(index, 'Vehicle_Type', value)
+                            }>
+                            <Picker.Item label="Select" value="" />
+                            <Picker.Item label="2-Wheeler" value="2-Wheeler" />
+                            <Picker.Item label="Car" value="Car" />
+                            <Picker.Item label="Bus" value="Bus" />
+                            <Picker.Item label="Taxi" value="Taxi" />
+                            <Picker.Item
+                              label="School Bus"
+                              value="School Bus"
+                            />
+                            <Picker.Item
+                              label="Police Van"
+                              value="Police Van"
+                            />
+                            <Picker.Item label="Van" value="Van" />
+                            <Picker.Item label="Auto" value="Auto" />
+                            <Picker.Item label="Ambulance" value="Ambulance" />
+                            <Picker.Item label="Truck" value="Truck" />
+                            <Picker.Item label="Tractor" value="Tractor" />
+                            <Picker.Item
+                              label="Cement Mixer"
+                              value="Cement Mixer"
+                            />
+                            <Picker.Item
+                              label="Fire Engine"
+                              value="Fire Engine"
+                            />
+                            <Picker.Item
+                              label="Transport Van"
+                              value="Transport Van"
+                            />
+                            <Picker.Item label="Bulldozer" value="Bulldozer" />
+                            <Picker.Item
+                              label="Roller Machine"
+                              value="Roller Machine"
+                            />
+                            {/* Add more vehicle types as needed */}
+                          </Picker>
+                          <TextInput
+                            style={styles.vehicleinput}
+                            placeholder="KA 01 CU 1234"
+                            placeholderTextColor="#c5c7ca"
+                            value={vehicle.Vehicle_Number}
+                            onChangeText={text =>
+                              handleTextChange(index, 'Vehicle_Number', text)
+                            }
+                          />
+
+
+                          <TouchableOpacity
+                            onPress={() => handleRemoveVehicle(index)}>
+                            <Image
+                              source={require('../assets/delete.png')}
+                              style={styles.removeButton}
+                            />
+                          </TouchableOpacity>
+                        </View>
+                        {vehicleErrorMessages[vehicle.ID] && (
+                          <Text
+                            style={[
+                              styles.errorText,
+                              {marginTop: -10, paddingLeft: 30},
+                            ]}>
+                            {vehicleErrorMessages[vehicle.ID]}
+                          </Text>
+                        )}
+                      </>
+                    ))}
+                    {addNewButtonVisibility && (
+                      <TouchableOpacity
+                        style={styles.addvehicle}
+                        onPress={handleAddVehicle}>
+                        <Image
+                          source={require('../assets/add.png')}
+                          style={{width: 15, height: 15}}
+                        />
+                        <Text style={{color: 'black', fontSize: 15}}>
+                          Add Vehicle Information
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+
+                </View>
+
+                <View style={styles.footer}>
+                  <TouchableOpacity
+                    onPress={handleSubmit}
+                    style={styles.submit}>
+                    <Text style={styles.buttonText}>Submit</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={handleReset} style={styles.Cancel}>
+                    <Text style={styles.buttonText1}>Cancel</Text>
+                  </TouchableOpacity>
                 </View>
               </View>
-
-              <View style={styles.footer}>
-                <TouchableOpacity onPress={handleSubmit} style={styles.submit}>
-                  <Text style={styles.buttonText}>Submit</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleReset} style={styles.Cancel}>
-                  <Text style={styles.buttonText1}>Cancel</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </ScrollView>
+            </ScrollView>
+          </GestureHandlerRootView>
         </SafeAreaView>
       )}
+
     </>
   );
 };
@@ -2053,12 +2206,21 @@ const styles = StyleSheet.create({
   },
   modalView: {
     margin: 20,
-    backgroundColor: 'white',
-    borderRadius: 50,
-    width: '95%',
-    padding: 35,
+    backgroundColor: '#ECECEC',
+    borderRadius: 30,
+    width: '100%',
+    height: '60%',
+    padding: 9,
     alignItems: 'center',
     elevation: 5,
+    borderColor: '#B21E2B',
+    borderWidth: 2,
+    overflow: 'hidden',
+  },
+  closeButton: {
+    height: 30,
+    width: 30,
+    left: 175,
   },
 
   HomeorOffice: {
