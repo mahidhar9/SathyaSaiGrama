@@ -865,7 +865,7 @@ const VerifyDetails = ({ navigation, route }) => {
 
             {/* Close and Share Button */}
             <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
-              <Text style={styles.closeButtonText}>Close</Text>
+              <Image source={require('../../../src/assets/cancel.png')} style={styles.closeButtonText} />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.shareButton} onPress={onShare}>
@@ -1531,15 +1531,15 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: 'absolute',
-    top: 110,
-    right: 20,
+    top: 115,
+    right: 10,
     padding: 10,
-    backgroundColor: '#B21E2B',
     borderRadius: 5,
   },
   closeButtonText: {
-    color: '#fff',
-    fontSize: 16,
+    width: 25,
+    height: 25,
+    tintColor: '#B21E2B'
   },
   shareButton: {
     position: 'absolute',
