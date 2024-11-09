@@ -19,12 +19,8 @@ export const getDataWithInt = async (reportName, criteria, value, token) => {
     return res;
   } catch (err) {
     if (err.message === 'Network request failed')
-      Alert.alert(
-        'Network Error',
-        'Failed to fetch data. Please check your network connection and try again.',
-      );
+      console.log('Network Error :  Failed to fetch data. Please check your network connection and try again.');
     else {
-      Alert.alert('Error: ', err);
       console.log(err);
     }
   }
@@ -216,12 +212,8 @@ export const getDataWithTwoInt = async (
     return await response.json();
   } catch (err) {
     if (err.message === 'Network request failed')
-      Alert.alert(
-        'Network Error',
-        'Failed to fetch data. Please check your network connection and try again.',
-      );
+      console.log('Network Error : Failed to fetch data. Please check your network connection and try again.');
     else {
-      Alert.alert('Error: ', err);
       console.log(err);
     }
   }

@@ -35,15 +35,14 @@ const lightTheme = {
 const App = () => {
   const [isNetworkAvailable, setIsNetworkAvailable] = useState(true);
   const { user } = useContext(AuthContext);
+  
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
       setIsNetworkAvailable(state.isConnected);
     });
 
-    return () => {
-      unsubscribe();
-    };
-  }, [isNetworkAvailable]);
+    return () => unsubscribe();
+  }, []);
 
   const {
     setAccessToken,
@@ -69,7 +68,8 @@ const App = () => {
   //To get zoho access token from Appwrite
   const getAppWriteToken = async () => {
     try {
-      console.log('database id : ', DATABASE_ID);
+      if (!isNetworkAvailable) return; // Stop if no network
+
       let res = await fetch(
         `https://cloud.appwrite.io/v1/databases/${DATABASE_ID}/collections/${COLLECTION_ID}/documents`,
         {
@@ -79,16 +79,13 @@ const App = () => {
             'X-Appwrite-Project': APPWRITE_FUNCTION_PROJECT_ID,
             'X-Appwrite-Key': APPWRITE_API_KEY,
           },
-        },
+        }
       );
-      console.log('After api call');
       res = await res.json();
-      console.log("Access token in App: ", res.documents[0].Token)
       await setAccessToken(res.documents[0].Token);
-      setIsTokenFetched(!isTokenFetched);
+      setIsTokenFetched(true);
     } catch (error) {
-      console.log('Error in App.js in getAppWriteToken function: ', error);
-      Alert.alert(error);
+      console.log('Error fetching AppWrite token:', error);
     }
   };
 
@@ -96,14 +93,13 @@ const App = () => {
 
   //UseEffect to call Appwrite and device token functions
   useEffect(() => {
-
     const fetchToken = async () => {
       await getAppWriteToken();
+      if (!isNetworkAvailable) return;
       const dToken = await getDeviceToken();
       setDeviceToken(dToken);
-      //console.log('device token is app.js: ', dToken);
     };
-    console.log("network available ", isNetworkAvailable)
+    
     if (isNetworkAvailable) {
       fetchToken();
     }

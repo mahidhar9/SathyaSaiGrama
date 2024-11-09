@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Alert,
   Dimensions,
+  Modal
 } from 'react-native';
 import React, {
   useContext,
@@ -481,7 +482,7 @@ const VerifyDetails = ({ navigation, route }) => {
         url: `file://${path}`,
       });
     } catch (error) {
-      Alert.alert('','The file is not shared.' );
+      Alert.alert('', 'The file is not shared.');
     }
   };
 
@@ -509,6 +510,8 @@ const VerifyDetails = ({ navigation, route }) => {
       };
     }, [route.params]),
   );
+
+  const [modalVisible, setModalVisible] = useState(false);
 
   console.log('User in verify details : ', user);
   return (
@@ -670,11 +673,14 @@ const VerifyDetails = ({ navigation, route }) => {
                   <ActivityIndicator size="large" color="#0000ff" />
                 ) : (
                   QrCodephoto && (
-                    <Image
-                      source={{ uri: QrCodephoto }}
-                      style={{ width: '98%', height: 200 }}
-                      resizeMode="contain"
-                    />
+                    <TouchableOpacity onPress={() => setModalVisible(true)} style={{width: "98%", height: 200}}>
+                      <Image
+                        source={{ uri: QrCodephoto }}
+                        style={{ width: '100%', height: 200 }}
+                        resizeMode="contain"
+                      />
+                    </TouchableOpacity>
+
                   )
                 )}
                 {loading ? null : (
@@ -851,6 +857,22 @@ const VerifyDetails = ({ navigation, route }) => {
             </View>
           </View>
         </ScrollView>
+
+        <Modal visible={modalVisible} transparent={true} animationType="fade">
+          <View style={styles.modalContainer}>
+            {/* Full-Screen Image */}
+            <Image source={{ uri: QrCodephoto }} style={styles.fullScreenImage} />
+
+            {/* Close and Share Button */}
+            <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+              <Image source={require('../../../src/assets/cancel.png')} style={styles.closeButtonText} />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.shareButton} onPress={onShare}>
+              <Image source={require('../../../src/assets/share.png')} style={styles.shareButtonText} />
+            </TouchableOpacity>
+          </View>
+        </Modal>
       </SafeAreaView>
 
       <Dialog.Container
@@ -1494,5 +1516,43 @@ const styles = StyleSheet.create({
   detailsNotEditableTxT: {
     color: 'black',
     bottom: -80,
+  },
+
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fullScreenImage: {
+    width: '90%',
+    height: '70%',
+    resizeMode: 'contain',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 115,
+    right: 10,
+    padding: 10,
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    width: 25,
+    height: 25,
+    tintColor: '#B21E2B'
+  },
+  shareButton: {
+    position: 'absolute',
+    bottom: 100,
+    right: 20,
+    padding: 10,
+    borderRadius: 5,
+    backgroundColor: '#fff',
+  },
+  shareButtonText: {
+    color: '#fff',
+    width: 30,
+    height: 30,
+    tintColor: "#B21E2B"
   },
 });
