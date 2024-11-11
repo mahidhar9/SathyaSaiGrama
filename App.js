@@ -145,32 +145,45 @@ const App = () => {
 
   const checkIsResident = async () => {
     const res = await getDataWithInt('All_Residents', 'App_User_lookup', loggedUser.userId, accessToken);
-    return res && res.data && res.data[0].Accommodation_Approval === 'APPROVED';
+    if(res && res.data && res.data[0].Department_Approval === 'APPROVED'){
+      return true;
+    }else{
+      return false;
+    }
   };
 
   const checkIsEmployee = async () => {
     const res = await getDataWithInt('All_Employees', 'App_User_lookup', loggedUser.userId, accessToken);
-    return res && res.data && res.data[0].Department_Approval === 'APPROVED';
+    if(res && res.data && res.data[0].Department_Approval === 'APPROVED'){
+      return true;
+    }else{
+      return false;
+    }
   };
 
   const checkIsTestResident = async () => {
     const res = await getDataWithTwoInt('All_Residents', 'App_User_lookup', loggedUser.userId, 'Flats_lookup', '3318254000031368021', accessToken);
-    return res && res.data && res.data[0].Accommodation_Approval === 'APPROVED';
+    if(res && res.data && res.data[0].Accommodation_Approval === 'APPROVED'){
+      return true;
+    }else{
+      return false;
+    }
   };
 
-  const setModifyData = async () => {
+  const setModifyData = async (role, resident, employee, testResident) => {
     const data = {
       userId: loggedUser.userId,
-      role: loggedUser.role,
+      role: role,
       email: loggedUser.email,
       deptIds: loggedUser.deptIds,
       name: loggedUser.name,
       profilePhoto: loggedUser.profilePhoto,
-      resident: loggedUser.resident,
-      employee: loggedUser.employee,
-      testResident: loggedUser.testResident,
+      resident: resident,
+      employee: employee,
+      testResident: testResident,
     };
 
+    setLoggedUser(data);
     console.log("Data to be set in AsyncStorage: ", data); // Log the data before setting
     await AsyncStorage.setItem('existedUser', JSON.stringify(data));
 
@@ -186,15 +199,8 @@ const App = () => {
       checkIsTestResident(),
     ]);
 
-    setLoggedUser(prevState => ({
-      ...prevState,
-      role,
-      resident,
-      employee,
-      testResident,
-    }));
+    await setModifyData(role, resident, employee, testResident);
 
-    await setModifyData();
   };
 
   useEffect(() => {
