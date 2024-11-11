@@ -620,7 +620,7 @@ const FillByYourSelf = ({ navigation }) => {
       setPhoneErr(null);
       const parsedPhoneNumber = parsePhoneNumberFromString(formattedValue);
       if (!parsedPhoneNumber || !parsedPhoneNumber.isValid()) {
-        setPhoneValidErr('Invalid phone number');
+        setPhoneValidErr('Invalid phone number'); 
       } else {
         setPhoneValidErr(null);
       }
