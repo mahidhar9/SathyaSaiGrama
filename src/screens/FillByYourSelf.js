@@ -1,4 +1,4 @@
-import React, { useState, useContext, useRef, useEffect } from 'react';
+import React, {useState, useContext, useRef, useEffect} from 'react';
 import {
   View,
   Text,
@@ -16,7 +16,6 @@ import {
   Dimensions,
 } from 'react-native';
 
-
 import {
   GestureHandlerRootView,
   TouchableOpacity,
@@ -26,17 +25,16 @@ import RNFS from 'react-native-fs';
 import {Picker} from '@react-native-picker/picker';
 
 import DatePicker from 'react-native-modern-datepicker';
-import { getToday, getFormatedDate } from 'react-native-modern-datepicker';
+import {getToday, getFormatedDate} from 'react-native-modern-datepicker';
 import PhoneInput from 'react-native-phone-number-input';
-import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import {parsePhoneNumberFromString} from 'libphonenumber-js';
 import UserContext from '../../context/UserContext';
-import { Dropdown } from 'react-native-element-dropdown';
-import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME, SECRET_KEY } from '@env';
+import {Dropdown} from 'react-native-element-dropdown';
+import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME, SECRET_KEY} from '@env';
 import moment from 'moment';
 
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { launchImageLibrary } from 'react-native-image-picker';
-
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {launchImageLibrary} from 'react-native-image-picker';
 
 import SentForApproval from './SentForApproval';
 
@@ -47,8 +45,8 @@ import {CalendarList} from 'react-native-calendars';
 
 LogBox.ignoreLogs(['Warnings...']);
 LogBox.ignoreAllLogs();
-const FillByYourSelf = ({ navigation }) => {
-  const { height } = Dimensions.get('window');
+const FillByYourSelf = ({navigation}) => {
+  const {height} = Dimensions.get('window');
   const [prefix, setPrefix] = useState(' ');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -78,7 +76,7 @@ const FillByYourSelf = ({ navigation }) => {
   const [vehicles, setVehicles] = useState([]);
   const [vehicleErrorMessages, setVehicleErrorMessages] = useState({});
   // Regex format for vehicle number like 'KA 01 CU 1234'
-  const vehicleNumberPattern = /^[a-z]{2}[0-9]{2}[a-z]{2}[0-9]{4}$/;
+  const vehicleNumberPattern = /^[A-Z]{2}[0-9]{2}[A-Z]{2}[0-9]{4}$/;
   let selectedHomeOffice = '';
 
   const {
@@ -96,22 +94,15 @@ const FillByYourSelf = ({ navigation }) => {
   // } else if (loggedUser.resident === false && loggedUser.employee === true) {
   //   selectedHomeOffice = 'Office';
   // }
-
-  const [selectedHO, setSelectedHO] = useState("");
-
-  useEffect(()=>{
-
-    console.log("Logged user is : ", loggedUser)
-    if (loggedUser.resident === true && loggedUser.employee === true) {
-      setSelectedHO("");
-    } else if (loggedUser.resident === true && loggedUser.employee === false) {
-      setSelectedHO("Home")
-    } else if (loggedUser.resident === false && loggedUser.employee === true) {
-      setSelectedHO("Office")
-    }
-  }, [])
-
-
+  let homeOrOffice = '';
+  if (loggedUser.resident === true && loggedUser.employee === true) {
+    homeOrOffice = '';
+  } else if (loggedUser.resident === true && loggedUser.employee === false) {
+    homeOrOffice = 'Home';
+  } else if (loggedUser.resident === false && loggedUser.employee === true) {
+    homeOrOffice = 'Office';
+  }
+  const [selectedHO, setSelectedHO] = useState(homeOrOffice);
 
   const [date, setDate] = useState('Select Date');
 
@@ -121,7 +112,6 @@ const FillByYourSelf = ({ navigation }) => {
   console.log('L1ID', L1ID);
   const minDate = dayjs().format('YYYY-MM-DD');
   const maxDate = dayjs().add(6, 'month').format('YYYY-MM-DD');
-
 
   const startMonth = dayjs(minDate).month();
   const endMonth = dayjs(maxDate).month();
@@ -135,15 +125,14 @@ const FillByYourSelf = ({ navigation }) => {
   const onDayPress = day => {
     if (day.dateString >= minDate && day.dateString <= maxDate) {
       setDate(day.dateString);
-      setShowModal(false); 
-      setDateOfVisitErr(null); 
+      setShowModal(false);
+      setDateOfVisitErr(null);
       const monthNumber = dayjs(day.dateString).month();
       setVisitingMonth(monthNumber);
-      console.log('Visiting month :', monthNumber); 
+      console.log('Visiting month :', monthNumber);
     }
 
     // const today = new Date();
-
 
     // const startDate = getFormatedDate(
     //   today.setDate(today.getDate()),
@@ -153,7 +142,6 @@ const FillByYourSelf = ({ navigation }) => {
     //   // Convert the input string (YYYY/MM/DD) into a Date object
     //   const [year, month, day] = dateString.split('/'); // Split the string by '/'
     //   const date = new Date(year, month - 1, day); // Month is 0-indexed in JavaScript
-
 
     //   // Add the specified number of days (60 days in this case)
     //   date.setDate(date.getDate() + daysToAdd);
@@ -197,51 +185,51 @@ const FillByYourSelf = ({ navigation }) => {
       : endMonth + 12 - MonthNumberCount;
 
   const prefixValues = [
-    { label: 'Mr.', value: 'Mr.' },
-    { label: 'Mrs.', value: 'Mrs.' },
-    { label: 'Ms.', value: 'Ms.' },
-    { label: 'Dr.', value: 'Dr.' },
-    { label: 'Prof.', value: 'Peof.' },
-    { label: 'Rtn.', value: 'Rtn.' },
-    { label: 'Sri', value: 'Sri.' },
-    { label: 'Smt.', value: 'Smt.' },
+    {label: 'Mr.', value: 'Mr.'},
+    {label: 'Mrs.', value: 'Mrs.'},
+    {label: 'Ms.', value: 'Ms.'},
+    {label: 'Dr.', value: 'Dr.'},
+    {label: 'Prof.', value: 'Peof.'},
+    {label: 'Rtn.', value: 'Rtn.'},
+    {label: 'Sri', value: 'Sri.'},
+    {label: 'Smt.', value: 'Smt.'},
   ];
   const guestCategoryValues = [
-    { label: 'Govt Officials', value: 'Govt Officials' },
-    { label: 'Politician', value: 'Politician' },
-    { label: 'Corporate', value: 'Corporate' },
-    { label: 'Press', value: 'Press' },
-    { label: 'Parent', value: 'Parent' },
-    { label: 'Devotee', value: 'Devotee' },
-    { label: 'Guest', value: 'Guest' },
-    { label: 'Staff', value: 'Staff' },
-    { label: 'Student', value: 'Student' },
-    { label: 'Intern', value: 'Intern' },
-    { label: 'Other', value: 'Other' },
+    {label: 'Govt Officials', value: 'Govt Officials'},
+    {label: 'Politician', value: 'Politician'},
+    {label: 'Corporate', value: 'Corporate'},
+    {label: 'Press', value: 'Press'},
+    {label: 'Parent', value: 'Parent'},
+    {label: 'Devotee', value: 'Devotee'},
+    {label: 'Guest', value: 'Guest'},
+    {label: 'Staff', value: 'Staff'},
+    {label: 'Student', value: 'Student'},
+    {label: 'Intern', value: 'Intern'},
+    {label: 'Other', value: 'Other'},
   ];
   const priorityValues = [
-    { label: 'P1', value: 'P1' },
-    { label: 'P2', value: 'P2' },
-    { label: 'P3', value: 'P3' },
+    {label: 'P1', value: 'P1'},
+    {label: 'P2', value: 'P2'},
+    {label: 'P3', value: 'P3'},
   ];
   const vehicleTypeValues = [
-    { label: '2-wheeler', value: '2-wheeler' },
-    { label: 'Car', value: 'Car' },
-    { label: 'Bus', value: 'Bus' },
-    { label: 'Taxi', value: 'Taxi' },
-    { label: 'School Bus', value: 'School Bus' },
-    { label: 'Police Van', value: 'Police Van' },
-    { label: 'Ambulence', value: 'Ambulence' },
-    { label: 'Van', value: 'Van' },
-    { label: 'Auto', value: 'Auto' },
-    { label: 'Truck', value: 'Truck' },
-    { label: 'Tractor', value: 'Tractor' },
-    { label: 'Cement Mixer', value: 'Cement Mixer' },
-    { label: 'Fire Engine', value: 'Fire Engine' },
-    { label: 'Transport Van', value: 'Transport Van' },
-    { label: 'Bulldozer', value: 'Bulldozer' },
-    { label: 'Roller Machine', value: 'Roller Machine' },
-    { label: 'Other', value: 'Other' },
+    {label: '2-wheeler', value: '2-wheeler'},
+    {label: 'Car', value: 'Car'},
+    {label: 'Bus', value: 'Bus'},
+    {label: 'Taxi', value: 'Taxi'},
+    {label: 'School Bus', value: 'School Bus'},
+    {label: 'Police Van', value: 'Police Van'},
+    {label: 'Ambulence', value: 'Ambulence'},
+    {label: 'Van', value: 'Van'},
+    {label: 'Auto', value: 'Auto'},
+    {label: 'Truck', value: 'Truck'},
+    {label: 'Tractor', value: 'Tractor'},
+    {label: 'Cement Mixer', value: 'Cement Mixer'},
+    {label: 'Fire Engine', value: 'Fire Engine'},
+    {label: 'Transport Van', value: 'Transport Van'},
+    {label: 'Bulldozer', value: 'Bulldozer'},
+    {label: 'Roller Machine', value: 'Roller Machine'},
+    {label: 'Other', value: 'Other'},
   ];
 
   let menCount = '0';
@@ -249,13 +237,12 @@ const FillByYourSelf = ({ navigation }) => {
   let boysCount = '0';
   let girlsCount = '0';
 
-
-  const generateQR = async (passcodeData) => {
+  const generateQR = async passcodeData => {
     try {
       const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${loggedUser.name}&&passcode=${passcodeData}&&date=${date}&&key=${SECRET_KEY}`;
       const res = await fetch(qrUrl);
       console.log('URL - ', qrUrl);
-      console.log("res from fetch img : ", res)
+      console.log('res from fetch img : ', res);
 
       if (!res.ok) {
         console.error('Error fetching image:', res.statusText);
@@ -272,7 +259,7 @@ const FillByYourSelf = ({ navigation }) => {
           const result = reader.result.split(',')[1]; // Extract the base64 part only
           resolve(result);
         };
-        reader.onerror = (error) => {
+        reader.onerror = error => {
           console.error('Error reading blob:', error);
           reject(error);
         };
@@ -313,7 +300,11 @@ const FillByYourSelf = ({ navigation }) => {
         console.log('Code posted successfully to Zoho.');
         console.log('Response for the code is:', response1);
       } else {
-        console.log('Failed to post code to Zoho:', response1.status, response1.statusText);
+        console.log(
+          'Failed to post code to Zoho:',
+          response1.status,
+          response1.statusText,
+        );
       }
 
       // POST request to upload image to Zoho
@@ -336,7 +327,7 @@ const FillByYourSelf = ({ navigation }) => {
         console.log('Image uploaded successfully to Zoho.', response);
         return;
       } else {
-        console.log('Failed to upload image to Zoho: ', response.status,);
+        console.log('Failed to upload image to Zoho: ', response.status);
         return;
       }
     } catch (error) {
@@ -347,8 +338,10 @@ const FillByYourSelf = ({ navigation }) => {
   const passcodeGenerator = async () => {
     let generatedPasscode;
     while (true) {
-      const newCode = Math.floor(100000 + Math.random() * (999999 - 100001 + 1),).toString();
-      const codeurl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Passcode_Report?criteria=Passcode==${newCode}`
+      const newCode = Math.floor(
+        100000 + Math.random() * (999999 - 100001 + 1),
+      ).toString();
+      const codeurl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Passcode_Report?criteria=Passcode==${newCode}`;
       const response = await fetch(codeurl, {
         method: 'GET',
         headers: {
@@ -362,7 +355,7 @@ const FillByYourSelf = ({ navigation }) => {
       if (response.ok) {
         continue;
       }
-      generatedPasscode = newCode
+      generatedPasscode = newCode;
       break;
     }
 
@@ -383,12 +376,11 @@ const FillByYourSelf = ({ navigation }) => {
     });
 
     const responseData = await passcodeResponse.json();
-    console.log("response of posting passcode to zoho : ", responseData);
+    console.log('response of posting passcode to zoho : ', responseData);
 
     await generateQR(generatedPasscode);
     return;
   };
-
 
   //To get employee record
   const getEmpId = async () => {
@@ -463,7 +455,7 @@ const FillByYourSelf = ({ navigation }) => {
         Vehicle_Information: vehicles,
       },
     };
-
+    console.log('formData', formData);
 
     if (loggedUser.role === 'L2') {
       if (
@@ -540,7 +532,7 @@ const FillByYourSelf = ({ navigation }) => {
   const handleAddVehicle = () => {
     setVehicles([
       ...vehicles,
-      { Vehicle_Type: '', Vehicle_Number: '', ID: Date.now() }, //Date now is used to create a unique id for each vehicle row
+      {Vehicle_Type: '', Vehicle_Number: '', ID: Date.now()}, //Date now is used to create a unique id for each vehicle row
     ]);
   };
 
@@ -551,7 +543,7 @@ const FillByYourSelf = ({ navigation }) => {
   //  Function to handle vehicle number change
   const handleTextChange = (index, field, value) => {
     const updatedVehicles = vehicles.map((vehicle, i) =>
-      i === index ? { ...vehicle, [field]: value } : vehicle,
+      i === index ? {...vehicle, [field]: value} : vehicle,
     );
     setVehicles(updatedVehicles);
   };
@@ -565,8 +557,8 @@ const FillByYourSelf = ({ navigation }) => {
 
     launchImageLibrary(options, response => {
       if (response.assets && response.assets.length > 0) {
-        const { uri, type, fileName } = response.assets[0];
-        setImage({ uri, type, name: fileName });
+        const {uri, type, fileName} = response.assets[0];
+        setImage({uri, type, name: fileName});
         setImageUri(uri); // For displaying the image preview
       }
     });
@@ -636,7 +628,7 @@ const FillByYourSelf = ({ navigation }) => {
   const validateForm = () => {
     let valid = true;
 
-    console.log("Home or office : ", selectedHO)
+    console.log('Home or office : ', selectedHO);
     menCount = men === '' ? '0' : men;
     womenCount = women === '' ? '0' : women;
     boysCount = boys === '' ? '0' : boys;
@@ -769,7 +761,7 @@ const FillByYourSelf = ({ navigation }) => {
       }
       if (
         !vehicleNumberPattern.test(
-          vehicleNumber.replace(/\s+/g, '').toLowerCase(),
+          vehicleNumber.replace(/\s+/g, '').toUpperCase(),
         ) &&
         vehicle.Vehicle_Type === ''
       ) {
@@ -784,7 +776,6 @@ const FillByYourSelf = ({ navigation }) => {
   };
 
   const handleSubmit = async () => {
-
     setSubmitFlag(true);
     if (validateForm()) {
       setIsSubmitted(true);
@@ -862,7 +853,6 @@ const FillByYourSelf = ({ navigation }) => {
     heightStyles = smallScreen;
   }
 
-
   const [firstNameError, setFirstNameError] = useState('');
   const [lastNameError, setLastNameError] = useState('');
   const validateInput = (txt, setError) => {
@@ -896,7 +886,7 @@ const FillByYourSelf = ({ navigation }) => {
   return (
     <>
       {isSubmitted ? (
-        <SentForApproval style={{ zIndex: 1 }} />
+        <SentForApproval style={{zIndex: 1}} />
       ) : (
         <SafeAreaView style={styles.container}>
           <GestureHandlerRootView>
@@ -1088,14 +1078,13 @@ const FillByYourSelf = ({ navigation }) => {
                       <View style={styles.centeredView}>
                         <TouchableWithoutFeedback>
                           <View style={styles.modalView}>
-                          <Pressable 
-                         onResponderStart={() => setShowModal(false)}
-                         >
-                           <Image
+                            <Pressable
+                              onResponderStart={() => setShowModal(false)}>
+                              <Image
                                 source={require('../assets/close_icon.png')}
                                 style={[styles.closeButton]}
                               />
-                         </Pressable>
+                            </Pressable>
                             <CalendarList
                               current={date === 'Select Date' ? minDate : date}
                               minDate={minDate}
@@ -1271,9 +1260,7 @@ const FillByYourSelf = ({ navigation }) => {
                 ) : null}
                 <View style={styles.namecontainer}>
                   <Text style={styles.label}>
-
                     Select Gender <Text style={{color: 'red'}}>*</Text>
-
                   </Text>
                   <View style={styles.radioButtonContainer}>
                     {options.map(option => {
@@ -1290,7 +1277,7 @@ const FillByYourSelf = ({ navigation }) => {
                               <View style={styles.innerCircle} />
                             ) : null}
                           </View>
-                          <Text style={{ marginLeft: 10 }}>{option}</Text>
+                          <Text style={{marginLeft: 10}}>{option}</Text>
                         </TouchableOpacity>
                       );
                     })}
@@ -1326,14 +1313,12 @@ const FillByYourSelf = ({ navigation }) => {
                           </TouchableOpacity>
                         )}
                       </View>
-
                     </View>
                   </View>
                   {/* <Button
                   title={imageUri ? 'Update Image' : 'Select Image'}
                   onPress={selectImage}
                 /> */}
-
 
                   {imageUri && (
                     <>
@@ -1393,7 +1378,6 @@ const FillByYourSelf = ({ navigation }) => {
                         setFocus(false);
                       }}
                     />
-
                   </View>
 
                   <View style={styles.namecontainer}>
@@ -1459,7 +1443,6 @@ const FillByYourSelf = ({ navigation }) => {
                             }
                           />
 
-
                           <TouchableOpacity
                             onPress={() => handleRemoveVehicle(index)}>
                             <Image
@@ -1493,7 +1476,6 @@ const FillByYourSelf = ({ navigation }) => {
                       </TouchableOpacity>
                     )}
                   </View>
-
                 </View>
 
                 <View style={styles.footer}>
@@ -1511,7 +1493,6 @@ const FillByYourSelf = ({ navigation }) => {
           </GestureHandlerRootView>
         </SafeAreaView>
       )}
-
     </>
   );
 };
