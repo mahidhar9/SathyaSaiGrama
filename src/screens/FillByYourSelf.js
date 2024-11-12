@@ -239,7 +239,7 @@ const FillByYourSelf = ({navigation}) => {
 
   const generateQR = async passcodeData => {
     try {
-      const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${loggedUser.name}&&passcode=${passcodeData}&&date=${date}&&key=${SECRET_KEY}`;
+      const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${loggedUser.name}&&passcode=${passcodeData}&&date=${convertDateFormat(date)}&&key=${SECRET_KEY}`;
       const res = await fetch(qrUrl);
       console.log('URL - ', qrUrl);
       console.log('res from fetch img : ', res);
@@ -612,7 +612,7 @@ const FillByYourSelf = ({navigation}) => {
       setPhoneErr(null);
       const parsedPhoneNumber = parsePhoneNumberFromString(formattedValue);
       if (!parsedPhoneNumber || !parsedPhoneNumber.isValid()) {
-        setPhoneValidErr('Invalid phone number'); 
+        setPhoneValidErr('Invalid phone number');
       } else {
         setPhoneValidErr(null);
       }
