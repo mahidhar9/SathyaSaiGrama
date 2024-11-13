@@ -82,6 +82,7 @@ const App = () => {
         }
       );
       res = await res.json();
+      console.log(res.documents[0].Token)
       await setAccessToken(res.documents[0].Token);
       setIsTokenFetched(true);
     } catch (error) {
@@ -145,7 +146,7 @@ const App = () => {
 
   const checkIsResident = async () => {
     const res = await getDataWithInt('All_Residents', 'App_User_lookup', loggedUser.userId, accessToken);
-    if(res && res.data && res.data[0].Department_Approval === 'APPROVED'){
+    if(res && res.data && res.data[0].Accommodation_Approval === 'APPROVED'){
       return true;
     }else{
       return false;
