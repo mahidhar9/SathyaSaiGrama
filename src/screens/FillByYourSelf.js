@@ -13,9 +13,7 @@ import {
   TouchableWithoutFeedback,
   Button,
   Image,
-  ImageBackground,
   Dimensions,
-  Platform,
 } from 'react-native';
 
 import {
@@ -23,28 +21,28 @@ import {
   TouchableOpacity,
 } from 'react-native-gesture-handler';
 import {encode} from 'base64-arraybuffer';
-import RNFS from 'react-native-fs'; 
+import RNFS from 'react-native-fs';
 import {Picker} from '@react-native-picker/picker';
+
 import DatePicker from 'react-native-modern-datepicker';
 import {getToday, getFormatedDate} from 'react-native-modern-datepicker';
 import PhoneInput from 'react-native-phone-number-input';
 import {parsePhoneNumberFromString} from 'libphonenumber-js';
 import UserContext from '../../context/UserContext';
 import {Dropdown} from 'react-native-element-dropdown';
-import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME} from '@env';
+import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME, SECRET_KEY} from '@env';
 import moment from 'moment';
+
 import {SafeAreaView} from 'react-native-safe-area-context';
-import LinearGradient from 'react-native-linear-gradient';
-import QRCode from 'react-native-qrcode-svg';
-import {captureRef} from 'react-native-view-shot';
 import {launchImageLibrary} from 'react-native-image-picker';
-import axios from 'axios';
 
 import SentForApproval from './SentForApproval';
+
 import {updateRecord} from './approval/VerifyDetails';
 import {isJSDocCommentContainingNode} from 'typescript';
 import dayjs from 'dayjs';
 import {CalendarList} from 'react-native-calendars';
+
 LogBox.ignoreLogs(['Warnings...']);
 LogBox.ignoreAllLogs();
 const FillByYourSelf = ({navigation}) => {
@@ -78,7 +76,7 @@ const FillByYourSelf = ({navigation}) => {
   const [vehicles, setVehicles] = useState([]);
   const [vehicleErrorMessages, setVehicleErrorMessages] = useState({});
   // Regex format for vehicle number like 'KA 01 CU 1234'
-  const vehicleNumberPattern = /^[a-z]{2}[0-9]{2}[a-z]{2}[0-9]{4}$/;
+  const vehicleNumberPattern = /^[A-Z]{2}[0-9]{2}[A-Z]{2}[0-9]{4}$/;
   let selectedHomeOffice = '';
 
   const {
@@ -88,19 +86,29 @@ const FillByYourSelf = ({navigation}) => {
     accessToken,
     setApproveDataFetched,
   } = useContext(UserContext);
-  if (loggedUser.resident === true && loggedUser.employee === true) {
-    selectedHomeOffice = '';
-  } else if (loggedUser.resident === true && loggedUser.employee === false) {
-    selectedHomeOffice = 'Home';
-  } else if (loggedUser.resident === false && loggedUser.employee === true) {
-    selectedHomeOffice = 'Office';
-  }
 
-  const [selectedHO, setSelectedHO] = useState(selectedHomeOffice);
+  // if (loggedUser.resident === true && loggedUser.employee === true) {
+  //   selectedHomeOffice = '';
+  // } else if (loggedUser.resident === true && loggedUser.employee === false) {
+  //   selectedHomeOffice = 'Home';
+  // } else if (loggedUser.resident === false && loggedUser.employee === true) {
+  //   selectedHomeOffice = 'Office';
+  // }
+  let homeOrOffice = '';
+  if (loggedUser.resident === true && loggedUser.employee === true) {
+    homeOrOffice = '';
+  } else if (loggedUser.resident === true && loggedUser.employee === false) {
+    homeOrOffice = 'Home';
+  } else if (loggedUser.resident === false && loggedUser.employee === true) {
+    homeOrOffice = 'Office';
+  }
+  const [selectedHO, setSelectedHO] = useState(homeOrOffice);
+
   const [date, setDate] = useState('Select Date');
 
   const [showModal, setShowModal] = useState(false);
   const L1ID = loggedUser.userId;
+
   console.log('L1ID', L1ID);
   const minDate = dayjs().format('YYYY-MM-DD');
   const maxDate = dayjs().add(6, 'month').format('YYYY-MM-DD');
@@ -117,11 +125,11 @@ const FillByYourSelf = ({navigation}) => {
   const onDayPress = day => {
     if (day.dateString >= minDate && day.dateString <= maxDate) {
       setDate(day.dateString);
-      setShowModal(false); // Close calendar after selecting a date
-      setDateOfVisitErr(null); // Clear any error
+      setShowModal(false);
+      setDateOfVisitErr(null);
       const monthNumber = dayjs(day.dateString).month();
-      setVisitingMonth(monthNumber); // Update the visiting month
-      console.log('Visiting month (number format):', monthNumber); // Log the visiting month
+      setVisitingMonth(monthNumber);
+      console.log('Visiting month :', monthNumber);
     }
 
     // const today = new Date();
@@ -150,14 +158,7 @@ const FillByYourSelf = ({navigation}) => {
   // console.log('endDate', endDate);
   const approvalToVisitorID = useRef(null);
   const viewRef = useRef();
-  const [code, setCode] = useState('');
-  const [codeReload, setcodeReload] = useState(false);
-  const codeGenrator = () => {
-    const newCode = Math.floor(
-      100000 + Math.random() * (999999 - 100001 + 1),
-    ).toString();
-    setCode(newCode);
-  };
+
   const options = ['Male', 'Female'];
   const singleorgroup = ['Single', 'Group'];
   const homeoroffice = ['Home', 'Office'];
@@ -174,8 +175,6 @@ const FillByYourSelf = ({navigation}) => {
   let pastScrollRange = 0;
   let futureScrollRange = 6;
   let MonthNumberCount = visitingMonth;
-  console.log('Count', MonthNumberCount);
-  console.log('Visiting month:', visitingMonth); // Log the visiting month state
   pastScrollRange =
     MonthNumberCount >= startMonth
       ? MonthNumberCount - startMonth
@@ -238,49 +237,149 @@ const FillByYourSelf = ({navigation}) => {
   let boysCount = '0';
   let girlsCount = '0';
 
-  const PasscodeUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Passcode`;
-
-  const payload = {
-    data: {
-      Passcode: code,
-    },
-  };
-
-  const PasscodeData = async () => {
-    setcodeReload(false);
-
-    console.log('in PasscodeData function');
+  const generateQR = async passcodeData => {
     try {
-      console.log('inside try in passcode');
-      const passcodeResponse = await fetch(PasscodeUrl, {
-        method: 'POST',
+      const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${loggedUser.name}&&passcode=${passcodeData}&&date=${convertDateFormat(date)}&&key=${SECRET_KEY}`;
+      const res = await fetch(qrUrl);
+      console.log('URL - ', qrUrl);
+      console.log('res from fetch img : ', res);
+
+      if (!res.ok) {
+        console.error('Error fetching image:', res.statusText);
+        return;
+      }
+
+      // Convert response to a Blob
+      const imageBlob = await res.blob();
+
+      // Convert Blob to base64 using a Promise
+      const base64Data = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const result = reader.result.split(',')[1]; // Extract the base64 part only
+          resolve(result);
+        };
+        reader.onerror = error => {
+          console.error('Error reading blob:', error);
+          reject(error);
+        };
+        reader.readAsDataURL(imageBlob);
+      });
+
+      if (!base64Data) {
+        throw new Error('Failed to extract base64 data from Blob');
+      }
+
+      // Prepare data to send as form data
+      const postData = new FormData();
+      postData.append('file', {
+        uri: `data:image/png;base64,${base64Data}`,
+        name: 'qrcode.png',
+        type: 'image/png',
+      });
+
+      // First PATCH request to Zoho
+      const payload = {
+        data: {
+          Generated_Passcode: passcodeData,
+        },
+      };
+
+      const url1 = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${approvalToVisitorID.current}`;
+      console.log(url1);
+      const response1 = await fetch(url1, {
+        method: 'PATCH',
         body: JSON.stringify(payload),
         headers: {
           Authorization: `Zoho-oauthtoken ${accessToken}`,
           'Content-Type': 'application/json',
         },
       });
-      console.log('after fetch in passcode');
-      const responseData = await passcodeResponse.json();
-
-      console.log('here is the passcode response', responseData);
-
-      if (responseData.code === 3002) {
-        console.log('Post of code was un-sucessfull');
-        codeGenrator();
-        setcodeReload(true);
-      } else if (responseData.code === 3000) {
-        console.log('code posted successfully to Zoho.');
-        ScreenshotQR();
-        setcodeReload(false);
+      console.log('Posting to Zoho....');
+      if (response1.ok) {
+        console.log('Code posted successfully to Zoho.');
+        console.log('Response for the code is:', response1);
+      } else {
+        console.log(
+          'Failed to post code to Zoho:',
+          response1.status,
+          response1.statusText,
+        );
       }
 
-      console.log('Passcode data:', passcodeResponse);
+      // POST request to upload image to Zoho
+      const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${approvalToVisitorID.current}/Generated_QR_Code/upload`;
+      console.log(url);
+      const response = await fetch(url, {
+        method: 'POST',
+        body: postData,
+        headers: {
+          Authorization: `Zoho-oauthtoken ${accessToken}`,
+          'Cache-Control': 'no-cache', // Prevent caching
+          Pragma: 'no-cache', // Prevent caching in older HTTP/1.0 proxies
+          Expires: '0',
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      console.log('Posting image to Zoho....');
+
+      if (response.ok) {
+        console.log('Image uploaded successfully to Zoho.', response);
+        return;
+      } else {
+        console.log('Failed to upload image to Zoho: ', response.status);
+        return;
+      }
     } catch (error) {
-      console.log(error);
-      return false;
+      console.error('Error capturing and uploading QR code:', error);
     }
-    return codeExsits;
+  };
+
+  const passcodeGenerator = async () => {
+    let generatedPasscode;
+    while (true) {
+      const newCode = Math.floor(
+        100000 + Math.random() * (999999 - 100001 + 1),
+      ).toString();
+      const codeurl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Passcode_Report?criteria=Passcode==${newCode}`;
+      const response = await fetch(codeurl, {
+        method: 'GET',
+        headers: {
+          Authorization: `Zoho-oauthtoken ${accessToken}`,
+        },
+        params: {
+          criteria: `Passcode==${newCode}`,
+        },
+      });
+
+      if (response.ok) {
+        continue;
+      }
+      generatedPasscode = newCode;
+      break;
+    }
+
+    const payload = {
+      data: {
+        Passcode: generatedPasscode,
+      },
+    };
+
+    const PasscodeUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Passcode`;
+    const passcodeResponse = await fetch(PasscodeUrl, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: {
+        Authorization: `Zoho-oauthtoken ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const responseData = await passcodeResponse.json();
+    console.log('response of posting passcode to zoho : ', responseData);
+
+    await generateQR(generatedPasscode);
+    return;
   };
 
   //To get employee record
@@ -356,11 +455,7 @@ const FillByYourSelf = ({navigation}) => {
         Vehicle_Information: vehicles,
       },
     };
-
-    console.log(
-      '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!form data',
-      formData,
-    );
+    console.log('formData', formData);
 
     if (loggedUser.role === 'L2') {
       if (
@@ -390,7 +485,6 @@ const FillByYourSelf = ({navigation}) => {
         },
       );
       const res = await response.json();
-      console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@', res);
       const photoUploadRes = await uploadPhoto(
         res.data.ID,
         'Approval_to_Visitor_Report',
@@ -428,7 +522,6 @@ const FillByYourSelf = ({navigation}) => {
         },
       );
       const res = await response.json();
-      console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^', res);
       await uploadPhoto(res.data.ID, 'All_Visitor_Details');
       return res;
     } catch (error) {
@@ -535,6 +628,7 @@ const FillByYourSelf = ({navigation}) => {
   const validateForm = () => {
     let valid = true;
 
+    console.log('Home or office : ', selectedHO);
     menCount = men === '' ? '0' : men;
     womenCount = women === '' ? '0' : women;
     boysCount = boys === '' ? '0' : boys;
@@ -667,7 +761,7 @@ const FillByYourSelf = ({navigation}) => {
       }
       if (
         !vehicleNumberPattern.test(
-          vehicleNumber.replace(/\s+/g, '').toLowerCase(),
+          vehicleNumber.replace(/\s+/g, '').toUpperCase(),
         ) &&
         vehicle.Vehicle_Type === ''
       ) {
@@ -682,7 +776,6 @@ const FillByYourSelf = ({navigation}) => {
   };
 
   const handleSubmit = async () => {
-    console.log('##########vehicles are: ', vehicles);
     setSubmitFlag(true);
     if (validateForm()) {
       setIsSubmitted(true);
@@ -707,8 +800,11 @@ const FillByYourSelf = ({navigation}) => {
         const responseFromVisitorDetails = await postToVisitorDetails();
         console.log('responseFromVisitorDetails', responseFromVisitorDetails);
         if (loggedUser.role === 'L2') {
-          PasscodeData();
+          await passcodeGenerator();
+          setIsSubmitted(false);
+          navigation.navigate('Invite');
         } else if (loggedUser.role === 'L1') {
+          setIsSubmitted(false);
           navigation.navigate('Invite');
         }
       } catch (err) {
@@ -756,137 +852,6 @@ const FillByYourSelf = ({navigation}) => {
   } else {
     heightStyles = smallScreen;
   }
-
-  const ScreenshotQR = async () => {
-    if (!codeReload) {
-      return;
-    }
-    try {
-      console.log('capturing view.......');
-      const uri = await captureRef(viewRef, {
-        format: 'png',
-        quality: 0.8,
-      });
-
-      console.log('view captured Uri:', uri);
-
-      // if (!uri){throw new Error('failed to capture, uri is undefined or null');
-      // }
-
-      let base64Data = '';
-      if(Platform.OS === 'ios'){
-        if (uri.startsWith('file://')) {
-          base64Data = await RNFS.readFile(uri, 'base64');
-        } else if (!uri.startsWith('file://')) {
-          base64Data =  await RNFS.readFile(`file://${uri}`, 'base64');
-        }
-        else{ 
-          throw new Error(`Unexpected URI format: ${uri}`);
-      }
-      }
-      else{
-      if (uri.startsWith('data:image/png;base64,')) {
-        base64Data = uri.split('data:image/png;base64,')[1];
-      } else if (uri.startsWith('file://')) {
-        base64Data = await RNFS.readFile(uri, 'base64');
-      } else {
-        throw new Error(`Unexpected URI format: ${uri}`);
-      }
-    }
-
-      console.log('extracted base 64 data:', base64Data.length);
-
-      if (!base64Data) {
-        throw new Error('failed to extract base64 Data from URI');
-      }
-
-      const postData = new FormData();
-      postData.append('file', {
-        uri: `data:image/png;base64, ${base64Data}`,
-        name: 'qrcode.png',
-        type: 'image/png',
-      });
-
-      const payload = {
-        data: {
-          Generated_Passcode: code,
-        },
-      };
-
-      const url1 = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${approvalToVisitorID.current}`;
-      console.log(url1);
-      const response1 = await fetch(
-        url1,
-        {
-          method: 'PATCH',
-          body: JSON.stringify(payload),
-          headers: {
-            Authorization: `Zoho-oauthtoken ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-        },
-        console.log('posting to zoho....'),
-      );
-      if (response1.ok) {
-        console.log('code posted successfully to Zoho.');
-        console.log('response', response1);
-      } else {
-        console.log(
-          'Failed to post code to Zoho:',
-          response1.status,
-          response1.statusText,
-          response1.ok,
-        );
-      }
-
-      const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${approvalToVisitorID.current}/Generated_QR_Code/upload`;
-      console.log(url);
-      const response = await fetch(
-        url,
-        {
-          method: 'POST',
-          body: postData,
-          headers: {
-            Authorization: `Zoho-oauthtoken ${accessToken}`,
-            'Content-Type': 'multipart/form-data',
-          },
-        },
-        console.log('posting to zoho....'),
-      );
-
-      if (response.ok) {
-        console.log('Image uploaded successfully to Zoho.');
-        setIsSubmitted(false);
-        setApproveDataFetched(false);
-        navigation.navigate('FooterTab', {
-          screen: 'AppApproveStack',
-          params: {
-            screen: 'ApprovalStack',
-            params: {
-              screen: 'ApprovalTab',
-              params: {
-                screen: 'Approved',
-              },
-            },
-          },
-        });
-      } else {
-        console.log(
-          'Failed to upload image to Zoho:',
-          response.status,
-          response.statusText,
-        );
-      }
-    } catch (error) {
-      console.error('Error capturing and uploading QR code:', error);
-    }
-  };
-
-  useEffect(() => {
-    if (codeReload === true) {
-      PasscodeData();
-    }
-  }, [codeReload]);
 
   const [firstNameError, setFirstNameError] = useState('');
   const [lastNameError, setLastNameError] = useState('');
@@ -1022,7 +987,6 @@ const FillByYourSelf = ({navigation}) => {
                   <Text style={styles.label}>
                     Phone <Text style={{color: 'red'}}>*</Text>
                   </Text>
-
                   <PhoneInput
                     defaultValue={value}
                     defaultCode="IN"
@@ -1114,14 +1078,19 @@ const FillByYourSelf = ({navigation}) => {
                       <View style={styles.centeredView}>
                         <TouchableWithoutFeedback>
                           <View style={styles.modalView}>
+                            <Pressable
+                              onResponderStart={() => setShowModal(false)}>
+                              <Image
+                                source={require('../assets/close_icon.png')}
+                                style={[styles.closeButton]}
+                              />
+                            </Pressable>
                             <CalendarList
-                              style={{width: '90%'}}
                               current={date === 'Select Date' ? minDate : date}
                               minDate={minDate}
                               maxDate={maxDate}
                               pastScrollRange={pastScrollRange}
                               futureScrollRange={futureScrollRange}
-                              scrollEnabled={true}
                               onDayPress={onDayPress}
                               markedDates={{
                                 [date]: {
@@ -1133,9 +1102,10 @@ const FillByYourSelf = ({navigation}) => {
                                 textSectionTitleColor: '#000',
                                 selectedDayBackgroundColor: '#B21E2B',
                                 todayTextColor: '#FFBE65',
-                                dayTextColor: '#2d4150',
+                                calendarBackground: '#ECECEC',
                                 agendaKnobColor: '#B21E2B',
-                                arrowColor: '#FFBE65',
+                                calendarWidth: 430,
+                                borderRadius: 90,
                               }}
                               showScrollIndicator={true}
                             />
@@ -1206,7 +1176,6 @@ const FillByYourSelf = ({navigation}) => {
                         selectionColor="#B21E2B"
                       />
                     </View>
-
                     <View style={styles.namecontainer}>
                       <Text style={styles.label}>
                         Number of Women <Text style={{color: 'red'}}>*</Text>
@@ -1316,6 +1285,7 @@ const FillByYourSelf = ({navigation}) => {
                   {genderErr && (
                     <Text style={styles.errorText}>{genderErr}</Text>
                   )}
+
                   <View style={styles.namecontainer}>
                     <Text style={styles.label}>Photo</Text>
                     <View
@@ -1523,65 +1493,6 @@ const FillByYourSelf = ({navigation}) => {
           </GestureHandlerRootView>
         </SafeAreaView>
       )}
-      <View style={[heightStyles.hidden]}>
-        {/* <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
-                <Text style={styles.btntxt}>Approve</Text>
-              </TouchableOpacity> */}
-        <View ref={viewRef} style={[heightStyles.container]}>
-          <View style={{flex: 1}}>
-            <View style={[heightStyles.qrCodeContainer]}>
-              <Text style={[heightStyles.title]}>{loggedUser.name}</Text>
-              <Text style={[heightStyles.title2]}>has invited you</Text>
-              <Text style={[heightStyles.text]}>
-                Show this QR code or OTP to the guard at the gate
-              </Text>
-              {code ? (
-                <QRCode value={code} size={160} />
-              ) : (
-                <Text>Genrating Qr code....</Text>
-              )}
-              <Text style={[heightStyles.middleText]}>---OR---</Text>
-              <View style={[heightStyles.codeBackdrop]}>
-                <Text style={[heightStyles.code]}>{code}</Text>
-                <View style={[heightStyles.BottomtextContainer]}>
-                  <Text style={[heightStyles.dateOfArrivalText]}>
-                    {convertDateFormat(date)}
-                  </Text>
-                  <Text style={[heightStyles.Bottomtext]}>
-                    Sathya Sai Grama -
-                  </Text>
-                  <Text style={[heightStyles.Bottomtext]}>
-                    Muddenahalli Rd,
-                  </Text>
-                  <Text style={[heightStyles.Bottomtext]}>
-                    {' '}
-                    Karnataka 562101,
-                  </Text>
-                  <View style={{flex: 1}}></View>
-                </View>
-              </View>
-              <View style={{flex: 0.7}}>
-                <ImageBackground
-                  style={[heightStyles.BottomImage]}
-                  source={require('../../src/assets/ashramQrScreen.jpg')}>
-                  <LinearGradient
-                    colors={['rgba(255,255,255,1)', 'rgba(255,255,255,0)']}
-                    style={[heightStyles.gradient, heightStyles.topGradient]}
-                  />
-                  <LinearGradient
-                    colors={['rgba(255,255,255,0)', 'rgba(255,255,255,1)']}
-                    style={[heightStyles.gradient, heightStyles.bottomGradient]}
-                  />
-                </ImageBackground>
-
-                <ImageBackground
-                  style={[heightStyles.BottomLogoImage]}
-                  source={require('../../src/assets/SSG_OWOF.png')}></ImageBackground>
-              </View>
-            </View>
-          </View>
-        </View>
-      </View>
     </>
   );
 };
@@ -2276,13 +2187,21 @@ const styles = StyleSheet.create({
   },
   modalView: {
     margin: 20,
-    backgroundColor: 'white',
-    borderRadius: 50,
-    width: '95%',
+    backgroundColor: '#ECECEC',
+    borderRadius: 30,
+    width: '100%',
     height: '60%',
-    padding: 35,
+    padding: 9,
     alignItems: 'center',
     elevation: 5,
+    borderColor: '#B21E2B',
+    borderWidth: 2,
+    overflow: 'hidden',
+  },
+  closeButton: {
+    height: 30,
+    width: 30,
+    left: 175,
   },
 
   HomeorOffice: {
