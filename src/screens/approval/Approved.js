@@ -28,13 +28,13 @@ const Approved = ({ navigation }) => {
       setApproveDataFetched(false);
       setLoading(false);
     } else {
-      all_approveds.sort((a, b) => {
-        // Parse the date strings into Date objects
-        const dateA = new parseDate(a.Date_of_Visit);
-        const dateB = new parseDate(b.Date_of_Visit);
-        // Compare the Date objects
-        return dateB - dateA;
-      });
+      // all_approveds.sort((a, b) => {
+      //   // Parse the date strings into Date objects
+      //   const dateA = new parseDate(a.Date_of_Visit);
+      //   const dateB = new parseDate(b.Date_of_Visit);
+      //   // Compare the Date objects
+      //   return dateB - dateA;
+      // });
       setApproveds(all_approveds);
       setApprovedsData(all_approveds)
       setLoading(false);
@@ -59,13 +59,13 @@ const Approved = ({ navigation }) => {
       setLoading(false);
     }
     else {
-      all_approveds.sort((a, b) => {
-        // Parse the date strings into Date objects
-        const dateA = new parseDate(a.Date_of_Visit);
-        const dateB = new parseDate(b.Date_of_Visit);
-        // Compare the Date objects
-        return dateB - dateA;
-      });
+      // all_approveds.sort((a, b) => {
+      //   // Parse the date strings into Date objects
+      //   const dateA = new parseDate(a.Date_of_Visit);
+      //   const dateB = new parseDate(b.Date_of_Visit);
+      //   // Compare the Date objects
+      //   return dateB - dateA;
+      // });
       setApproveds(all_approveds);
       setApprovedsData(all_approveds)
       setRefreshing(false);

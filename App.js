@@ -1,9 +1,10 @@
 import BaseRoute from './navigation/stack-navigation/BaseRoute';
 import UserContext from './context/UserContext';
 import { useContext, useEffect, useState } from 'react';
-import { Appearance, AppearanceProvider } from 'react-native';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 import NetInfo from '@react-native-community/netinfo';
+
+import { StyleSheet } from 'react-native';
 
 import {
   DATABASE_ID,
@@ -11,7 +12,8 @@ import {
   APPWRITE_FUNCTION_PROJECT_ID,
   APPWRITE_API_KEY,
 } from '@env';
-import { StyleSheet, ActivityIndicator, Alert } from 'react-native';
+
+import { ActivityIndicator, Alert } from 'react-native';
 import { AuthContext, AuthProvider } from './src/auth/AuthProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SplashScreen from './src/screens/SplashScreen';
@@ -33,14 +35,13 @@ const lightTheme = {
 const App = () => {
   const [isNetworkAvailable, setIsNetworkAvailable] = useState(true);
   const { user } = useContext(AuthContext);
+  
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
       setIsNetworkAvailable(state.isConnected);
     });
 
-    return () => {
-      unsubscribe();
-    };
+    return () => unsubscribe();
   }, []);
 
   const {
@@ -67,7 +68,8 @@ const App = () => {
   //To get zoho access token from Appwrite
   const getAppWriteToken = async () => {
     try {
-      console.log('database id : ', DATABASE_ID);
+      if (!isNetworkAvailable) return; // Stop if no network
+
       let res = await fetch(
         `https://cloud.appwrite.io/v1/databases/${DATABASE_ID}/collections/${COLLECTION_ID}/documents`,
         {
@@ -77,31 +79,31 @@ const App = () => {
             'X-Appwrite-Project': APPWRITE_FUNCTION_PROJECT_ID,
             'X-Appwrite-Key': APPWRITE_API_KEY,
           },
-        },
+        }
       );
-      console.log('After api call');
       res = await res.json();
-      console.log("Access token in App: ", res.documents[0].Token)
       await setAccessToken(res.documents[0].Token);
-      setIsTokenFetched(!isTokenFetched);
+      setIsTokenFetched(true);
     } catch (error) {
-      console.log('Error in App.js in getAppWriteToken function: ', error);
-      Alert.alert(error);
+      console.log('Error fetching AppWrite token:', error);
     }
   };
+
 
 
   //UseEffect to call Appwrite and device token functions
   useEffect(() => {
     const fetchToken = async () => {
       await getAppWriteToken();
+      if (!isNetworkAvailable) return;
       const dToken = await getDeviceToken();
       setDeviceToken(dToken);
-      //console.log('device token is app.js: ', dToken);
     };
-
-    fetchToken();
-  }, []);
+    
+    if (isNetworkAvailable) {
+      fetchToken();
+    }
+  }, [isNetworkAvailable]);
 
   //====================================
   //To check user exists in local storage, if exists set in Context
@@ -115,7 +117,7 @@ const App = () => {
         setL1ID(existedUser.userId);
         setUserEmail(existedUser.email);
         setProfileImage(existedUser.profilePhoto);
-        console.log('Existed user name in App.js:', existedUser.name);
+        console.log('Existed user in App.js:', existedUser);
       }
     };
 
@@ -126,125 +128,98 @@ const App = () => {
 
   //==================================
   // check whether user is changed from L2 to L1 or not
+
+
+  const checkRoleChanged = async () => {
+    let changerUserType = userType;
+    const res = await getDataWithInt('All_Offices', 'Approver_app_user_lookup', loggedUser.userId, accessToken);
+    if (res && res.data) {
+      if (loggedUser.role === "L1") changerUserType = "L2";
+      const deptIds = res.data.map(dept => dept.ID);
+      setDepartmentIds(deptIds);
+    } else {
+      if (loggedUser.role === "L2") changerUserType = "L1"; 
+    }
+    return changerUserType;
+  };
+
+  const checkIsResident = async () => {
+    const res = await getDataWithInt('All_Residents', 'App_User_lookup', loggedUser.userId, accessToken);
+    if(res && res.data && res.data[0].Department_Approval === 'APPROVED'){
+      return true;
+    }else{
+      return false;
+    }
+  };
+
+  const checkIsEmployee = async () => {
+    const res = await getDataWithInt('All_Employees', 'App_User_lookup', loggedUser.userId, accessToken);
+    if(res && res.data && res.data[0].Department_Approval === 'APPROVED'){
+      return true;
+    }else{
+      return false;
+    }
+  };
+
+  const checkIsTestResident = async () => {
+    const res = await getDataWithTwoInt('All_Residents', 'App_User_lookup', loggedUser.userId, 'Flats_lookup', '3318254000031368021', accessToken);
+    if(res && res.data && res.data[0].Accommodation_Approval === 'APPROVED'){
+      return true;
+    }else{
+      return false;
+    }
+  };
+
+  const setModifyData = async (role, resident, employee, testResident) => {
+    const data = {
+      userId: loggedUser.userId,
+      role: role,
+      email: loggedUser.email,
+      deptIds: loggedUser.deptIds,
+      name: loggedUser.name,
+      profilePhoto: loggedUser.profilePhoto,
+      resident: resident,
+      employee: employee,
+      testResident: testResident,
+    };
+
+    setLoggedUser(data);
+    console.log("Data to be set in AsyncStorage: ", data); // Log the data before setting
+    await AsyncStorage.setItem('existedUser', JSON.stringify(data));
+
+    const existedUser = await AsyncStorage.getItem('existedUser');
+    console.log("existed user inside of setModifyData: ", JSON.parse(existedUser));
+  };
+
+  const runChecks = async () => {
+    const [role, resident, employee, testResident] = await Promise.all([
+      checkRoleChanged(),
+      checkIsResident(),
+      checkIsEmployee(),
+      checkIsTestResident(),
+    ]);
+
+    await setModifyData(role, resident, employee, testResident);
+
+  };
+
   useEffect(() => {
-
-    const checkRoleChanged = async () => {
-      let changerUserType = userType;
-      const res = await getDataWithInt('All_Offices', 'Approver_app_user_lookup', loggedUser.userId, accessToken);
-      console.log("response is : ", res)
-      if (res && res.data) {
-        if (loggedUser.role === "L1") {
-          changerUserType = "L2"
-          console.log("User changed")
-        }
-        const deptIds = res.data.map(dept => dept.ID);
-        setDepartmentIds(deptIds);
-      } else {
-        if (loggedUser.role === "L2") {
-          changerUserType = "L1";
-          console.log("User changed")
-        }
-      }
-      setLoggedUser(prevState => ({
-        ...prevState,
-        role: changerUserType
-      }));
-      
+    if (isTokenFetched && loggedUser && isNetworkAvailable) {
+      runChecks();
     }
-    /////_________Check whether user is resident or not
-    const checkIsResident = async() => {
-      let resident;
-      const res = await getDataWithInt('All_Residents', 'App_User_lookup', loggedUser.userId, accessToken);
-      if (res && res.data && res.data[0].Accommodation_Approval === 'APPROVED') {
-        console.log('resident is true');
-        // resident.current = true;
-        resident = true;
-        setResident(true);
-      } else {
-        console.log('resident is false');
-        resident = false;
-        setResident(false);
-      }
+  }, [isTokenFetched]);
 
-      setLoggedUser(prevState => ({
-        ...prevState,
-        resident: resident
-      }));
-    };
 
-    ///___________Check whether user is employee or not
-    const checkIsEmployee = async() => {
-      let employee;
-      const res = await getDataWithInt('All_Employees', 'App_User_lookup', loggedUser.userId, accessToken);
-      if (res && res.data && res.data[0].Department_Approval === 'APPROVED') {
-        console.log('employee is true');
-        employee = true;
-        setEmployee(true);
-      } else {
-        console.log('employee is false');
-        employee = false;
-        setEmployee(false);
-      }
-
-      setLoggedUser(prevState => ({
-        ...prevState,
-        employee: employee
-      }));
-    };
-
-    ///_________Check whether user is test resident
-    const checkIsTestResident = async() => {
-      let testResident;
-      const res = await getDataWithTwoInt('All_Residents', 'App_User_lookup', loggedUser.userId, 'Flats_lookup', '3318254000031368021', accessToken);
-      if (res && res.data && res.data[0].Accommodation_Approval === 'APPROVED') {
-        console.log('Test resident is true');
-        testResident = true;
-        setTestResident(true);
-      } else {
-        console.log('Test Resident is false');
-        testResident = false;
-        setTestResident(false);
-      }
-
-      setLoggedUser(prevState => ({
-        ...prevState,
-        testResident: testResident
-      }));
-    };
-
-    const setModifyData = async() => {
-      await AsyncStorage.setItem(
-        'existedUser',
-        JSON.stringify({
-          userId: loggedUser.userId,
-          role: loggedUser.role,
-          email: loggedUser.email,
-          deptIds: loggedUser.deptIds,
-          name: loggedUser.name,
-          profilePhoto: loggedUser.profilePhoto,
-          resident: loggedUser.resident,
-          employee: loggedUser.employee,
-          testResident: loggedUser.testResident,
-        }),
-      );
-    }
-
-    if (isTokenFetched && loggedUser) {
-      checkRoleChanged();
-      checkIsResident();
-      checkIsEmployee();
-      checkIsTestResident();
-      setModifyData();
-    }
-
-  }, [isTokenFetched])
 
   useEffect(() => {
     if (accessToken) {
-      console.log('Access token in App useEffect: ', accessToken);
+      console.log("Access token found, stopping loading");
       setLoading(false);
+    } else {
+      console.log("Access token missing, still loading");
     }
   }, [accessToken]);
+
 
   return (
     <PaperProvider theme={lightTheme}>

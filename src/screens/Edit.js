@@ -9,9 +9,9 @@ import {
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
-import {useForm, Controller} from 'react-hook-form';
-import React, {useContext, useEffect, useState} from 'react';
-import {Dropdown} from 'react-native-element-dropdown';
+import { useForm, Controller } from 'react-hook-form';
+import React, { useContext, useEffect, useState } from 'react';
+import { Dropdown } from 'react-native-element-dropdown';
 import {
   patchDataWithInt,
   patchDataWithRecordId,
@@ -20,9 +20,11 @@ import {
 import UserContext from '../../context/UserContext';
 import PhoneInput from 'react-native-phone-number-input';
 
-import {parsePhoneNumberFromString} from 'libphonenumber-js';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
-const Edit = ({route, navigation}) => {
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const Edit = ({ route, navigation }) => {
   const formType = route.params?.formType;
   const userdata = route.params?.userdata;
   const vehicledata = route.params?.vehicledata;
@@ -52,35 +54,35 @@ const Edit = ({route, navigation}) => {
   const [submitFlag, setSubmitFlag] = useState(false);
 
   const relationTypeDropDown = [
-    {label: 'Spouse', value: 'Spouse'},
-    {label: 'Son', value: 'Son'},
-    {label: 'Daughter', value: 'Daughter'},
-    {label: 'Mother', value: 'Mother'},
-    {label: 'Father', value: 'Father'},
-    {label: 'Brother', value: 'Brother'},
-    {label: 'Sister', value: 'Sister'},
-    {label: 'Colleague', value: 'Colleague'},
-    {label: 'Grand Mother', value: 'Grand Mother'},
-    {label: 'Grand Father', value: 'Grand Father'},
-    {label: 'Aunt', value: 'Aunt'},
-    {label: 'Uncle', value: 'Uncle'},
-    {label: 'Father-in-Law', value: 'Father-in-Law'},
-    {label: 'Mother-in-Law', value: 'Mother-in-Law'},
-    {label: 'Sister-in-Law', value: 'Sister-in-Law'},
-    {label: 'Brother-in-Law', value: 'Brother-in-Law'},
-    {label: 'Niece', value: 'Niece'},
-    {label: 'Nephew', value: 'Nephew'},
-    {label: 'Grandson', value: 'Grandson'},
-    {label: 'Granddaughter', value: 'Granddaughter'},
-    {label: 'Other', value: 'Other'},
+    { label: 'Spouse', value: 'Spouse' },
+    { label: 'Son', value: 'Son' },
+    { label: 'Daughter', value: 'Daughter' },
+    { label: 'Mother', value: 'Mother' },
+    { label: 'Father', value: 'Father' },
+    { label: 'Brother', value: 'Brother' },
+    { label: 'Sister', value: 'Sister' },
+    { label: 'Colleague', value: 'Colleague' },
+    { label: 'Grand Mother', value: 'Grand Mother' },
+    { label: 'Grand Father', value: 'Grand Father' },
+    { label: 'Aunt', value: 'Aunt' },
+    { label: 'Uncle', value: 'Uncle' },
+    { label: 'Father-in-Law', value: 'Father-in-Law' },
+    { label: 'Mother-in-Law', value: 'Mother-in-Law' },
+    { label: 'Sister-in-Law', value: 'Sister-in-Law' },
+    { label: 'Brother-in-Law', value: 'Brother-in-Law' },
+    { label: 'Niece', value: 'Niece' },
+    { label: 'Nephew', value: 'Nephew' },
+    { label: 'Grandson', value: 'Grandson' },
+    { label: 'Granddaughter', value: 'Granddaughter' },
+    { label: 'Other', value: 'Other' },
   ];
 
   // const { formType, userdata, vehicledata } = route.params;
-  const {L1ID, getAccessToken} = useContext(UserContext);
+  const { L1ID, getAccessToken, loggedUser, setLoggedUser } = useContext(UserContext);
   const {
     control,
     handleSubmit,
-    formState: {errors},
+    formState: { errors },
   } = useForm({
     defaultValues: {
       name: userdata?.Name_field,
@@ -95,8 +97,8 @@ const Edit = ({route, navigation}) => {
   });
   const [invalidVehicleNumber, setInvalidVehicleNumber] = useState([]);
   const vehicleTypeDropDown = [
-    {label: '2-wheeler', value: '2-wheeler'},
-    {label: 'Car', value: 'Car'},
+    { label: '2-wheeler', value: '2-wheeler' },
+    { label: 'Car', value: 'Car' },
   ];
 
   const [isFocus, setIsFocus] = useState(true);
@@ -107,7 +109,7 @@ const Edit = ({route, navigation}) => {
 
   const handleCancelByBasicInfo = () => {
     navigation.navigate('MyProfile', {
-      userInfo: [{...userdata}],
+      userInfo: [{ ...userdata }],
       vehicleInfo: vehicledata,
       familyMembersData: route.params.family,
       flatExists: route.params.flat,
@@ -131,51 +133,38 @@ const Edit = ({route, navigation}) => {
   const validatePhoneNumber = () => {
     if (!formattedValue) {
       setPhoneErr('Phone number is required');
+      console.log("phone number required error")
       setPhoneValidErr(null);
+      return false;
     } else {
       setPhoneErr(null);
       const parsedPhoneNumber = parsePhoneNumberFromString(formattedValue);
       if (!parsedPhoneNumber || !parsedPhoneNumber.isValid()) {
+        console.log("invalid phone number  error")
         setPhoneValidErr('Invalid phone number');
+        return false;
       } else {
         setPhoneValidErr(null);
+        return true;
       }
     }
   };
+
 
   useEffect(() => {
     if (submitFlag) {
       validatePhoneNumber();
     }
-  }, [formattedValue]);
+  }, [formattedValue, submitFlag]);
 
   const saveDataFromBasicInfo = async basicInfo => {
+
+    setPhoneErr(null);
+    setPhoneValidErr(null);
+
     setSubmitFlag(true);
 
-    // Perform validation synchronously and store result locally
-    let localPhoneErr = null;
-    let localPhoneValidErr = null;
-
-    if (!formattedValue) {
-      localPhoneErr = 'Phone number is required';
-    } else {
-      const parsedPhoneNumber = parsePhoneNumberFromString(formattedValue);
-      if (!parsedPhoneNumber || !parsedPhoneNumber.isValid()) {
-        localPhoneValidErr = 'Invalid phone number';
-      }
-    }
-
-    // Log the errors for debugging
-    console.log('Phone Error:', localPhoneErr);
-    console.log('Phone Valid Error:', localPhoneValidErr);
-
-    // Set the errors in state so they can be displayed in the UI
-    setPhoneErr(localPhoneErr);
-    setPhoneValidErr(localPhoneValidErr);
-
-    // Stop submission if there are errors
-    if (localPhoneErr || localPhoneValidErr) {
-      console.log('Validation failed. Aborting submission.');
+    if(!validatePhoneNumber()){
       return;
     }
 
@@ -198,6 +187,7 @@ const Edit = ({route, navigation}) => {
         Gender: basicInfo.gender,
       };
     }
+    console.log("object------------- ", updateddata)
 
     const user = {
       criteria: `ID==${L1ID}`,
@@ -209,13 +199,30 @@ const Edit = ({route, navigation}) => {
       user,
       getAccessToken(),
     );
+    console.log(" (((((((((((((((((( ", resFromUserUpdate)
 
     if (resFromUserUpdate.result[0].code === 3000) {
       setLoading(false);
       console.log(basicInfo);
+
+      console.log("Data to be set in AsyncStorage: ", data); // Log the data before setting
+      const data = {
+        userId: loggedUser.userId,
+        role: loggedUser.role,
+        email: loggedUser.email,
+        deptIds: loggedUser.deptIds,
+        name: basicInfo.name,
+        profilePhoto: loggedUser.profilePhoto,
+        resident: loggedUser.resident,
+        employee: loggedUser.employee,
+        testResident: loggedUser.testResident,
+      };
+      await AsyncStorage.setItem('existedUser', JSON.stringify(data));
+      setLoggedUser(data)
+
       setFormattedValue('');
       navigation.navigate('MyProfile', {
-        userInfo: [{...userdata, ...updateddata}],
+        userInfo: [{ ...userdata, ...updateddata }],
         vehicleInfo: vehicledata,
         familyMembersData: route.params.family,
         flatExists: route.params.flat,
@@ -237,7 +244,7 @@ const Edit = ({route, navigation}) => {
     if (
       vehicleNumberPattern.test(vehicleNumber.replace(/\s+/g, '').toLowerCase())
     ) {
-      setInvalidVehicleNumber({number: false, ind: ind});
+      setInvalidVehicleNumber({ number: false, ind: ind });
       const updateddata = {
         Vehicle_Type: vehicleInfo[`vehicleType${ind}`],
         Vehicle_Number: vehicleInfo[`vehicleNumber${ind}`],
@@ -261,10 +268,10 @@ const Edit = ({route, navigation}) => {
         const ind = vehicledata.findIndex(vehicle => vehicle.ID === id);
 
         if (ind != -1) {
-          vehicledata[ind] = {...vehicledata[ind], ...updateddata};
+          vehicledata[ind] = { ...vehicledata[ind], ...updateddata };
         }
         navigation.navigate('MyProfile', {
-          userInfo: [{...userdata}],
+          userInfo: [{ ...userdata }],
           vehicleInfo: vehicledata,
           familyMembersData: route.params.family,
           flatExists: route.params.flat,
@@ -278,7 +285,7 @@ const Edit = ({route, navigation}) => {
         Alert.alert('Error code', resFromVehicleUpdate.code);
       }
     } else {
-      setInvalidVehicleNumber({number: true, ind: ind});
+      setInvalidVehicleNumber({ number: true, ind: ind });
       setLoading(false);
     }
   };
@@ -296,7 +303,7 @@ const Edit = ({route, navigation}) => {
 
       vehicledata.splice(index, 1);
       navigation.navigate('MyProfile', {
-        userInfo: [{...userdata}],
+        userInfo: [{ ...userdata }],
         vehicleInfo: vehicledata,
         familyMembersData: route.params.family,
         flatExists: route.params.flat,
@@ -410,19 +417,19 @@ const Edit = ({route, navigation}) => {
                 <Text style={styles.title}>Personal Info</Text>
                 <View style={styles.field}>
                   <Text style={styles.label}>
-                    Name <Text style={{color: 'red'}}>*</Text>
+                    Name <Text style={{ color: 'red' }}>*</Text>
                   </Text>
                   <Controller
                     name="name"
                     control={control}
-                    render={({field: {onChange, value}}) => (
+                    render={({ field: { onChange, value } }) => (
                       <TextInput
                         style={styles.inputBox}
                         value={value}
                         onChangeText={onChange}
                       />
                     )}
-                    rules={{required: true}}
+                    rules={{ required: true }}
                   />
                   {errors.name && (
                     <Text style={styles.textError}>Name is required</Text>
@@ -431,12 +438,12 @@ const Edit = ({route, navigation}) => {
 
                 <View style={styles.field}>
                   <Text style={styles.label}>
-                    Email <Text style={{color: 'red'}}>*</Text>
+                    Email <Text style={{ color: 'red' }}>*</Text>
                   </Text>
                   <Controller
                     name="email"
                     control={control}
-                    render={({field: {onChange, value}}) => (
+                    render={({ field: { onChange, value } }) => (
                       <TextInput
                         style={styles.inputBox}
                         value={value}
@@ -449,7 +456,7 @@ const Edit = ({route, navigation}) => {
 
                 <View style={styles.field}>
                   <Text style={styles.label}>
-                    Phone <Text style={{color: 'red'}}>*</Text>
+                    Phone <Text style={{ color: 'red' }}>*</Text>
                   </Text>
 
                   <View style={styles.editPhoneContainer}>
@@ -457,14 +464,14 @@ const Edit = ({route, navigation}) => {
                       name="phoneDisplay"
                       control={control}
                       defaultValue={userdata?.Phone_Number}
-                      render={({field: {onChange, value}}) => (
+                      render={({ field: { onChange, value } }) => (
                         <TextInput
                           style={styles.displayPhone}
                           value={value}
                           editable={false}
                         />
                       )}
-                      rules={{required: true}}
+                      rules={{ required: true }}
                     />
                     <TouchableOpacity
                       onPress={handleEditPhone}
@@ -490,7 +497,7 @@ const Edit = ({route, navigation}) => {
                           onChangeFormattedText={text => {
                             setFormattedValue(text);
                           }}
-                          countryPickerProps={{withAlphaFilter: true}}
+                          countryPickerProps={{ withAlphaFilter: true }}
                           disabled={false}
                           withDarkTheme
                           withShadow
@@ -503,7 +510,7 @@ const Edit = ({route, navigation}) => {
                             source={require('../assets/cancel.png')}
                             style={[
                               styles.editPhoneIcon,
-                              {tintColor: '#B21E2B'},
+                              { tintColor: '#B21E2B' },
                             ]}
                           />
                         </TouchableOpacity>
@@ -536,13 +543,13 @@ const Edit = ({route, navigation}) => {
 
                 <View style={styles.field}>
                   <Text style={styles.label}>
-                    Gender <Text style={{color: 'red'}}>*</Text>
+                    Gender <Text style={{ color: 'red' }}>*</Text>
                   </Text>
                   <Controller
                     control={control}
                     name="gender"
-                    rules={{required: 'Gender is required'}}
-                    render={({field: {onChange}}) => (
+                    rules={{ required: 'Gender is required' }}
+                    render={({ field: { onChange } }) => (
                       <View style={styles.radioButtonContainer}>
                         {gender.map(option => (
                           <TouchableOpacity
@@ -557,14 +564,14 @@ const Edit = ({route, navigation}) => {
                                 <View style={styles.innerCircle} />
                               )}
                             </View>
-                            <Text style={{marginLeft: 10}}>{option}</Text>
+                            <Text style={{ marginLeft: 10 }}>{option}</Text>
                           </TouchableOpacity>
                         ))}
                       </View>
                     )}
                   />
                   {errors.gender && (
-                    <Text style={{color: 'red'}}>{errors.gender.message}</Text>
+                    <Text style={{ color: 'red' }}>{errors.gender.message}</Text>
                   )}
                 </View>
 
@@ -623,13 +630,13 @@ const Edit = ({route, navigation}) => {
                           flexDirection: 'row',
                           marginBottom: 0,
                         }}>
-                        <View style={{marginEnd: 15}}>
+                        <View style={{ marginEnd: 15 }}>
                           <Text style={styles.label}>Vehicle Type</Text>
                           <Controller
                             name={`vehicleType${index}`} // Use unique key for Controller name
                             control={control}
                             defaultValue={vehicle.Vehicle_Type}
-                            render={({field: {onChange, value}}) => (
+                            render={({ field: { onChange, value } }) => (
                               <Dropdown
                                 style={[
                                   styles.dropdownVehicle,
@@ -648,7 +655,7 @@ const Edit = ({route, navigation}) => {
                                 }}
                               />
                             )}
-                            rules={{required: true}}
+                            rules={{ required: true }}
                           />
                           {errors[`vehicleType-${index}`] && (
                             <Text style={styles.textError}>
@@ -662,7 +669,7 @@ const Edit = ({route, navigation}) => {
                             name={`vehicleNumber${index}`} // Use unique key for Controller name
                             control={control}
                             defaultValue={vehicle.Vehicle_Number}
-                            render={({field: {onChange, value}}) => (
+                            render={({ field: { onChange, value } }) => (
                               <TextInput
                                 style={styles.vehicleNumber}
                                 value={value}
@@ -670,7 +677,7 @@ const Edit = ({route, navigation}) => {
                                 onChangeText={onChange}
                               />
                             )}
-                            rules={{required: true}}
+                            rules={{ required: true }}
                           />
 
                           {errors[`vehicleNumber${index}`] && ( // Corrected error handling for dynamic field names
@@ -730,19 +737,19 @@ const Edit = ({route, navigation}) => {
                 <Text style={styles.title}>Personal Info</Text>
                 <View style={styles.field}>
                   <Text style={styles.label}>
-                    Name <Text style={{color: 'red'}}>*</Text>
+                    Name <Text style={{ color: 'red' }}>*</Text>
                   </Text>
                   <Controller
                     name="familymembername"
                     control={control}
-                    render={({field: {onChange, value}}) => (
+                    render={({ field: { onChange, value } }) => (
                       <TextInput
                         style={styles.inputBox}
                         value={value}
                         onChangeText={onChange}
                       />
                     )}
-                    rules={{required: true}}
+                    rules={{ required: true }}
                   />
                   {errors.familymembername && (
                     <Text style={styles.textError}>Name is required</Text>
@@ -751,12 +758,12 @@ const Edit = ({route, navigation}) => {
 
                 <View style={styles.field}>
                   <Text style={styles.label}>
-                    Relation Type <Text style={{color: 'red'}}>*</Text>
+                    Relation Type <Text style={{ color: 'red' }}>*</Text>
                   </Text>
                   <Controller
                     name="familymemberrelation" // Use unique key for Controller name
                     control={control}
-                    render={({field: {onChange, value}}) => (
+                    render={({ field: { onChange, value } }) => (
                       <Dropdown
                         style={styles.inputBox}
                         data={relationTypeDropDown}
@@ -772,7 +779,7 @@ const Edit = ({route, navigation}) => {
                         }}
                       />
                     )}
-                    rules={{required: true}}
+                    rules={{ required: true }}
                   />
                   {errors['familymemberrelation'] && (
                     <Text style={styles.textError}>
@@ -783,12 +790,12 @@ const Edit = ({route, navigation}) => {
 
                 <View style={styles.field}>
                   <Text style={styles.label}>
-                    Email <Text style={{color: 'red'}}>*</Text>
+                    Email <Text style={{ color: 'red' }}>*</Text>
                   </Text>
                   <Controller
                     name="familymemberemail"
                     control={control}
-                    render={({field: {onChange, value}}) => (
+                    render={({ field: { onChange, value } }) => (
                       <TextInput
                         style={styles.inputBox}
                         editable={false}
@@ -801,19 +808,19 @@ const Edit = ({route, navigation}) => {
 
                 <View style={styles.field}>
                   <Text style={styles.label}>
-                    Phone <Text style={{color: 'red'}}>*</Text>
+                    Phone <Text style={{ color: 'red' }}>*</Text>
                   </Text>
                   <Controller
                     name="familymemberphone"
                     control={control}
-                    render={({field: {onChange, value}}) => (
+                    render={({ field: { onChange, value } }) => (
                       <TextInput
                         style={styles.inputBox}
                         value={value}
                         onChangeText={onChange}
                       />
                     )}
-                    rules={{required: true}}
+                    rules={{ required: true }}
                   />
                   {errors.familymemberphone && (
                     <Text style={styles.textError}>
@@ -824,7 +831,7 @@ const Edit = ({route, navigation}) => {
 
                 <View style={styles.field}>
                   <Text style={styles.label}>
-                    Gender <Text style={{color: 'red'}}>*</Text>
+                    Gender <Text style={{ color: 'red' }}>*</Text>
                   </Text>
                   <View style={styles.radioButtonContainer}>
                     {gender.map(option => (
@@ -1126,7 +1133,7 @@ const styles = StyleSheet.create({
     flexShrink: 0,
     ...Platform.select({
       ios: {
-        shadowOffset: {width: 2, height: 2},
+        shadowOffset: { width: 2, height: 2 },
         shadowColor: '#FFF',
         shadowOpacity: 0.3,
         shadowRadius: 4,
