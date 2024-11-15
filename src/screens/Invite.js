@@ -172,7 +172,7 @@ const Invite = ({navigation}) => {
     } catch (error) {
       setLoading(false);
       setModal(false);
-      Alert.alert(error.message);
+      //Alert.alert(error.message);
     }
   };
 

@@ -157,6 +157,7 @@ const Edit = ({ route, navigation }) => {
     }
   }, [formattedValue, submitFlag]);
 
+  
   const saveDataFromBasicInfo = async basicInfo => {
 
     setPhoneErr(null);
