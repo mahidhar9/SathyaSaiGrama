@@ -126,6 +126,7 @@ const Filter = ({ setFilteredData, ToFilterData, comingFrom }) => {
       if (res.length === 0) {
         setFilteredData([]);  // This will trigger the "No Visitor Founds" message
       } else {
+        console.log("object::: ", res)
         setFilteredData(res);
       }
       setFilterCount(Object.keys(filters).length);
@@ -571,17 +572,17 @@ const styles = StyleSheet.create({
   bubble: {
     position: 'absolute',
     top: -5,
-    right: -5,
-    backgroundColor: 'red',
-    borderRadius: 10,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    right: -8,
+    backgroundColor: '#ff9d00',
+    width: 15,
+    height: 15,
+    borderRadius: 7.5,
     justifyContent: 'center',
     alignItems: 'center',
   },
   bubbleText: {
     color: 'white',
-    fontSize: 12,
+    fontSize: 8,
     fontWeight: 'bold',
   },
   filtertxt: {

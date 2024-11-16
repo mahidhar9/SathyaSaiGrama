@@ -119,7 +119,6 @@ const App = () => {
         setL1ID(existedUser.userId);
         setUserEmail(existedUser.email);
         setProfileImage(existedUser.profilePhoto);
-        console.log('Existed user in App.js:', existedUser.name);
       }
     };
 
@@ -185,10 +184,14 @@ const App = () => {
       testResident: testResident,
     };
 
+
     setLoggedUser(data);
-    console.log("Data to be set in AsyncStorage: ", data.name); 
+    console.log("Data to be set in AsyncStorage: ", data); // Log the data before setting
+
     await AsyncStorage.setItem('existedUser', JSON.stringify(data));
 
+    const existedUser = await AsyncStorage.getItem('existedUser');
+    
   };
 
   const runChecks = async () => {
@@ -215,7 +218,8 @@ const App = () => {
 
   useEffect(() => {
     if (accessToken) {
-      console.log("Access token found, stopping loading");
+      console.log("Access token found, stopping loading", accessToken);
+
       setLoading(false);
     } else {
       console.log("Access token missing, still loading");

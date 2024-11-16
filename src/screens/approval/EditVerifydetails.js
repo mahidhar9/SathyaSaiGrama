@@ -81,10 +81,11 @@ const EditVerifyDetails = ({navigation, route}) => {
   const [vehicles, setVehicles] = useState(user.Vehicle_Information);
   const [vehicleErrorMessages, setVehicleErrorMessages] = useState({});
   // Regex format for vehicle number like 'KA 01 CU 1234'
-  const vehicleNumberPattern = /^[a-z]{2}[0-9]{2}[a-z]{2}[0-9]{4}$/;
+  const vehicleNumberPattern = /^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}$/;
   const [selectedGender, setSelectedGender] = useState(user.Gender);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [DialogVisible, setDialogVisible] = useState(false);
+  const [errType, setErrType] = useState(null);
 
   const [showModal, setShowModal] = useState(false);
   const gender = ['Male', 'Female'];
@@ -222,13 +223,30 @@ const EditVerifyDetails = ({navigation, route}) => {
         girlsCount = 0;
       }
 
-      let people = menCount + womenCount + boysCount + girlsCount;
-      console.log('Total people : ', people);
+      // Calculate the total number of people
+    let people = parseInt(menCount) + parseInt(womenCount) + parseInt(boysCount) + parseInt(girlsCount);
+    console.log('Total people : ', people);
 
+    // Validation checks for minimum counts
+    let tempErrType = null;
+    if (selectedGender === 'Male' && menCount < 1) {
+      tempErrType = 'MenCount';
+    } else if (selectedGender === 'Female' && womenCount < 1) {
+      tempErrType = 'WomenCount';
+    }
+   
+    setErrType(tempErrType);
+
+     if(people >= 1 && tempErrType == null){
       vehicles.map(vehicle => {
         delete vehicle.ID;
         delete vehicle.zc_display_value;
       });
+
+      const uppercaseVehicles = vehicles.map(vehicle => ({
+        ...vehicle,
+        Vehicle_Number: vehicle.Vehicle_Number.toUpperCase(),
+      }));
 
       const updateField = {
         Date_of_Visit: date,
@@ -241,9 +259,9 @@ const EditVerifyDetails = ({navigation, route}) => {
         Number_of_Women: womenCount,
         Priority: priority,
         Remarks: remarks,
-        Single_or_Group_Visit: isSingle,
+        Single_or_Group_Visit: people == 1 ? 'Single' : 'Group',
         Guest_Category: category,
-        Vehicle_Information: vehicles,
+        Vehicle_Information: uppercaseVehicles,
       };
 
       const updateData = {
@@ -269,6 +287,12 @@ const EditVerifyDetails = ({navigation, route}) => {
       } else {
         Alert.alert('Error: ', response.code);
       }
+     }
+      else{
+       if(people < 1){
+        Alert.alert('Error: ', 'Please select at least one person to visit.');
+     }
+    }
     }
   };
 
@@ -315,7 +339,7 @@ const EditVerifyDetails = ({navigation, route}) => {
       const vehicleNumber = vehicle.Vehicle_Number;
       if (
         !vehicleNumberPattern.test(
-          vehicleNumber.replace(/\s+/g, '').toLowerCase(),
+          vehicleNumber.replace(/\s+/g, '').toUpperCase(),
         )
       ) {
         errors[vehicle.ID] = `Invalid Vehicle Number`;
@@ -327,7 +351,7 @@ const EditVerifyDetails = ({navigation, route}) => {
       }
       if (
         !vehicleNumberPattern.test(
-          vehicleNumber.replace(/\s+/g, '').toLowerCase(),
+          vehicleNumber.replace(/\s+/g, '').toUpperCase(),
         ) &&
         vehicle.Vehicle_Type === ''
       ) {
@@ -363,6 +387,7 @@ const EditVerifyDetails = ({navigation, route}) => {
   };
 
   const handleTextChange = (index, field, value) => {
+    console.log(vehicles)
     const updatedVehicles = vehicles.map((vehicle, i) =>
       i === index ? {...vehicle, [field]: value} : vehicle,
     );
@@ -460,6 +485,7 @@ const EditVerifyDetails = ({navigation, route}) => {
               <TouchableOpacity
                 key={option}
                 style={styles.singleOptionContainer}
+                disabled={true}
                 onPress={() => {
                   setSelectedGender(option);
                 }}>
@@ -514,6 +540,11 @@ const EditVerifyDetails = ({navigation, route}) => {
                     setMen(numericValue);
                   }}
                 />
+                 {
+                  errType == 'MenCount' && (
+                    <Text style={{color: 'red'}}>Please enter a valid number.</Text>
+                  )
+                }
               </View>
             </View>
             <View style={styles.single}>
@@ -531,6 +562,11 @@ const EditVerifyDetails = ({navigation, route}) => {
                     setWomen(numericValue);
                   }}
                 />
+                {
+                  errType == 'WomenCount' && (
+                    <Text style={{color: 'red'}}>Please enter a valid number.</Text>
+                  )
+                }
               </View>
             </View>
             <View style={styles.single}>
@@ -654,13 +690,16 @@ const EditVerifyDetails = ({navigation, route}) => {
         </View>
 
         <View style={styles.v}>
-          <Text style={styles.txt}>Vehicle Information</Text>
+        <Text style={styles.txt}>Vehicle Information</Text>
+        </View>
+       
+        <View style={styles.v1}>
           <View style={styles.vehicle}>
             <Text>Vehicle type</Text>
             <Text>Vehicle Number</Text>
           </View>
           {vehicles.map((vehicle, index) => (
-            <View style={{flexDirection: 'column'}}>
+            <View style={{flexDirection: 'column', width: 350}}>
               <View key={index} style={styles.newvehicle}>
                 <Picker
                   selectedValue={vehicle.Vehicle_Type}
@@ -690,11 +729,10 @@ const EditVerifyDetails = ({navigation, route}) => {
                 <TextInput
                   style={styles.vehicleinput}
                   value={vehicle.Vehicle_Number}
-                  placeholder="KA 01 ab 1234"
+                  placeholder="KA 01 AB 1234"
                   placeholderTextColor="#c5c7ca"
-                  onChangeText={text =>
-                    handleTextChange(index, 'Vehicle_Number', text)
-                  }
+                  onChangeText={text => handleTextChange(index, 'Vehicle_Number', text )}
+                  autoCapitalize='characters'
                 />
                 <TouchableOpacity onPress={() => handleRemoveVehicle(index)}>
                   <Image
@@ -817,12 +855,13 @@ const styles = StyleSheet.create({
   picker: {
     flex: 1,
     height: 40,
-    paddingRight: 70,
+    paddingRight: 60,
     // marginRight: -10,
   },
   vehicleinput: {
     flex: 1,
     height: 40,
+    width: '100%'
   },
 
   removeButton: {
@@ -875,6 +914,11 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     marginBottom: 10,
     marginRight: 20,
+  },
+  v1:{
+    marginLeft: 8,
+    marginBottom: 10,
+    marginRight: 0,
   },
   txt: {
     fontSize: 16,

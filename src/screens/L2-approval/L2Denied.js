@@ -7,6 +7,7 @@ import parseDate from '../../components/ParseDate';
 import { useFocusEffect, } from '@react-navigation/native';
 import Filter from '../../components/Filter';
 import DotsBlinkingLoaderEllipsis from '../../components/DotsBlinkingLoaderEllipsis'
+import Sort from '../../components/Sort';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const L2Denied = ({ navigation }) => {
@@ -96,18 +97,22 @@ const L2Denied = ({ navigation }) => {
     onRefresh();
   }, [L2Denied]));
   return (
-    <><View style={{ flex: 1, paddingTop: 10 , backgroundColor: '#FFF'}}>
+    <><View style={{ flex: 1, paddingTop: 10, backgroundColor: '#FFF' }}>
       {loading ? (
         <View style={styles.loadingContainer}>
           {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
-          <DotsBlinkingLoaderEllipsis/>
+          <DotsBlinkingLoaderEllipsis />
         </View>
       ) : ((refreshing ? (<View style={styles.loadingContainer}>
         {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
-        <DotsBlinkingLoaderEllipsis/>
+        <DotsBlinkingLoaderEllipsis />
       </View>) : (
         <>
-          <Filter setFilteredData={setL2DeniedsData} ToFilterData={L2Denieds}  comingFrom={"L2Denied"}/>
+          <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+            <Sort setSortedData={setL2DeniedsData} ToSortData={L2Denieds} />
+            <Filter setFilteredData={setL2DeniedsData} ToFilterData={L2Denieds} comingFrom={"L2Denied"} />
+          </View>
+
           <FlatList
             data={L2DeniedsData}
             renderItem={({ item }) => (
