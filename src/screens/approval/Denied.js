@@ -7,6 +7,7 @@ import { getDataWithIntAndString } from '../../components/ApiRequest';
 import parseDate from "../../components/ParseDate"
 import Filter from '../../components/Filter';
 import DotsBlinkingLoaderEllipsis from '../../components/DotsBlinkingLoaderEllipsis';
+import Sort from '../../components/Sort';
 
 
 const Denied = ({ navigation }) => {
@@ -90,7 +91,10 @@ const Denied = ({ navigation }) => {
         <DotsBlinkingLoaderEllipsis/>
       </View>) : (
         <>
-          <Filter setFilteredData={setDeniedsData} ToFilterData={denieds} comingFrom={"Denied"} />
+          <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+            <Sort setSortedData={setDeniedsData} ToSortData={denieds} />
+            <Filter setFilteredData={setDeniedsData} ToFilterData={denieds} comingFrom={"Denied"} />
+          </View>
           <FlatList
             data={deniedsData}
             renderItem={({ item }) => (

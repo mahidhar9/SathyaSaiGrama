@@ -3,6 +3,7 @@ import React from 'react'
 
 const L2ApprovalComponent = ({ navigation, user }) => {
 
+
     const openPending = () => {
         navigation.navigate("ViewDetails", { user: user })
     }

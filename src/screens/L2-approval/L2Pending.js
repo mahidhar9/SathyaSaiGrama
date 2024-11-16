@@ -7,6 +7,7 @@ import parseDate from '../../components/ParseDate';
 import { useFocusEffect, } from '@react-navigation/native';
 import Filter from '../../components/Filter';
 import DotsBlinkingLoaderEllipsis from '../../components/DotsBlinkingLoaderEllipsis'
+import Sort from '../../components/Sort';
 
 const L2Pending = ({ navigation }) => {
 
@@ -15,6 +16,7 @@ const L2Pending = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [L2PendingsData, setL2PendingsData] = useState([]);
+
 
   const fetchData = async () => {
     setLoading(true)
@@ -41,6 +43,7 @@ const L2Pending = ({ navigation }) => {
       setLoading(false)
       setL2PendingDataFetched(true)
     }
+    console.log("object:: ", L2Pendings)
   };
 
   useEffect(() => {
@@ -75,6 +78,7 @@ const L2Pending = ({ navigation }) => {
       setL2PendingsData(all_L2pendings)
       setRefreshing(false);
     }
+    console.log("object:: ", L2Pendings)
   };
 
 
@@ -89,14 +93,18 @@ const L2Pending = ({ navigation }) => {
       {loading ? (
         <View style={styles.loadingContainer}>
           {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
-          <DotsBlinkingLoaderEllipsis/>
+          <DotsBlinkingLoaderEllipsis />
         </View>
       ) : ((refreshing ? (<View style={styles.loadingContainer}>
         {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
-        <DotsBlinkingLoaderEllipsis/>
+        <DotsBlinkingLoaderEllipsis />
       </View>) : (
         <>
-          <Filter setFilteredData={setL2PendingsData} ToFilterData={L2Pendings} comingFrom={"L2Pending"}/>
+          <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+            <Sort setSortedData={setL2PendingsData} ToSortData={L2Pendings} />
+            <Filter setFilteredData={setL2PendingsData} ToFilterData={L2Pendings} comingFrom={"L2Pending"} />
+          </View>
+
           <FlatList
             data={L2PendingsData}
             renderItem={({ item }) => (

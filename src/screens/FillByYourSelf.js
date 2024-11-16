@@ -16,14 +16,13 @@ import {
   Dimensions,
 } from 'react-native';
 
-
 import {
   GestureHandlerRootView,
   TouchableOpacity,
 } from 'react-native-gesture-handler';
-import {encode} from 'base64-arraybuffer';
+import { encode } from 'base64-arraybuffer';
 import RNFS from 'react-native-fs';
-import {Picker} from '@react-native-picker/picker';
+import { Picker } from '@react-native-picker/picker';
 
 import DatePicker from 'react-native-modern-datepicker';
 import { getToday, getFormatedDate } from 'react-native-modern-datepicker';
@@ -37,13 +36,12 @@ import moment from 'moment';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { launchImageLibrary } from 'react-native-image-picker';
 
-
 import SentForApproval from './SentForApproval';
 
-import {updateRecord} from './approval/VerifyDetails';
-import {isJSDocCommentContainingNode} from 'typescript';
+import { updateRecord } from './approval/VerifyDetails';
+import { isJSDocCommentContainingNode } from 'typescript';
 import dayjs from 'dayjs';
-import {CalendarList} from 'react-native-calendars';
+import { CalendarList } from 'react-native-calendars';
 
 LogBox.ignoreLogs(['Warnings...']);
 LogBox.ignoreAllLogs();
@@ -78,7 +76,8 @@ const FillByYourSelf = ({ navigation }) => {
   const [vehicles, setVehicles] = useState([]);
   const [vehicleErrorMessages, setVehicleErrorMessages] = useState({});
   // Regex format for vehicle number like 'KA 01 CU 1234'
-  const vehicleNumberPattern = /^[a-z]{2}[0-9]{2}[a-z]{2}[0-9]{4}$/;
+  const vehicleNumberPattern = /^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}$/;
+  const [errType, setErrType] = useState(null);
   let selectedHomeOffice = '';
 
   const {
@@ -96,22 +95,15 @@ const FillByYourSelf = ({ navigation }) => {
   // } else if (loggedUser.resident === false && loggedUser.employee === true) {
   //   selectedHomeOffice = 'Office';
   // }
-
-  const [selectedHO, setSelectedHO] = useState("");
-
-  useEffect(()=>{
-
-    console.log("Logged user is : ", loggedUser)
-    if (loggedUser.resident === true && loggedUser.employee === true) {
-      setSelectedHO("");
-    } else if (loggedUser.resident === true && loggedUser.employee === false) {
-      setSelectedHO("Home")
-    } else if (loggedUser.resident === false && loggedUser.employee === true) {
-      setSelectedHO("Office")
-    }
-  }, [])
-
-
+  let homeOrOffice = '';
+  if (loggedUser.resident === true && loggedUser.employee === true) {
+    homeOrOffice = '';
+  } else if (loggedUser.resident === true && loggedUser.employee === false) {
+    homeOrOffice = 'Home';
+  } else if (loggedUser.resident === false && loggedUser.employee === true) {
+    homeOrOffice = 'Office';
+  }
+  const [selectedHO, setSelectedHO] = useState(homeOrOffice);
 
   const [date, setDate] = useState('Select Date');
 
@@ -121,7 +113,6 @@ const FillByYourSelf = ({ navigation }) => {
   console.log('L1ID', L1ID);
   const minDate = dayjs().format('YYYY-MM-DD');
   const maxDate = dayjs().add(6, 'month').format('YYYY-MM-DD');
-
 
   const startMonth = dayjs(minDate).month();
   const endMonth = dayjs(maxDate).month();
@@ -135,15 +126,14 @@ const FillByYourSelf = ({ navigation }) => {
   const onDayPress = day => {
     if (day.dateString >= minDate && day.dateString <= maxDate) {
       setDate(day.dateString);
-      setShowModal(false); 
-      setDateOfVisitErr(null); 
+      setShowModal(false);
+      setDateOfVisitErr(null);
       const monthNumber = dayjs(day.dateString).month();
       setVisitingMonth(monthNumber);
-      console.log('Visiting month :', monthNumber); 
+      console.log('Visiting month :', monthNumber);
     }
 
     // const today = new Date();
-
 
     // const startDate = getFormatedDate(
     //   today.setDate(today.getDate()),
@@ -153,7 +143,6 @@ const FillByYourSelf = ({ navigation }) => {
     //   // Convert the input string (YYYY/MM/DD) into a Date object
     //   const [year, month, day] = dateString.split('/'); // Split the string by '/'
     //   const date = new Date(year, month - 1, day); // Month is 0-indexed in JavaScript
-
 
     //   // Add the specified number of days (60 days in this case)
     //   date.setDate(date.getDate() + daysToAdd);
@@ -249,13 +238,12 @@ const FillByYourSelf = ({ navigation }) => {
   let boysCount = '0';
   let girlsCount = '0';
 
-
-  const generateQR = async (passcodeData) => {
+  const generateQR = async passcodeData => {
     try {
-      const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${loggedUser.name}&&passcode=${passcodeData}&&date=${date}&&key=${SECRET_KEY}`;
+      const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${loggedUser.name}&&passcode=${passcodeData}&&date=${convertDateFormat(date)}&&key=${SECRET_KEY}`;
       const res = await fetch(qrUrl);
       console.log('URL - ', qrUrl);
-      console.log("res from fetch img : ", res)
+      console.log('res from fetch img : ', res);
 
       if (!res.ok) {
         console.error('Error fetching image:', res.statusText);
@@ -272,7 +260,7 @@ const FillByYourSelf = ({ navigation }) => {
           const result = reader.result.split(',')[1]; // Extract the base64 part only
           resolve(result);
         };
-        reader.onerror = (error) => {
+        reader.onerror = error => {
           console.error('Error reading blob:', error);
           reject(error);
         };
@@ -313,7 +301,11 @@ const FillByYourSelf = ({ navigation }) => {
         console.log('Code posted successfully to Zoho.');
         console.log('Response for the code is:', response1);
       } else {
-        console.log('Failed to post code to Zoho:', response1.status, response1.statusText);
+        console.log(
+          'Failed to post code to Zoho:',
+          response1.status,
+          response1.statusText,
+        );
       }
 
       // POST request to upload image to Zoho
@@ -336,7 +328,7 @@ const FillByYourSelf = ({ navigation }) => {
         console.log('Image uploaded successfully to Zoho.', response);
         return;
       } else {
-        console.log('Failed to upload image to Zoho: ', response.status,);
+        console.log('Failed to upload image to Zoho: ', response.status);
         return;
       }
     } catch (error) {
@@ -347,8 +339,10 @@ const FillByYourSelf = ({ navigation }) => {
   const passcodeGenerator = async () => {
     let generatedPasscode;
     while (true) {
-      const newCode = Math.floor(100000 + Math.random() * (999999 - 100001 + 1),).toString();
-      const codeurl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Passcode_Report?criteria=Passcode==${newCode}`
+      const newCode = Math.floor(
+        100000 + Math.random() * (999999 - 100001 + 1),
+      ).toString();
+      const codeurl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Passcode_Report?criteria=Passcode==${newCode}`;
       const response = await fetch(codeurl, {
         method: 'GET',
         headers: {
@@ -362,7 +356,7 @@ const FillByYourSelf = ({ navigation }) => {
       if (response.ok) {
         continue;
       }
-      generatedPasscode = newCode
+      generatedPasscode = newCode;
       break;
     }
 
@@ -383,12 +377,11 @@ const FillByYourSelf = ({ navigation }) => {
     });
 
     const responseData = await passcodeResponse.json();
-    console.log("response of posting passcode to zoho : ", responseData);
+    console.log('response of posting passcode to zoho : ', responseData);
 
     await generateQR(generatedPasscode);
     return;
   };
-
 
   //To get employee record
   const getEmpId = async () => {
@@ -438,9 +431,19 @@ const FillByYourSelf = ({ navigation }) => {
       menCount = men === '' ? '0' : men;
       womenCount = women === '' ? '0' : women;
     }
+
+    const uppercaseVehicles = vehicles.map(({ ID, ...vehicle }) => ({
+      ...vehicle,
+      Vehicle_Number: vehicle.Vehicle_Number.toUpperCase(),
+    }));
+  
+    // Calculate the total number of people
+    let people = parseInt(menCount) + parseInt(womenCount) + parseInt(boys) + parseInt(girls);
+    console.log('Total people : ', people);
+
     const formData = {
       data: {
-        Single_or_Group_Visit: selectedSG,
+        Single_or_Group_Visit: people == 1 ? 'Single' : 'Group',
         L2_Approval_Status: 'PENDING APPROVAL',
         Name_field: {
           prefix: prefix,
@@ -460,10 +463,11 @@ const FillByYourSelf = ({ navigation }) => {
         Number_of_Women: womenCount,
         Number_of_Girls: girls,
         Home_or_Office: selectedHO,
-        Vehicle_Information: vehicles,
+        Vehicle_Information: uppercaseVehicles,
       },
     };
-
+    console.log('formData...: ', formData);
+    console.log("veh::::: ", formData.data.Vehicle_Information);
 
     if (loggedUser.role === 'L2') {
       if (
@@ -482,8 +486,10 @@ const FillByYourSelf = ({ navigation }) => {
     }
 
     try {
+      const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Approval_to_Visitor`
+      console.log("url is :::::", url)
       const response = await fetch(
-        `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Approval_to_Visitor`,
+        url,
         {
           method: 'POST',
           headers: {
@@ -636,7 +642,7 @@ const FillByYourSelf = ({ navigation }) => {
   const validateForm = () => {
     let valid = true;
 
-    console.log("Home or office : ", selectedHO)
+    console.log('Home or office : ', selectedHO);
     menCount = men === '' ? '0' : men;
     womenCount = women === '' ? '0' : women;
     boysCount = boys === '' ? '0' : boys;
@@ -753,11 +759,24 @@ const FillByYourSelf = ({ navigation }) => {
     }
     const errors = {};
 
+
+    // Validation checks for minimum counts
+    let tempErrType = null;
+    if (selectedGender === 'Male' && menCount < 1 && selectedSG === 'Group') {
+      tempErrType = 'MenCount';
+      valid = false
+    } else if (selectedGender === 'Female' && womenCount < 1 && selectedSG === 'Group') {
+      tempErrType = 'WomenCount';
+      valid = false
+    }
+    setErrType(tempErrType);
+    
+
     vehicles.forEach((vehicle, index) => {
       const vehicleNumber = vehicle.Vehicle_Number;
       if (
         !vehicleNumberPattern.test(
-          vehicleNumber.replace(/\s+/g, '').toLowerCase(),
+          vehicleNumber.replace(/\s+/g, '').toUpperCase(),
         )
       ) {
         errors[vehicle.ID] = `Invalid Vehicle Number`;
@@ -769,7 +788,7 @@ const FillByYourSelf = ({ navigation }) => {
       }
       if (
         !vehicleNumberPattern.test(
-          vehicleNumber.replace(/\s+/g, '').toLowerCase(),
+          vehicleNumber.replace(/\s+/g, '').toUpperCase(),
         ) &&
         vehicle.Vehicle_Type === ''
       ) {
@@ -784,7 +803,6 @@ const FillByYourSelf = ({ navigation }) => {
   };
 
   const handleSubmit = async () => {
-
     setSubmitFlag(true);
     if (validateForm()) {
       setIsSubmitted(true);
@@ -862,7 +880,6 @@ const FillByYourSelf = ({ navigation }) => {
     heightStyles = smallScreen;
   }
 
-
   const [firstNameError, setFirstNameError] = useState('');
   const [lastNameError, setLastNameError] = useState('');
   const validateInput = (txt, setError) => {
@@ -900,11 +917,11 @@ const FillByYourSelf = ({ navigation }) => {
       ) : (
         <SafeAreaView style={styles.container}>
           <GestureHandlerRootView>
-            <ScrollView style={{paddingStart: 8}}>
+            <ScrollView style={{ paddingStart: 8 }}>
               <View>
                 <View style={styles.namecontainer}>
-                  <Text style={[styles.label, {marginTop: 20}]}>
-                    Name <Text style={{color: 'red'}}>*</Text>
+                  <Text style={[styles.label, { marginTop: 20 }]}>
+                    Name <Text style={{ color: 'red' }}>*</Text>
                   </Text>
                   <View
                     style={{
@@ -913,7 +930,7 @@ const FillByYourSelf = ({ navigation }) => {
                       justifyContent: 'space-between',
                     }}>
                     <Dropdown
-                      style={[styles.dropdown, {width: '25%'}]}
+                      style={[styles.dropdown, { width: '25%' }]}
                       placeholderStyle={styles.placeholderStyle}
                       selectedTextStyle={styles.selectedTextStyle}
                       inputSearchStyle={styles.inputSearchStyle}
@@ -939,7 +956,7 @@ const FillByYourSelf = ({ navigation }) => {
                     <TextInput
                       style={[
                         styles.dropdown,
-                        {width: '32%', color: '#71727A'},
+                        { width: '32%', color: '#71727A' },
                         styles.input,
                       ]}
                       value={firstName}
@@ -955,7 +972,7 @@ const FillByYourSelf = ({ navigation }) => {
                     <TextInput
                       style={[
                         styles.dropdown,
-                        {width: '30%', color: '#71727A'},
+                        { width: '30%', color: '#71727A' },
                       ]}
                       value={lastName}
                       onChangeText={txt => {
@@ -973,11 +990,11 @@ const FillByYourSelf = ({ navigation }) => {
                       flex: 1,
                       flexDirection: 'row',
                     }}>
-                    <Text style={[styles.bottomtext, {marginRight: 75}]}>
+                    <Text style={[styles.bottomtext, { marginRight: 75 }]}>
                       Prefix
                     </Text>
 
-                    <Text style={[styles.bottomtext, {marginRight: 72}]}>
+                    <Text style={[styles.bottomtext, { marginRight: 72 }]}>
                       First Name
                     </Text>
 
@@ -995,7 +1012,7 @@ const FillByYourSelf = ({ navigation }) => {
 
                 <View style={styles.namecontainer}>
                   <Text style={styles.label}>
-                    Phone <Text style={{color: 'red'}}>*</Text>
+                    Phone <Text style={{ color: 'red' }}>*</Text>
                   </Text>
                   <PhoneInput
                     defaultValue={value}
@@ -1014,7 +1031,7 @@ const FillByYourSelf = ({ navigation }) => {
                     onChangeFormattedText={text => {
                       setFormattedValue(text);
                     }}
-                    countryPickerProps={{withAlphaFilter: true}}
+                    countryPickerProps={{ withAlphaFilter: true }}
                     disabled={false}
                     withDarkTheme
                     withShadow
@@ -1026,7 +1043,7 @@ const FillByYourSelf = ({ navigation }) => {
                 </View>
                 <View style={styles.namecontainer}>
                   <Text style={styles.label}>
-                    Date of Visit <Text style={{color: 'red'}}>*</Text>
+                    Date of Visit <Text style={{ color: 'red' }}>*</Text>
                   </Text>
                   {Platform.OS === 'ios' ? (
                     <TouchableOpacity
@@ -1037,7 +1054,7 @@ const FillByYourSelf = ({ navigation }) => {
                       <TextInput
                         style={[
                           styles.phoneInputContainer,
-                          {paddingLeft: 12, color: '#71727A'},
+                          { paddingLeft: 12, color: '#71727A' },
                         ]}
                         value={convertDateFormat(date)}
                         editable={false}
@@ -1052,7 +1069,7 @@ const FillByYourSelf = ({ navigation }) => {
                       <TextInput
                         style={[
                           styles.phoneInputContainer,
-                          {paddingLeft: 12, color: '#71727A'},
+                          { paddingLeft: 12, color: '#71727A' },
                         ]}
                         value={convertDateFormat(date)}
                         editable={false}
@@ -1088,14 +1105,13 @@ const FillByYourSelf = ({ navigation }) => {
                       <View style={styles.centeredView}>
                         <TouchableWithoutFeedback>
                           <View style={styles.modalView}>
-                          <Pressable 
-                         onResponderStart={() => setShowModal(false)}
-                         >
-                           <Image
+                            <Pressable
+                              onResponderStart={() => setShowModal(false)}>
+                              <Image
                                 source={require('../assets/close_icon.png')}
                                 style={[styles.closeButton]}
                               />
-                         </Pressable>
+                            </Pressable>
                             <CalendarList
                               current={date === 'Select Date' ? minDate : date}
                               minDate={minDate}
@@ -1143,7 +1159,7 @@ const FillByYourSelf = ({ navigation }) => {
                 </View>
                 <View style={styles.namecontainer}>
                   <Text style={styles.label}>
-                    Single or Group Visit <Text style={{color: 'red'}}>*</Text>
+                    Single or Group Visit <Text style={{ color: 'red' }}>*</Text>
                   </Text>
                   <View style={styles.radioButtonContainer}>
                     {singleorgroup.map(optionss => {
@@ -1160,7 +1176,7 @@ const FillByYourSelf = ({ navigation }) => {
                               <View style={styles.innerCircle} />
                             ) : null}
                           </View>
-                          <Text style={{marginLeft: 10}}>{optionss}</Text>
+                          <Text style={{ marginLeft: 10 }}>{optionss}</Text>
                         </TouchableOpacity>
                       );
                     })}
@@ -1173,10 +1189,10 @@ const FillByYourSelf = ({ navigation }) => {
                   <View>
                     <View style={styles.namecontainer}>
                       <Text style={styles.label}>
-                        Number of Men <Text style={{color: 'red'}}>*</Text>
+                        Number of Men <Text style={{ color: 'red' }}>*</Text>
                       </Text>
                       <TextInput
-                        style={[styles.phoneInputContainer, {paddingLeft: 15}]}
+                        style={[styles.phoneInputContainer, { paddingLeft: 15 }]}
                         keyboardType="numeric"
                         value={men}
                         onChangeText={text => {
@@ -1186,13 +1202,18 @@ const FillByYourSelf = ({ navigation }) => {
                         }}
                         selectionColor="#B21E2B"
                       />
+                      {
+                        errType == 'MenCount' && (
+                          <Text style={{ color: 'red' }}>Invalid</Text>
+                        )
+                      }
                     </View>
                     <View style={styles.namecontainer}>
                       <Text style={styles.label}>
-                        Number of Women <Text style={{color: 'red'}}>*</Text>
+                        Number of Women <Text style={{ color: 'red' }}>*</Text>
                       </Text>
                       <TextInput
-                        style={[styles.phoneInputContainer, {paddingLeft: 15}]}
+                        style={[styles.phoneInputContainer, { paddingLeft: 15 }]}
                         keyboardType="numeric"
                         value={women}
                         onChangeText={text => {
@@ -1202,13 +1223,18 @@ const FillByYourSelf = ({ navigation }) => {
                         }}
                         selectionColor="#B21E2B"
                       />
+                      {
+                        errType == 'WomenCount' && (
+                          <Text style={{ color: 'red' }}>Invalid</Text>
+                        )
+                      }
                     </View>
                     <View style={styles.namecontainer}>
                       <Text style={styles.label}>
-                        Number of Boys <Text style={{color: 'red'}}>*</Text>
+                        Number of Boys <Text style={{ color: 'red' }}>*</Text>
                       </Text>
                       <TextInput
-                        style={[styles.phoneInputContainer, {paddingLeft: 15}]}
+                        style={[styles.phoneInputContainer, { paddingLeft: 15 }]}
                         keyboardType="numeric"
                         value={boys}
                         onChangeText={text => {
@@ -1221,10 +1247,10 @@ const FillByYourSelf = ({ navigation }) => {
                     </View>
                     <View style={styles.namecontainer}>
                       <Text style={styles.label}>
-                        Number of Girls <Text style={{color: 'red'}}>*</Text>
+                        Number of Girls <Text style={{ color: 'red' }}>*</Text>
                       </Text>
                       <TextInput
-                        style={[styles.phoneInputContainer, {paddingLeft: 15}]}
+                        style={[styles.phoneInputContainer, { paddingLeft: 15 }]}
                         keyboardType="numeric"
                         value={girls}
                         onChangeText={text => {
@@ -1238,11 +1264,11 @@ const FillByYourSelf = ({ navigation }) => {
                   </View>
                 ) : null}
                 {loggedUser.resident === true &&
-                loggedUser.employee === true ? (
+                  loggedUser.employee === true ? (
                   <View style={styles.namecontainer}>
                     <Text style={styles.label}>
                       Is the Guest being invited to Home or Office
-                      <Text style={{color: 'red'}}> *</Text>
+                      <Text style={{ color: 'red' }}> *</Text>
                     </Text>
                     <View style={styles.radioButtonContainer}>
                       {homeoroffice.map(option => {
@@ -1259,7 +1285,7 @@ const FillByYourSelf = ({ navigation }) => {
                                 <View style={styles.innerCircle} />
                               ) : null}
                             </View>
-                            <Text style={{marginLeft: 10}}>{option}</Text>
+                            <Text style={{ marginLeft: 10 }}>{option}</Text>
                           </TouchableOpacity>
                         );
                       })}
@@ -1271,9 +1297,7 @@ const FillByYourSelf = ({ navigation }) => {
                 ) : null}
                 <View style={styles.namecontainer}>
                   <Text style={styles.label}>
-
-                    Select Gender <Text style={{color: 'red'}}>*</Text>
-
+                    Select Gender <Text style={{ color: 'red' }}>*</Text>
                   </Text>
                   <View style={styles.radioButtonContainer}>
                     {options.map(option => {
@@ -1304,29 +1328,28 @@ const FillByYourSelf = ({ navigation }) => {
                     <View
                       style={[
                         styles.dropdown,
-                        {flexDirection: 'row', justifyContent: 'space-between'},
+                        { flexDirection: 'row', justifyContent: 'space-between' },
                       ]}>
-                      <Text style={{color: 'gray', marginHorizontal: 10}}>
+                      <Text style={{ color: 'gray', marginHorizontal: 10 }}>
                         {imageUri ? image.name : 'Select Image'}
                       </Text>
-                      <View style={{paddingHorizontal: 10}}>
+                      <View style={{ paddingHorizontal: 10 }}>
                         {imageUri ? (
                           <TouchableOpacity onPress={removeImage}>
                             <Image
                               source={require('../assets/close_icon.png')}
-                              style={{width: 20, height: 20}}
+                              style={{ width: 20, height: 20 }}
                             />
                           </TouchableOpacity>
                         ) : (
                           <TouchableOpacity onPress={selectImage}>
                             <Image
                               source={require('../assets/upload.png')}
-                              style={{width: 20, height: 20}}
+                              style={{ width: 20, height: 20 }}
                             />
                           </TouchableOpacity>
                         )}
                       </View>
-
                     </View>
                   </View>
                   {/* <Button
@@ -1334,12 +1357,11 @@ const FillByYourSelf = ({ navigation }) => {
                   onPress={selectImage}
                 /> */}
 
-
                   {imageUri && (
                     <>
                       <Image
-                        source={{uri: imageUri}}
-                        style={{width: 100, height: 100}}
+                        source={{ uri: imageUri }}
+                        style={{ width: 100, height: 100 }}
                       />
                       {/* <Button title="Remove Image" onPress={removeImage} /> */}
                     </>
@@ -1349,7 +1371,7 @@ const FillByYourSelf = ({ navigation }) => {
                     <Dropdown
                       style={[
                         styles.dropdown,
-                        {width: '95%', paddingLeft: 12, color: '#71727a'},
+                        { width: '95%', paddingLeft: 12, color: '#71727a' },
                       ]}
                       placeholderStyle={styles.placeholderStyle}
                       selectedTextStyle={styles.selectedTextStyle}
@@ -1374,7 +1396,7 @@ const FillByYourSelf = ({ navigation }) => {
                     <Dropdown
                       style={[
                         styles.dropdown,
-                        {width: '95%', paddingLeft: 12, color: '#71727a'},
+                        { width: '95%', paddingLeft: 12, color: '#71727a' },
                       ]}
                       placeholderStyle={styles.placeholderStyle}
                       selectedTextStyle={styles.selectedTextStyle}
@@ -1393,7 +1415,6 @@ const FillByYourSelf = ({ navigation }) => {
                         setFocus(false);
                       }}
                     />
-
                   </View>
 
                   <View style={styles.namecontainer}>
@@ -1457,8 +1478,8 @@ const FillByYourSelf = ({ navigation }) => {
                             onChangeText={text =>
                               handleTextChange(index, 'Vehicle_Number', text)
                             }
+                            autoCapitalize='characters'
                           />
-
 
                           <TouchableOpacity
                             onPress={() => handleRemoveVehicle(index)}>
@@ -1472,7 +1493,7 @@ const FillByYourSelf = ({ navigation }) => {
                           <Text
                             style={[
                               styles.errorText,
-                              {marginTop: -10, paddingLeft: 30},
+                              { marginTop: -10, paddingLeft: 30 },
                             ]}>
                             {vehicleErrorMessages[vehicle.ID]}
                           </Text>
@@ -1485,15 +1506,14 @@ const FillByYourSelf = ({ navigation }) => {
                         onPress={handleAddVehicle}>
                         <Image
                           source={require('../assets/add.png')}
-                          style={{width: 15, height: 15}}
+                          style={{ width: 15, height: 15 }}
                         />
-                        <Text style={{color: 'black', fontSize: 15}}>
+                        <Text style={{ color: 'black', fontSize: 15 }}>
                           Add Vehicle Information
                         </Text>
                       </TouchableOpacity>
                     )}
                   </View>
-
                 </View>
 
                 <View style={styles.footer}>
@@ -1511,7 +1531,6 @@ const FillByYourSelf = ({ navigation }) => {
           </GestureHandlerRootView>
         </SafeAreaView>
       )}
-
     </>
   );
 };
