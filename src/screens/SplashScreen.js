@@ -3,13 +3,14 @@ import React from 'react';
 
 const SplashScreen = () => {
   return (
-    <View
+    <View datatestID="SplashScreen"
       style={{
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'white',
       }}>
+      <Text datatestID="SplashScreenText">Splash Screen</Text>
       <Image
         style={{width: '75%'}}
         resizeMode="contain"

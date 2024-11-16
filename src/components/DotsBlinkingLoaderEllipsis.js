@@ -1,4 +1,4 @@
-import { View, StyleSheet, Animated } from 'react-native';
+import { View, StyleSheet, Animated,Text } from 'react-native';
 import React, { useEffect, useRef } from 'react';
 
 export default function DotsBlinkingLoaderEllipsis() {
@@ -57,7 +57,7 @@ export default function DotsBlinkingLoaderEllipsis() {
     };
 
     return (
-        <View style={styles.container}>
+        <View style={styles.container} data-testid="loader">
             {scales.map((scale, index) => (
                 <Animated.View 
                     key={index}
@@ -70,6 +70,7 @@ export default function DotsBlinkingLoaderEllipsis() {
                     ]}
                 />
             ))}
+            <Text >Sairam</Text>
         </View>
     );
 }

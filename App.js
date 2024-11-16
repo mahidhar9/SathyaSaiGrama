@@ -20,6 +20,7 @@ import SplashScreen from './src/screens/SplashScreen';
 import { getDeviceToken } from './src/utils/notificationService';
 import NoNetworkScreen from './src/screens/NoNetworkScreen';
 import CodePush from 'react-native-code-push';
+console.log('Codepush', CodePush)
 import { getDataWithInt, getDataWithTwoInt } from './src/components/ApiRequest';
 
 const lightTheme = {
@@ -37,9 +38,12 @@ const App = () => {
   const { user } = useContext(AuthContext);
   
   useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener(state => {
+
+    const unsubscribe = NetInfo.addEventListener(
+      function callback  ()  {
       setIsNetworkAvailable(state.isConnected);
-    });
+    }
+  );
 
     return () => unsubscribe();
   }, []);
@@ -124,7 +128,7 @@ const App = () => {
 
     checkUserExist();
 
-  }, [loggedUser]);
+  }, []);
 
 
   //==================================
@@ -229,10 +233,12 @@ const App = () => {
 
   return (
     <PaperProvider theme={lightTheme}>
+   
       {!isNetworkAvailable ? (
         <NoNetworkScreen />
       ) : loading ? (
         // <ActivityIndicator size="large" color="#752A26" style={styles.loadingContainer}/>
+
         <SplashScreen />
       ) : (
         <BaseRoute />

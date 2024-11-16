@@ -42,3 +42,6 @@ export const initializeAuth = jest.fn(() => ({
   currentUser: null,
 }));
 export const getReactNativePersistence = jest.fn();
+export const onAuthStateChanged = jest.fn().mockImplementation ((props) => {
+  return (jest.fn())
+})

@@ -7,8 +7,6 @@ import '@jest/globals';
 
 // console.log(global.expect); // Should not be undefined
 
-import '@testing-library/jest-native/extend-expect'; // If you're using jest-native
-import { mockAsyncStorage } from './__mocks__/@react-native-async-storage/async-storage';
 
 // Clear mock data between tests
 beforeEach(() => {
