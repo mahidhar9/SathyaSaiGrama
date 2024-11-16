@@ -542,7 +542,7 @@ const EditVerifyDetails = ({navigation, route}) => {
                 />
                  {
                   errType == 'MenCount' && (
-                    <Text style={{color: 'red'}}>Invalid</Text>
+                    <Text style={{color: 'red'}}>Please enter a valid number.</Text>
                   )
                 }
               </View>
@@ -564,7 +564,7 @@ const EditVerifyDetails = ({navigation, route}) => {
                 />
                 {
                   errType == 'WomenCount' && (
-                    <Text style={{color: 'red'}}>Invalid</Text>
+                    <Text style={{color: 'red'}}>Please enter a valid number.</Text>
                   )
                 }
               </View>

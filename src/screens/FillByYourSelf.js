@@ -1204,7 +1204,7 @@ const FillByYourSelf = ({ navigation }) => {
                       />
                       {
                         errType == 'MenCount' && (
-                          <Text style={{ color: 'red' }}>Invalid</Text>
+                          <Text style={{ color: 'red' }}>The selected gender is Male. Please enter a valid number.</Text>
                         )
                       }
                     </View>
@@ -1225,7 +1225,7 @@ const FillByYourSelf = ({ navigation }) => {
                       />
                       {
                         errType == 'WomenCount' && (
-                          <Text style={{ color: 'red' }}>Invalid</Text>
+                          <Text style={{ color: 'red' }}>The selected gender is Female. Please enter a valid number.</Text>
                         )
                       }
                     </View>
