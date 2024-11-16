@@ -7,6 +7,7 @@ import parseDate from '../../components/ParseDate';
 import { useFocusEffect, } from '@react-navigation/native';
 import Filter from '../../components/Filter';
 import DotsBlinkingLoaderEllipsis from '../../components/DotsBlinkingLoaderEllipsis'
+import Sort from '../../components/Sort';
 
 const L2Approved = ({ navigation }) => {
 
@@ -87,15 +88,18 @@ const L2Approved = ({ navigation }) => {
         <View style={styles.loadingContainer}>
           {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
           {/* <RequestSkeletonScreen/> */}
-          <DotsBlinkingLoaderEllipsis/>
+          <DotsBlinkingLoaderEllipsis />
         </View>
       ) : ((refreshing ? (<View style={styles.loadingContainer}>
         {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
         {/* <RequestSkeletonScreen/> */}
-        <DotsBlinkingLoaderEllipsis/>
+        <DotsBlinkingLoaderEllipsis />
       </View>) : (
         <>
-          <Filter setFilteredData={setL2ApprovedsData} ToFilterData={L2Approveds}  comingFrom={"L2Approved"}/>
+          <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+            <Sort setSortedData={setL2ApprovedsData} ToSortData={L2Approveds} />
+            <Filter setFilteredData={setL2ApprovedsData} ToFilterData={L2Approveds} comingFrom={"L2Approved"} />
+          </View>
           <FlatList
             data={L2ApprovedsData}
             renderItem={({ item }) => (

@@ -8,6 +8,7 @@ const L2ApprovalComponent = ({navigation, user}) => {
 
   let backColor;
 
+
   if (user.L2_Approval_Status === 'APPROVED') {
     backColor = '#0080000D';
   } else if (user.L2_Approval_Status === 'PENDING APPROVAL') {

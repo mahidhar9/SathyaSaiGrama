@@ -7,6 +7,7 @@ import { getDataWithIntAndString } from '../../components/ApiRequest';
 import parseDate from "../../components/ParseDate"
 import Filter from '../../components/Filter';
 import DotsBlinkingLoaderEllipsis from '../../components/DotsBlinkingLoaderEllipsis'
+import Sort from '../../components/Sort';
 
 const Approved = ({ navigation }) => {
   const { L1ID, getAccessToken, approveDataFetched, setApproveDataFetched } = useContext(UserContext);
@@ -91,7 +92,10 @@ const Approved = ({ navigation }) => {
         <DotsBlinkingLoaderEllipsis/>
       </View>) : (
         <>
-          <Filter setFilteredData={setApprovedsData} ToFilterData={approveds}  comingFrom={"Approved"}/>
+          <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+            <Sort setSortedData={setApprovedsData} ToSortData={approveds} />
+            <Filter setFilteredData={setApprovedsData} ToFilterData={approveds} comingFrom={"Approved"} />
+          </View>
           <FlatList
             data={approvedsData}
             renderItem={({ item }) => (
