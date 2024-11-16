@@ -1,4 +1,4 @@
-import React, { useState, useContext, useRef, useEffect } from 'react';
+import React, {useState, useContext, useRef, useEffect} from 'react';
 import {
   View,
   Text,
@@ -25,16 +25,18 @@ import RNFS from 'react-native-fs';
 import { Picker } from '@react-native-picker/picker';
 
 import DatePicker from 'react-native-modern-datepicker';
-import { getToday, getFormatedDate } from 'react-native-modern-datepicker';
+import {getToday, getFormatedDate} from 'react-native-modern-datepicker';
 import PhoneInput from 'react-native-phone-number-input';
-import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import {parsePhoneNumberFromString} from 'libphonenumber-js';
 import UserContext from '../../context/UserContext';
-import { Dropdown } from 'react-native-element-dropdown';
-import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME, SECRET_KEY } from '@env';
+import {Dropdown} from 'react-native-element-dropdown';
+import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME, SECRET_KEY} from '@env';
 import moment from 'moment';
 
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { launchImageLibrary } from 'react-native-image-picker';
+
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {launchImageLibrary} from 'react-native-image-picker';
+
 
 import SentForApproval from './SentForApproval';
 
@@ -45,8 +47,8 @@ import { CalendarList } from 'react-native-calendars';
 
 LogBox.ignoreLogs(['Warnings...']);
 LogBox.ignoreAllLogs();
-const FillByYourSelf = ({ navigation }) => {
-  const { height } = Dimensions.get('window');
+const FillByYourSelf = ({navigation}) => {
+  const {height} = Dimensions.get('window');
   const [prefix, setPrefix] = useState(' ');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -76,8 +78,10 @@ const FillByYourSelf = ({ navigation }) => {
   const [vehicles, setVehicles] = useState([]);
   const [vehicleErrorMessages, setVehicleErrorMessages] = useState({});
   // Regex format for vehicle number like 'KA 01 CU 1234'
+
   const vehicleNumberPattern = /^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}$/;
   const [errType, setErrType] = useState(null);
+
   let selectedHomeOffice = '';
 
   const {
@@ -186,51 +190,51 @@ const FillByYourSelf = ({ navigation }) => {
       : endMonth + 12 - MonthNumberCount;
 
   const prefixValues = [
-    { label: 'Mr.', value: 'Mr.' },
-    { label: 'Mrs.', value: 'Mrs.' },
-    { label: 'Ms.', value: 'Ms.' },
-    { label: 'Dr.', value: 'Dr.' },
-    { label: 'Prof.', value: 'Peof.' },
-    { label: 'Rtn.', value: 'Rtn.' },
-    { label: 'Sri', value: 'Sri.' },
-    { label: 'Smt.', value: 'Smt.' },
+    {label: 'Mr.', value: 'Mr.'},
+    {label: 'Mrs.', value: 'Mrs.'},
+    {label: 'Ms.', value: 'Ms.'},
+    {label: 'Dr.', value: 'Dr.'},
+    {label: 'Prof.', value: 'Peof.'},
+    {label: 'Rtn.', value: 'Rtn.'},
+    {label: 'Sri', value: 'Sri.'},
+    {label: 'Smt.', value: 'Smt.'},
   ];
   const guestCategoryValues = [
-    { label: 'Govt Officials', value: 'Govt Officials' },
-    { label: 'Politician', value: 'Politician' },
-    { label: 'Corporate', value: 'Corporate' },
-    { label: 'Press', value: 'Press' },
-    { label: 'Parent', value: 'Parent' },
-    { label: 'Devotee', value: 'Devotee' },
-    { label: 'Guest', value: 'Guest' },
-    { label: 'Staff', value: 'Staff' },
-    { label: 'Student', value: 'Student' },
-    { label: 'Intern', value: 'Intern' },
-    { label: 'Other', value: 'Other' },
+    {label: 'Govt Officials', value: 'Govt Officials'},
+    {label: 'Politician', value: 'Politician'},
+    {label: 'Corporate', value: 'Corporate'},
+    {label: 'Press', value: 'Press'},
+    {label: 'Parent', value: 'Parent'},
+    {label: 'Devotee', value: 'Devotee'},
+    {label: 'Guest', value: 'Guest'},
+    {label: 'Staff', value: 'Staff'},
+    {label: 'Student', value: 'Student'},
+    {label: 'Intern', value: 'Intern'},
+    {label: 'Other', value: 'Other'},
   ];
   const priorityValues = [
-    { label: 'P1', value: 'P1' },
-    { label: 'P2', value: 'P2' },
-    { label: 'P3', value: 'P3' },
+    {label: 'P1', value: 'P1'},
+    {label: 'P2', value: 'P2'},
+    {label: 'P3', value: 'P3'},
   ];
   const vehicleTypeValues = [
-    { label: '2-wheeler', value: '2-wheeler' },
-    { label: 'Car', value: 'Car' },
-    { label: 'Bus', value: 'Bus' },
-    { label: 'Taxi', value: 'Taxi' },
-    { label: 'School Bus', value: 'School Bus' },
-    { label: 'Police Van', value: 'Police Van' },
-    { label: 'Ambulence', value: 'Ambulence' },
-    { label: 'Van', value: 'Van' },
-    { label: 'Auto', value: 'Auto' },
-    { label: 'Truck', value: 'Truck' },
-    { label: 'Tractor', value: 'Tractor' },
-    { label: 'Cement Mixer', value: 'Cement Mixer' },
-    { label: 'Fire Engine', value: 'Fire Engine' },
-    { label: 'Transport Van', value: 'Transport Van' },
-    { label: 'Bulldozer', value: 'Bulldozer' },
-    { label: 'Roller Machine', value: 'Roller Machine' },
-    { label: 'Other', value: 'Other' },
+    {label: '2-wheeler', value: '2-wheeler'},
+    {label: 'Car', value: 'Car'},
+    {label: 'Bus', value: 'Bus'},
+    {label: 'Taxi', value: 'Taxi'},
+    {label: 'School Bus', value: 'School Bus'},
+    {label: 'Police Van', value: 'Police Van'},
+    {label: 'Ambulence', value: 'Ambulence'},
+    {label: 'Van', value: 'Van'},
+    {label: 'Auto', value: 'Auto'},
+    {label: 'Truck', value: 'Truck'},
+    {label: 'Tractor', value: 'Tractor'},
+    {label: 'Cement Mixer', value: 'Cement Mixer'},
+    {label: 'Fire Engine', value: 'Fire Engine'},
+    {label: 'Transport Van', value: 'Transport Van'},
+    {label: 'Bulldozer', value: 'Bulldozer'},
+    {label: 'Roller Machine', value: 'Roller Machine'},
+    {label: 'Other', value: 'Other'},
   ];
 
   let menCount = '0';
@@ -466,8 +470,10 @@ const FillByYourSelf = ({ navigation }) => {
         Vehicle_Information: uppercaseVehicles,
       },
     };
+
     console.log('formData...: ', formData);
     console.log("veh::::: ", formData.data.Vehicle_Information);
+
 
     if (loggedUser.role === 'L2') {
       if (
@@ -546,7 +552,7 @@ const FillByYourSelf = ({ navigation }) => {
   const handleAddVehicle = () => {
     setVehicles([
       ...vehicles,
-      { Vehicle_Type: '', Vehicle_Number: '', ID: Date.now() }, //Date now is used to create a unique id for each vehicle row
+      {Vehicle_Type: '', Vehicle_Number: '', ID: Date.now()}, //Date now is used to create a unique id for each vehicle row
     ]);
   };
 
@@ -557,7 +563,7 @@ const FillByYourSelf = ({ navigation }) => {
   //  Function to handle vehicle number change
   const handleTextChange = (index, field, value) => {
     const updatedVehicles = vehicles.map((vehicle, i) =>
-      i === index ? { ...vehicle, [field]: value } : vehicle,
+      i === index ? {...vehicle, [field]: value} : vehicle,
     );
     setVehicles(updatedVehicles);
   };
@@ -571,8 +577,8 @@ const FillByYourSelf = ({ navigation }) => {
 
     launchImageLibrary(options, response => {
       if (response.assets && response.assets.length > 0) {
-        const { uri, type, fileName } = response.assets[0];
-        setImage({ uri, type, name: fileName });
+        const {uri, type, fileName} = response.assets[0];
+        setImage({uri, type, name: fileName});
         setImageUri(uri); // For displaying the image preview
       }
     });
@@ -913,7 +919,7 @@ const FillByYourSelf = ({ navigation }) => {
   return (
     <>
       {isSubmitted ? (
-        <SentForApproval style={{ zIndex: 1 }} />
+        <SentForApproval style={{zIndex: 1}} />
       ) : (
         <SafeAreaView style={styles.container}>
           <GestureHandlerRootView>
@@ -1297,7 +1303,9 @@ const FillByYourSelf = ({ navigation }) => {
                 ) : null}
                 <View style={styles.namecontainer}>
                   <Text style={styles.label}>
-                    Select Gender <Text style={{ color: 'red' }}>*</Text>
+
+                    Select Gender <Text style={{color: 'red'}}>*</Text>
+
                   </Text>
                   <View style={styles.radioButtonContainer}>
                     {options.map(option => {
@@ -1314,7 +1322,7 @@ const FillByYourSelf = ({ navigation }) => {
                               <View style={styles.innerCircle} />
                             ) : null}
                           </View>
-                          <Text style={{ marginLeft: 10 }}>{option}</Text>
+                          <Text style={{marginLeft: 10}}>{option}</Text>
                         </TouchableOpacity>
                       );
                     })}
