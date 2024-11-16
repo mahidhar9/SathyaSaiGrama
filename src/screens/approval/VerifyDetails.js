@@ -26,6 +26,7 @@ import RNFS from 'react-native-fs';
 import Share from 'react-native-share';
 import Dialog from 'react-native-dialog';
 import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const updateRecord = async (reportName, modified_data, token, id) => {
   try {
@@ -55,7 +56,7 @@ export const updateRecord = async (reportName, modified_data, token, id) => {
 const VerifyDetails = ({ navigation, route }) => {
   const { height } = Dimensions.get('window');
   const { stringified } = route.params;
-  console.log('stringified', stringified);
+  //console.log('stringified', stringified);
   let { user } = route.params;
   // console.log('user outside stringified', user);
 
@@ -92,8 +93,24 @@ const VerifyDetails = ({ navigation, route }) => {
     setPendingDataFetched,
     setEditData,
     loggedUser,
+    setLoggedUser,
     accessToken,
   } = useContext(UserContext);
+
+  
+  useEffect(()=>{
+    const settingLoggedUser = async() => {
+      let existedUser = await AsyncStorage.getItem('existedUser');
+      existedUser = JSON.parse(existedUser);
+      if(existedUser){
+        setLoggedUser(existedUser);
+      }
+    }
+
+    if(!loggedUser || loggedUser===null){
+      settingLoggedUser();
+    }
+  }, [])
 
   const onPressOk = () => {
     setDialogVisible(false);
@@ -482,11 +499,10 @@ const VerifyDetails = ({ navigation, route }) => {
         url: `file://${path}`,
       });
     } catch (error) {
-      Alert.alert('', 'The file is not shared.');
+      console.log('', 'The file is not shared.');
     }
   };
 
-  console.log('Screen Height:', height);
 
   let heightStyles;
   if (height > 900) {
@@ -513,7 +529,6 @@ const VerifyDetails = ({ navigation, route }) => {
 
   const [modalVisible, setModalVisible] = useState(false);
 
-  console.log('User in verify details : ', user);
   return (
     <>
       <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF', zIndex: 1 }}>

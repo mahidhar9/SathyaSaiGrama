@@ -17,12 +17,28 @@ import {useContext, useEffect, useState} from 'react';
 import {AuthContext} from '../auth/AuthProvider';
 import {BASE_APP_URL, APP_OWNER_NAME, APP_LINK_NAME, YOURLS_KEY} from '@env';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Invite = ({navigation}) => {
   const {user} = useContext(AuthContext);
 
-  const {userEmail, getAccessToken, loggedUser, employee, resident} =
+  const {userEmail, getAccessToken, loggedUser, setLoggedUser, employee, resident} =
     useContext(UserContext);
+
+    useEffect(()=>{
+      const settingLoggedUser = async() => {
+        let existedUser = await AsyncStorage.getItem('existedUser');
+        existedUser = JSON.parse(existedUser);
+        if(existedUser){
+          setLoggedUser(existedUser);
+        }
+      }
+  
+      if(!loggedUser || loggedUser===null){
+        settingLoggedUser();
+      }
+    }, [])
+
   const L1ID = loggedUser.userId;
   const [selectedOption, setSelectedOption] = useState(null);
   const [modal, setModal] = useState(false);

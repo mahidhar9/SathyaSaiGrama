@@ -112,6 +112,7 @@ const App = () => {
     const checkUserExist = async () => {
       let existedUser = await AsyncStorage.getItem('existedUser');
       existedUser = JSON.parse(existedUser);
+      // console.log("Existed user in App.js : ", existedUser)
       if (existedUser) {
         setLoggedUser(existedUser);
         setUserType(existedUser.role);
@@ -123,7 +124,7 @@ const App = () => {
 
     checkUserExist();
 
-  }, []);
+  }, [loggedUser]);
 
 
   //==================================
@@ -202,6 +203,8 @@ const App = () => {
     ]);
 
     await setModifyData(role, resident, employee, testResident);
+
+   // console.log("loggedUser after setting: ", loggedUser)
 
   };
 

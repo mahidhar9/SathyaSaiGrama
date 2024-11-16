@@ -79,6 +79,21 @@ const Edit = ({ route, navigation }) => {
 
   // const { formType, userdata, vehicledata } = route.params;
   const { L1ID, getAccessToken, loggedUser, setLoggedUser } = useContext(UserContext);
+
+  useEffect(()=>{
+    const settingLoggedUser = async() => {
+      let existedUser = await AsyncStorage.getItem('existedUser');
+      existedUser = JSON.parse(existedUser);
+      if(existedUser){
+        setLoggedUser(existedUser);
+      }
+    }
+
+    if(!loggedUser || loggedUser===null){
+      settingLoggedUser();
+    }
+  }, [])
+  
   const {
     control,
     handleSubmit,
@@ -158,7 +173,7 @@ const Edit = ({ route, navigation }) => {
   }, [formattedValue, submitFlag]);
 
   
-  const saveDataFromBasicInfo = async basicInfo => {
+  const saveDataFromBasicInfo = async (basicInfo) => {
 
     setPhoneErr(null);
     setPhoneValidErr(null);

@@ -8,10 +8,28 @@ import { useFocusEffect, } from '@react-navigation/native';
 import Filter from '../../components/Filter';
 import DotsBlinkingLoaderEllipsis from '../../components/DotsBlinkingLoaderEllipsis'
 import Sort from '../../components/Sort';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const L2Denied = ({ navigation }) => {
+ // console.log("Logged user name in L2 denied: ", loggedUser.name)
 
-  const { loggedUser, accessToken, L2DeniedDataFetched, setL2DeniedDataFetched } = useContext(UserContext)
+  const { loggedUser, setLoggedUser, accessToken, L2DeniedDataFetched, setL2DeniedDataFetched } = useContext(UserContext)
+
+  
+  useEffect(()=>{
+    const settingLoggedUser = async() => {
+      let existedUser = await AsyncStorage.getItem('existedUser');
+      existedUser = JSON.parse(existedUser);
+      if(existedUser){
+        setLoggedUser(existedUser);
+      }
+    }
+
+    if(!loggedUser || loggedUser===null){
+      settingLoggedUser();
+    }
+  }, [])
+
   const [L2Denieds, setL2Denieds] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);

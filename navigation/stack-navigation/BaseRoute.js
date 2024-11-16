@@ -136,6 +136,7 @@ const BaseRoute = () => {
   // const { user } = useContext(AuthContext);
 
   const {setAccessToken, loggedUser, setLoggedUser} = useContext(UserContext);
+
   const [loading, setLoading] = useState(true);
 
   const Stack = createNativeStackNavigator();
