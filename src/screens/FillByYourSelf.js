@@ -44,6 +44,7 @@ import {updateRecord} from './approval/VerifyDetails';
 import {isJSDocCommentContainingNode} from 'typescript';
 import dayjs from 'dayjs';
 import {CalendarList} from 'react-native-calendars';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 LogBox.ignoreLogs(['Warnings...']);
 LogBox.ignoreAllLogs();
@@ -84,10 +85,25 @@ const FillByYourSelf = ({ navigation }) => {
   const {
     getAccessToken,
     loggedUser,
+    setLoggedUser,
     testResident,
     accessToken,
     setApproveDataFetched,
   } = useContext(UserContext);
+
+  useEffect(()=>{
+    const settingLoggedUser = async() => {
+      let existedUser = await AsyncStorage.getItem('existedUser');
+      existedUser = JSON.parse(existedUser);
+      if(existedUser){
+        setLoggedUser(existedUser);
+      }
+    }
+
+    if(!loggedUser || loggedUser===null){
+      settingLoggedUser();
+    }
+  }, [])
 
   // if (loggedUser.resident === true && loggedUser.employee === true) {
   //   selectedHomeOffice = '';
@@ -100,8 +116,6 @@ const FillByYourSelf = ({ navigation }) => {
   const [selectedHO, setSelectedHO] = useState("");
 
   useEffect(()=>{
-
-    console.log("Logged user is : ", loggedUser)
     if (loggedUser.resident === true && loggedUser.employee === true) {
       setSelectedHO("");
     } else if (loggedUser.resident === true && loggedUser.employee === false) {
@@ -118,7 +132,6 @@ const FillByYourSelf = ({ navigation }) => {
   const [showModal, setShowModal] = useState(false);
   const L1ID = loggedUser.userId;
 
-  console.log('L1ID', L1ID);
   const minDate = dayjs().format('YYYY-MM-DD');
   const maxDate = dayjs().add(6, 'month').format('YYYY-MM-DD');
 
@@ -250,8 +263,11 @@ const FillByYourSelf = ({ navigation }) => {
   let girlsCount = '0';
 
 
+  console.log("Logged usename in FillByYourSelf: ", loggedUser.name)
+
   const generateQR = async (passcodeData) => {
     try {
+      console.log("Logged usename is generateQR in FillByYourSelf: ", loggedUser.name)
       const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${loggedUser.name}&&passcode=${passcodeData}&&date=${date}&&key=${SECRET_KEY}`;
       const res = await fetch(qrUrl);
       console.log('URL - ', qrUrl);

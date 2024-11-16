@@ -21,8 +21,6 @@ const AddData = ({navigation, route}) => {
 
   const {getAccessToken, L1ID} = useContext(UserContext);
 
-  console.log('object: ', dept, deptExist);
-
   const {
     control,
     handleSubmit,
@@ -67,12 +65,11 @@ const AddData = ({navigation, route}) => {
   const gender = ['Male', 'Female'];
   const [selectedGender, setSelectedGender] = useState('');
 
-  const saveDataFromVehicle = async vehicledata => {
-    const vehicleNumberPattern = /^[a-z]{2}[0-9]{2}[a-z]{2}[0-9]{4}$/;
+  const saveDataFromVehicle = async (vehicledata) => {
+    console.log("**********************", vehicledata);
+    const vehicleNumberPattern = /^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}$/;
     const vehicleNumber = vehicledata.vehicleNumber;
-    if (
-      vehicleNumberPattern.test(vehicleNumber.replace(/\s+/g, '').toLowerCase())
-    ) {
+    if (vehicleNumberPattern.test(vehicleNumber.replace(/\s+/g, '').toUpperCase())) {
       setInvalidVehicleNumber(false);
 
       console.log(vehicledata);
@@ -80,7 +77,7 @@ const AddData = ({navigation, route}) => {
         data: {
           App_User_lookup: L1ID,
           Vehicle_Type: vehicledata.vehicleType,
-          Vehicle_Number: vehicledata.vehicleNumber,
+          Vehicle_Number: vehicledata.vehicleNumber.toUpperCase(),
         },
       };
 
@@ -102,6 +99,7 @@ const AddData = ({navigation, route}) => {
         });
       }
     } else {
+      console.log("Something is wrong")
       setInvalidVehicleNumber(true);
     }
   };
@@ -386,6 +384,7 @@ const AddData = ({navigation, route}) => {
                     placeholderTextColor="#c5c7ca"
                     value={value}
                     onChangeText={onChange}
+                    autoCapitalize='characters'
                   />
                 )}
                 rules={{required: true}}

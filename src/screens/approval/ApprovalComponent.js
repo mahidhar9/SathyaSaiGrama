@@ -1,10 +1,26 @@
 import { StyleSheet, Text, View, TouchableOpacity, Platform } from 'react-native'
-import React, { useContext } from 'react'
+import React, { useContext, useEffect } from 'react'
 import UserContext from '../../../context/UserContext'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ApprovalComponent = ({ navigation, user }) => {
 
-    const { loggedUser } = useContext(UserContext)
+    const { loggedUser, setLoggedUser } = useContext(UserContext)
+
+    
+  useEffect(()=>{
+    const settingLoggedUser = async() => {
+      let existedUser = await AsyncStorage.getItem('existedUser');
+      existedUser = JSON.parse(existedUser);
+      if(existedUser){
+        setLoggedUser(existedUser);
+      }
+    }
+
+    if(!loggedUser || loggedUser===null){
+      settingLoggedUser();
+    }
+  }, [])
 
     const openPending = () => {
         navigation.navigate("VerifyDetails", { user: user })

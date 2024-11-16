@@ -112,13 +112,14 @@ const App = () => {
     const checkUserExist = async () => {
       let existedUser = await AsyncStorage.getItem('existedUser');
       existedUser = JSON.parse(existedUser);
+      // console.log("Existed user in App.js : ", existedUser)
       if (existedUser) {
         setLoggedUser(existedUser);
         setUserType(existedUser.role);
         setL1ID(existedUser.userId);
         setUserEmail(existedUser.email);
         setProfileImage(existedUser.profilePhoto);
-        console.log('Existed user in App.js:', existedUser);
+        console.log('Existed user in App.js:', existedUser.name);
       }
     };
 
@@ -185,11 +186,9 @@ const App = () => {
     };
 
     setLoggedUser(data);
-    console.log("Data to be set in AsyncStorage: ", data); // Log the data before setting
+    console.log("Data to be set in AsyncStorage: ", data.name); 
     await AsyncStorage.setItem('existedUser', JSON.stringify(data));
 
-    const existedUser = await AsyncStorage.getItem('existedUser');
-    console.log("existed user inside of setModifyData: ", JSON.parse(existedUser));
   };
 
   const runChecks = async () => {
@@ -201,6 +200,8 @@ const App = () => {
     ]);
 
     await setModifyData(role, resident, employee, testResident);
+
+   // console.log("loggedUser after setting: ", loggedUser)
 
   };
 

@@ -7,10 +7,30 @@ import parseDate from '../../components/ParseDate';
 import { useFocusEffect, } from '@react-navigation/native';
 import Filter from '../../components/Filter';
 import DotsBlinkingLoaderEllipsis from '../../components/DotsBlinkingLoaderEllipsis'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const L2Pending = ({ navigation }) => {
 
-  const { loggedUser, accessToken, L2PendingDataFetched, setL2PendingDataFetched } = useContext(UserContext)
+  const { loggedUser, setLoggedUser, accessToken, L2PendingDataFetched, setL2PendingDataFetched } = useContext(UserContext)
+
+  
+  useEffect(()=>{
+    const settingLoggedUser = async() => {
+      let existedUser = await AsyncStorage.getItem('existedUser');
+      existedUser = JSON.parse(existedUser);
+      if(existedUser){
+        setLoggedUser(existedUser);
+      }
+    }
+
+    if(!loggedUser || loggedUser===null){
+      settingLoggedUser();
+    }
+  }, [])
+
+  console.log("Logged user name in L2 pending: ", loggedUser.name)
+
+
   const [L2Pendings, setL2Pendings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
