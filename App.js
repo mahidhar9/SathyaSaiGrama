@@ -37,16 +37,14 @@ const App = () => {
   const [isNetworkAvailable, setIsNetworkAvailable] = useState(true);
   const { user } = useContext(AuthContext);
   
-  useEffect(() => {
 
-    const unsubscribe = NetInfo.addEventListener(
-      function callback  ()  {
-      setIsNetworkAvailable(state.isConnected);
-    }
-  );
-
-    return () => unsubscribe();
-  }, []);
+    useEffect(() => {
+      const unsubscribe = NetInfo.addEventListener(state => {
+        setIsNetworkAvailable(state.isConnected);
+      });
+  
+      return () => unsubscribe();
+    }, []);
 
   const {
     setAccessToken,
