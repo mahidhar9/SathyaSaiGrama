@@ -611,7 +611,7 @@ const Login = ({navigation}) => {
                     onPress={() => {
                       navigation.navigate('Register');
                     }}>
-                    <Text
+                    <Text id='register'
                       style={{
                         color: '#B21E2B',
                         width: 124,
