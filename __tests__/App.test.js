@@ -16,6 +16,9 @@ jest.mock('../navigation/stack-navigation/BaseRoute', () => {
     })
    
   
+
+
+    
 })
 jest.mock('@react-native-community/netinfo', () => {
   return ({addEventListener:jest.fn().mockImplementation ((callback) => {

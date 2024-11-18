@@ -70,7 +70,6 @@ export default function DotsBlinkingLoaderEllipsis() {
                     ]}
                 />
             ))}
-            <Text >Sairam</Text>
         </View>
     );
 }
