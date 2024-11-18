@@ -1,11 +1,12 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import { Platform } from 'react-native'; // Import Platform
+import { Platform } from 'react-native'; 
 import Login from '../../src/screens/Login';
 import Register from '../../src/screens/Register';
-import UserContext from '../../context/UserContext'; // Ensure correct import
-
+import UserContext from '../../context/UserContext'; 
+import { auth } from '../../src/auth/firebaseConfig';
 const mockNavigation = { navigate: jest.fn() };
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const mockUserContextValue = {
   userType: 'admin',
@@ -27,7 +28,7 @@ const mockUserContextValue = {
   setDepartmentIds: jest.fn(),
 };
 
-test('Verify the Register now link redirects to the registration page ', () => {
+test('Verify the Register now link redirects to the registration page.', () => {
   const { getByText,  } = render(
     <UserContext.Provider value={mockUserContextValue}>
       <Login navigation={mockNavigation} />
@@ -39,3 +40,57 @@ test('Verify the Register now link redirects to the registration page ', () => {
   fireEvent.press(link);
   expect(mockNavigation.navigate).toHaveBeenCalledWith('Register');
 });
+
+
+
+
+
+
+
+
+
+
+
+jest.mock('react-native/Libraries/Alert/Alert', () => ({
+  alert: jest.fn(),
+}));
+
+jest.mock('../../src/auth/firebaseConfig', () => ({
+  createUserWithEmailAndPassword: jest.fn().mockResolvedValue({}),
+  sendEmailVerification: jest.fn().mockResolvedValue({}),
+}));
+
+jest.mock('../../src/components/ApiRequest.js', () => ({
+  getDataWithString: jest.fn().mockResolvedValue({
+    data: [{ ID: 'user123', Name_field: 'John Doe', Accommodation_Approval: 'APPROVED' }],
+  }),
+  isResident: jest.fn().mockResolvedValue(true),
+  isEmployee: jest.fn().mockResolvedValue(true),
+  isTestResident: jest.fn().mockResolvedValue(true),
+}));
+
+
+test('Verify that user can Register with valid details', async () => {
+  const { getByText, getByPlaceholderText } = render(
+    <UserContext.Provider value={mockUserContextValue}>
+      <Register navigation={mockNavigation} />
+    </UserContext.Provider>
+  );
+    
+    fireEvent.changeText(getByPlaceholderText('Name'),'sasi');
+    fireEvent.changeText(getByPlaceholderText('Email Address','ks@gmail.com'));
+    fireEvent.changeText(getByPlaceholderText('Password'),'@Sa1234');
+    fireEvent.changeText(getByPlaceholderText('Confirm Password'),'@Sa1234');
+    fireEvent.press(getByText('Register'));
+
+    await waitFor(() => {
+      expect(mockNavigation.navigate).toHaveBeenCalledWith('VerificationNotice', {
+        id: 'user123',
+        email: 'ks@gmail.com',
+        name: 'sasi',
+        resident: true,
+        employee: true,
+        testResident: true,
+      });
+    });
+  });
