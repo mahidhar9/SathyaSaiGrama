@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   ScrollView,
   Image,
+  Platform,
 } from 'react-native';
 import React, {useContext} from 'react';
 import {useState} from 'react';
@@ -185,12 +186,14 @@ const Register = ({navigation}) => {
           }
           console.log('Error in auth: ', error);
         }
-      } else {
+      } 
+      else {
         setLoading(false);
         Alert.alert('Your data does not exist. Please contact Admin');
         console.log('false');
       }
-    } else {
+    } 
+    else {
       setLoading(false);
       Alert.alert('Your data does not exist. Please contact Admin');
       console.log('false');
@@ -470,7 +473,7 @@ const Register = ({navigation}) => {
               <Text style={styles.registerTitle}>Register</Text>
             </TouchableOpacity> */}
 
-            <TouchableOpacity
+            <TouchableOpacity 
               onPress={handleSubmit(handleRegForm)}
               // style={styles.register}
               disabled={!isValidPassword()}
