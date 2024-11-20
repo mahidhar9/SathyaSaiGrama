@@ -42,7 +42,7 @@ import {launchImageLibrary, launchCamera} from 'react-native-image-picker';
 import {PERMISSIONS, request} from 'react-native-permissions';
 import MyProfileSkeletonLoader from '../components/MyProfileSkeletonScreen'
 const Profile = ({navigation}) => {
-  const {
+ const {
     getAccessToken,
     userEmail,
     L1ID,
@@ -51,7 +51,7 @@ const Profile = ({navigation}) => {
     accessToken,
     profileImage,
     setProfileImage,
-  } = useContext(UserContext);
+  } = useContext(UserContext); 
   const {user, setUser} = useContext(AuthContext);
 
   const [email, setEmail] = useState('');

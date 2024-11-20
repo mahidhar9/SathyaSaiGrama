@@ -321,7 +321,7 @@ const Login = ({navigation}) => {
       employeeLocalVar,
     );
     await isTestResident(res.data[0].ID);
-    if (res && res.data && (residentLocalVar || employeeLocalVar)) {
+     if (res && res.data && (residentLocalVar || employeeLocalVar)) {
       try {
         fetchDataFromOffice(res.data[0].ID);
         const userCredential = await signInWithEmailAndPassword(
@@ -555,7 +555,7 @@ const Login = ({navigation}) => {
                       onPress={() => {
                         setShowPassword(!showPassword);
                       }}>
-                      <Image
+                      <Image testID='eye'
                         source={require('../assets/eyestrike.png')}
                         style={{width: 16, height: 16}}
                       />

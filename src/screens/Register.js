@@ -134,12 +134,14 @@ const Register = ({navigation}) => {
   const handleRegForm = async userCred => {
     setLoading(true);
     console.log(userCred.email);
+    console.log(' this is one log')
     const res = await getDataWithString(
       'All_App_Users',
       'Email',
       userCred.email.toLowerCase().trim(),
       accessToken,
     );
+    console.log('2nd log')
     console.log('App user response returned in handleReg', res);
     if (res.data && res.data.length > 0) {
       await isResident(res.data[0].ID);
@@ -150,7 +152,7 @@ const Register = ({navigation}) => {
         employeeLocalVar,
       );
       await isTestResident(res.data[0].ID);
-
+console.log('main log')
       if (residentLocalVar || employeeLocalVar) {
         //authentication
         try {
@@ -189,13 +191,13 @@ const Register = ({navigation}) => {
       } 
       else {
         setLoading(false);
-        Alert.alert('Your data does not exist. Please contact Admin');
+        Alert.alert('This email is not registered as a resident or employee. Please contact Admin');
         console.log('false');
       }
     } 
     else {
       setLoading(false);
-      Alert.alert('Your data does not exist. Please contact Admin');
+      Alert.alert('This email is not registered as a resident or employee. Please contact Admin');
       console.log('false');
     }
   };
