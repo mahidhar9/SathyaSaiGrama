@@ -2,7 +2,7 @@ import React from 'react';
 import { render, waitForElementToBeRemoved } from '@testing-library/react-native';
 import L2Pending from './L2Pending';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { UserContext } from '../context/UserContext'; 
+import { UserContext } from '../../../context/UserContext'; 
 
 // Mock the AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () => ({
