@@ -109,6 +109,8 @@ const Sort = ({ ToSortData, setSortedData }) => {
   return (
     <View style={styles.filterview}>
       <TouchableOpacity style={styles.filterbtn} onPress={handleSortModal}>
+      {
+        ToSortData != null && (
         <View style={{ flexDirection: "row" }}>
           <Text style={styles.filter}>Sort</Text>
           <Image source={sortIcon} style={styles.image} />
@@ -118,6 +120,7 @@ const Sort = ({ ToSortData, setSortedData }) => {
             </View>
           )}
         </View>
+        )}
       </TouchableOpacity>
 
       <Modal
