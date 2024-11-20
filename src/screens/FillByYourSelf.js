@@ -269,8 +269,8 @@ const FillByYourSelf = ({navigation}) => {
     try {
       console.log("Logged usename is generateQR in FillByYourSelf: ", loggedUser.name)
       const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${loggedUser.name}&&passcode=${passcodeData}&&date=${date}&&key=${SECRET_KEY}`;
-      const res = await fetch(qrUrl);
       console.log('URL - ', qrUrl);
+      const res = await fetch(qrUrl);
       console.log('res from fetch img : ', res);
 
       if (!res.ok) {
@@ -336,7 +336,7 @@ const FillByYourSelf = ({navigation}) => {
         );
       }
 
-      // POST request to upload image to Zoho
+      // POST request to upload qrcode image to Zoho
       const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${approvalToVisitorID.current}/Generated_QR_Code/upload`;
       console.log(url);
       const response = await fetch(url, {
@@ -406,7 +406,6 @@ const FillByYourSelf = ({navigation}) => {
 
     const responseData = await passcodeResponse.json();
     console.log('response of posting passcode to zoho : ', responseData);
-
     await generateQR(generatedPasscode);
     return;
   };
@@ -496,7 +495,7 @@ const FillByYourSelf = ({navigation}) => {
     };
 
     console.log('formData...: ', formData);
-    console.log("veh::::: ", formData.data.Vehicle_Information);
+    console.log("vehicles :  ", formData.data.Vehicle_Information);
 
 
     if (loggedUser.role === 'L2') {
@@ -517,7 +516,7 @@ const FillByYourSelf = ({navigation}) => {
 
     try {
       const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Approval_to_Visitor`
-      console.log("url is :::::", url)
+      console.log("url is : ", url)
       const response = await fetch(
         url,
         {
@@ -533,7 +532,7 @@ const FillByYourSelf = ({navigation}) => {
         res.data.ID,
         'Approval_to_Visitor_Report',
       );
-      console.log('', photoUploadRes);
+      console.log('photo upload response : ', photoUploadRes);
       return res;
     } catch (error) {
       Alert.alert('Error', 'Something went wrong');
@@ -837,10 +836,9 @@ const FillByYourSelf = ({navigation}) => {
     if (validateForm()) {
       setIsSubmitted(true);
       let office_id;
-
       if (selectedHO === 'Home') {
         office_id = '3318254000027832015';
-        if (testResident) {
+        if (loggedUser.testResident) {
           office_id = '3318254000031368009';
         }
         console.log('In Home conditional block');

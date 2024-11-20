@@ -274,8 +274,9 @@ const ViewDetails = ({ navigation, route }) => {
 
     const responseData = await passcodeResponse.json();
     console.log("response of posting passcode to zoho : ", responseData);
-
+    console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`")
     await generateQR(generatedPasscode);
+    console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`")
     return;
   };
 
