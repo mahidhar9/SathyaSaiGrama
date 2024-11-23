@@ -20,9 +20,9 @@ import {
   GestureHandlerRootView,
   TouchableOpacity,
 } from 'react-native-gesture-handler';
-import { encode } from 'base64-arraybuffer';
+import {encode} from 'base64-arraybuffer';
 import RNFS from 'react-native-fs';
-import { Picker } from '@react-native-picker/picker';
+import {Picker} from '@react-native-picker/picker';
 
 import DatePicker from 'react-native-modern-datepicker';
 import {getToday, getFormatedDate} from 'react-native-modern-datepicker';
@@ -33,15 +33,13 @@ import {Dropdown} from 'react-native-element-dropdown';
 import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME, SECRET_KEY} from '@env';
 import moment from 'moment';
 
-
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {launchImageLibrary} from 'react-native-image-picker';
 
-
 import SentForApproval from './SentForApproval';
 
-import { updateRecord } from './approval/VerifyDetails';
-import { isJSDocCommentContainingNode } from 'typescript';
+import {updateRecord} from './approval/VerifyDetails';
+import {isJSDocCommentContainingNode} from 'typescript';
 import dayjs from 'dayjs';
 import {CalendarList} from 'react-native-calendars';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -94,19 +92,19 @@ const FillByYourSelf = ({navigation}) => {
     setApproveDataFetched,
   } = useContext(UserContext);
 
-  useEffect(()=>{
-    const settingLoggedUser = async() => {
+  useEffect(() => {
+    const settingLoggedUser = async () => {
       let existedUser = await AsyncStorage.getItem('existedUser');
       existedUser = JSON.parse(existedUser);
-      if(existedUser){
+      if (existedUser) {
         setLoggedUser(existedUser);
       }
-    }
+    };
 
-    if(!loggedUser || loggedUser===null){
+    if (!loggedUser || loggedUser === null) {
       settingLoggedUser();
     }
-  }, [])
+  }, []);
 
   // if (loggedUser.resident === true && loggedUser.employee === true) {
   //   selectedHomeOffice = '';
@@ -116,19 +114,17 @@ const FillByYourSelf = ({navigation}) => {
   //   selectedHomeOffice = 'Office';
   // }
 
-  const [selectedHO, setSelectedHO] = useState("");
+  const [selectedHO, setSelectedHO] = useState('');
 
-  useEffect(()=>{
+  useEffect(() => {
     if (loggedUser.resident === true && loggedUser.employee === true) {
-      setSelectedHO("");
+      setSelectedHO('');
     } else if (loggedUser.resident === true && loggedUser.employee === false) {
-      setSelectedHO("Home")
+      setSelectedHO('Home');
     } else if (loggedUser.resident === false && loggedUser.employee === true) {
-      setSelectedHO("Office")
+      setSelectedHO('Office');
     }
-  }, [])
-
-
+  }, []);
 
   const [date, setDate] = useState('Select Date');
 
@@ -262,12 +258,14 @@ const FillByYourSelf = ({navigation}) => {
   let boysCount = '0';
   let girlsCount = '0';
 
+  console.log('Logged usename in FillByYourSelf: ', loggedUser.name);
 
-  console.log("Logged usename in FillByYourSelf: ", loggedUser.name)
-
-  const generateQR = async (passcodeData) => {
+  const generateQR = async passcodeData => {
     try {
-      console.log("Logged usename is generateQR in FillByYourSelf: ", loggedUser.name)
+      console.log(
+        'Logged usename is generateQR in FillByYourSelf: ',
+        loggedUser.name,
+      );
       const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${loggedUser.name}&&passcode=${passcodeData}&&date=${date}&&key=${SECRET_KEY}`;
       const res = await fetch(qrUrl);
       console.log('URL - ', qrUrl);
@@ -460,13 +458,17 @@ const FillByYourSelf = ({navigation}) => {
       womenCount = women === '' ? '0' : women;
     }
 
-    const uppercaseVehicles = vehicles.map(({ ID, ...vehicle }) => ({
+    const uppercaseVehicles = vehicles.map(({ID, ...vehicle}) => ({
       ...vehicle,
       Vehicle_Number: vehicle.Vehicle_Number.toUpperCase(),
     }));
-  
+
     // Calculate the total number of people
-    let people = parseInt(menCount) + parseInt(womenCount) + parseInt(boys) + parseInt(girls);
+    let people =
+      parseInt(menCount) +
+      parseInt(womenCount) +
+      parseInt(boys) +
+      parseInt(girls);
     console.log('Total people : ', people);
 
     const formData = {
@@ -496,8 +498,7 @@ const FillByYourSelf = ({navigation}) => {
     };
 
     console.log('formData...: ', formData);
-    console.log("veh::::: ", formData.data.Vehicle_Information);
-
+    console.log('veh::::: ', formData.data.Vehicle_Information);
 
     if (loggedUser.role === 'L2') {
       if (
@@ -516,18 +517,15 @@ const FillByYourSelf = ({navigation}) => {
     }
 
     try {
-      const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Approval_to_Visitor`
-      console.log("url is :::::", url)
-      const response = await fetch(
-        url,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Zoho-oauthtoken ${getAccessToken()}`,
-          },
-          body: JSON.stringify(formData),
+      const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Approval_to_Visitor`;
+      console.log('url is :::::', url);
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Zoho-oauthtoken ${getAccessToken()}`,
         },
-      );
+        body: JSON.stringify(formData),
+      });
       const res = await response.json();
       const photoUploadRes = await uploadPhoto(
         res.data.ID,
@@ -789,18 +787,20 @@ const FillByYourSelf = ({navigation}) => {
     }
     const errors = {};
 
-
     // Validation checks for minimum counts
     let tempErrType = null;
     if (selectedGender === 'Male' && menCount < 1 && selectedSG === 'Group') {
       tempErrType = 'MenCount';
-      valid = false
-    } else if (selectedGender === 'Female' && womenCount < 1 && selectedSG === 'Group') {
+      valid = false;
+    } else if (
+      selectedGender === 'Female' &&
+      womenCount < 1 &&
+      selectedSG === 'Group'
+    ) {
       tempErrType = 'WomenCount';
-      valid = false
+      valid = false;
     }
     setErrType(tempErrType);
-    
 
     vehicles.forEach((vehicle, index) => {
       const vehicleNumber = vehicle.Vehicle_Number;
@@ -840,7 +840,7 @@ const FillByYourSelf = ({navigation}) => {
 
       if (selectedHO === 'Home') {
         office_id = '3318254000027832015';
-        if (testResident) {
+        if (loggedUser.testResident) {
           office_id = '3318254000031368009';
         }
         console.log('In Home conditional block');
@@ -947,11 +947,11 @@ const FillByYourSelf = ({navigation}) => {
       ) : (
         <SafeAreaView style={styles.container}>
           <GestureHandlerRootView>
-            <ScrollView style={{ paddingStart: 8 }}>
+            <ScrollView style={{paddingStart: 8}}>
               <View>
                 <View style={styles.namecontainer}>
-                  <Text style={[styles.label, { marginTop: 20 }]}>
-                    Name <Text style={{ color: 'red' }}>*</Text>
+                  <Text style={[styles.label, {marginTop: 20}]}>
+                    Name <Text style={{color: 'red'}}>*</Text>
                   </Text>
                   <View
                     style={{
@@ -960,7 +960,7 @@ const FillByYourSelf = ({navigation}) => {
                       justifyContent: 'space-between',
                     }}>
                     <Dropdown
-                      style={[styles.dropdown, { width: '25%' }]}
+                      style={[styles.dropdown, {width: '25%'}]}
                       placeholderStyle={styles.placeholderStyle}
                       selectedTextStyle={styles.selectedTextStyle}
                       inputSearchStyle={styles.inputSearchStyle}
@@ -986,7 +986,7 @@ const FillByYourSelf = ({navigation}) => {
                     <TextInput
                       style={[
                         styles.dropdown,
-                        { width: '32%', color: '#71727A' },
+                        {width: '32%', color: '#71727A'},
                         styles.input,
                       ]}
                       value={firstName}
@@ -1002,7 +1002,7 @@ const FillByYourSelf = ({navigation}) => {
                     <TextInput
                       style={[
                         styles.dropdown,
-                        { width: '30%', color: '#71727A' },
+                        {width: '30%', color: '#71727A'},
                       ]}
                       value={lastName}
                       onChangeText={txt => {
@@ -1020,11 +1020,11 @@ const FillByYourSelf = ({navigation}) => {
                       flex: 1,
                       flexDirection: 'row',
                     }}>
-                    <Text style={[styles.bottomtext, { marginRight: 75 }]}>
+                    <Text style={[styles.bottomtext, {marginRight: 75}]}>
                       Prefix
                     </Text>
 
-                    <Text style={[styles.bottomtext, { marginRight: 72 }]}>
+                    <Text style={[styles.bottomtext, {marginRight: 72}]}>
                       First Name
                     </Text>
 
@@ -1042,7 +1042,7 @@ const FillByYourSelf = ({navigation}) => {
 
                 <View style={styles.namecontainer}>
                   <Text style={styles.label}>
-                    Phone <Text style={{ color: 'red' }}>*</Text>
+                    Phone <Text style={{color: 'red'}}>*</Text>
                   </Text>
                   <PhoneInput
                     defaultValue={value}
@@ -1061,7 +1061,7 @@ const FillByYourSelf = ({navigation}) => {
                     onChangeFormattedText={text => {
                       setFormattedValue(text);
                     }}
-                    countryPickerProps={{ withAlphaFilter: true }}
+                    countryPickerProps={{withAlphaFilter: true}}
                     disabled={false}
                     withDarkTheme
                     withShadow
@@ -1073,7 +1073,7 @@ const FillByYourSelf = ({navigation}) => {
                 </View>
                 <View style={styles.namecontainer}>
                   <Text style={styles.label}>
-                    Date of Visit <Text style={{ color: 'red' }}>*</Text>
+                    Date of Visit <Text style={{color: 'red'}}>*</Text>
                   </Text>
                   {Platform.OS === 'ios' ? (
                     <TouchableOpacity
@@ -1084,7 +1084,7 @@ const FillByYourSelf = ({navigation}) => {
                       <TextInput
                         style={[
                           styles.phoneInputContainer,
-                          { paddingLeft: 12, color: '#71727A' },
+                          {paddingLeft: 12, color: '#71727A'},
                         ]}
                         value={convertDateFormat(date)}
                         editable={false}
@@ -1099,7 +1099,7 @@ const FillByYourSelf = ({navigation}) => {
                       <TextInput
                         style={[
                           styles.phoneInputContainer,
-                          { paddingLeft: 12, color: '#71727A' },
+                          {paddingLeft: 12, color: '#71727A'},
                         ]}
                         value={convertDateFormat(date)}
                         editable={false}
@@ -1189,7 +1189,7 @@ const FillByYourSelf = ({navigation}) => {
                 </View>
                 <View style={styles.namecontainer}>
                   <Text style={styles.label}>
-                    Single or Group Visit <Text style={{ color: 'red' }}>*</Text>
+                    Single or Group Visit <Text style={{color: 'red'}}>*</Text>
                   </Text>
                   <View style={styles.radioButtonContainer}>
                     {singleorgroup.map(optionss => {
@@ -1206,7 +1206,7 @@ const FillByYourSelf = ({navigation}) => {
                               <View style={styles.innerCircle} />
                             ) : null}
                           </View>
-                          <Text style={{ marginLeft: 10 }}>{optionss}</Text>
+                          <Text style={{marginLeft: 10}}>{optionss}</Text>
                         </TouchableOpacity>
                       );
                     })}
@@ -1219,10 +1219,10 @@ const FillByYourSelf = ({navigation}) => {
                   <View>
                     <View style={styles.namecontainer}>
                       <Text style={styles.label}>
-                        Number of Men <Text style={{ color: 'red' }}>*</Text>
+                        Number of Men <Text style={{color: 'red'}}>*</Text>
                       </Text>
                       <TextInput
-                        style={[styles.phoneInputContainer, { paddingLeft: 15 }]}
+                        style={[styles.phoneInputContainer, {paddingLeft: 15}]}
                         keyboardType="numeric"
                         value={men}
                         onChangeText={text => {
@@ -1232,18 +1232,19 @@ const FillByYourSelf = ({navigation}) => {
                         }}
                         selectionColor="#B21E2B"
                       />
-                      {
-                        errType == 'MenCount' && (
-                          <Text style={{ color: 'red' }}>The selected gender is Male. Please enter a valid number.</Text>
-                        )
-                      }
+                      {errType == 'MenCount' && (
+                        <Text style={{color: 'red'}}>
+                          The selected gender is Male. Please enter a valid
+                          number.
+                        </Text>
+                      )}
                     </View>
                     <View style={styles.namecontainer}>
                       <Text style={styles.label}>
-                        Number of Women <Text style={{ color: 'red' }}>*</Text>
+                        Number of Women <Text style={{color: 'red'}}>*</Text>
                       </Text>
                       <TextInput
-                        style={[styles.phoneInputContainer, { paddingLeft: 15 }]}
+                        style={[styles.phoneInputContainer, {paddingLeft: 15}]}
                         keyboardType="numeric"
                         value={women}
                         onChangeText={text => {
@@ -1253,18 +1254,19 @@ const FillByYourSelf = ({navigation}) => {
                         }}
                         selectionColor="#B21E2B"
                       />
-                      {
-                        errType == 'WomenCount' && (
-                          <Text style={{ color: 'red' }}>The selected gender is Female. Please enter a valid number.</Text>
-                        )
-                      }
+                      {errType == 'WomenCount' && (
+                        <Text style={{color: 'red'}}>
+                          The selected gender is Female. Please enter a valid
+                          number.
+                        </Text>
+                      )}
                     </View>
                     <View style={styles.namecontainer}>
                       <Text style={styles.label}>
-                        Number of Boys <Text style={{ color: 'red' }}>*</Text>
+                        Number of Boys <Text style={{color: 'red'}}>*</Text>
                       </Text>
                       <TextInput
-                        style={[styles.phoneInputContainer, { paddingLeft: 15 }]}
+                        style={[styles.phoneInputContainer, {paddingLeft: 15}]}
                         keyboardType="numeric"
                         value={boys}
                         onChangeText={text => {
@@ -1277,10 +1279,10 @@ const FillByYourSelf = ({navigation}) => {
                     </View>
                     <View style={styles.namecontainer}>
                       <Text style={styles.label}>
-                        Number of Girls <Text style={{ color: 'red' }}>*</Text>
+                        Number of Girls <Text style={{color: 'red'}}>*</Text>
                       </Text>
                       <TextInput
-                        style={[styles.phoneInputContainer, { paddingLeft: 15 }]}
+                        style={[styles.phoneInputContainer, {paddingLeft: 15}]}
                         keyboardType="numeric"
                         value={girls}
                         onChangeText={text => {
@@ -1294,11 +1296,11 @@ const FillByYourSelf = ({navigation}) => {
                   </View>
                 ) : null}
                 {loggedUser.resident === true &&
-                  loggedUser.employee === true ? (
+                loggedUser.employee === true ? (
                   <View style={styles.namecontainer}>
                     <Text style={styles.label}>
                       Is the Guest being invited to Home or Office
-                      <Text style={{ color: 'red' }}> *</Text>
+                      <Text style={{color: 'red'}}> *</Text>
                     </Text>
                     <View style={styles.radioButtonContainer}>
                       {homeoroffice.map(option => {
@@ -1315,7 +1317,7 @@ const FillByYourSelf = ({navigation}) => {
                                 <View style={styles.innerCircle} />
                               ) : null}
                             </View>
-                            <Text style={{ marginLeft: 10 }}>{option}</Text>
+                            <Text style={{marginLeft: 10}}>{option}</Text>
                           </TouchableOpacity>
                         );
                       })}
@@ -1327,9 +1329,7 @@ const FillByYourSelf = ({navigation}) => {
                 ) : null}
                 <View style={styles.namecontainer}>
                   <Text style={styles.label}>
-
                     Select Gender <Text style={{color: 'red'}}>*</Text>
-
                   </Text>
                   <View style={styles.radioButtonContainer}>
                     {options.map(option => {
@@ -1360,24 +1360,24 @@ const FillByYourSelf = ({navigation}) => {
                     <View
                       style={[
                         styles.dropdown,
-                        { flexDirection: 'row', justifyContent: 'space-between' },
+                        {flexDirection: 'row', justifyContent: 'space-between'},
                       ]}>
-                      <Text style={{ color: 'gray', marginHorizontal: 10 }}>
+                      <Text style={{color: 'gray', marginHorizontal: 10}}>
                         {imageUri ? image.name : 'Select Image'}
                       </Text>
-                      <View style={{ paddingHorizontal: 10 }}>
+                      <View style={{paddingHorizontal: 10}}>
                         {imageUri ? (
                           <TouchableOpacity onPress={removeImage}>
                             <Image
                               source={require('../assets/close_icon.png')}
-                              style={{ width: 20, height: 20 }}
+                              style={{width: 20, height: 20}}
                             />
                           </TouchableOpacity>
                         ) : (
                           <TouchableOpacity onPress={selectImage}>
                             <Image
                               source={require('../assets/upload.png')}
-                              style={{ width: 20, height: 20 }}
+                              style={{width: 20, height: 20}}
                             />
                           </TouchableOpacity>
                         )}
@@ -1392,8 +1392,8 @@ const FillByYourSelf = ({navigation}) => {
                   {imageUri && (
                     <>
                       <Image
-                        source={{ uri: imageUri }}
-                        style={{ width: 100, height: 100 }}
+                        source={{uri: imageUri}}
+                        style={{width: 100, height: 100}}
                       />
                       {/* <Button title="Remove Image" onPress={removeImage} /> */}
                     </>
@@ -1403,7 +1403,7 @@ const FillByYourSelf = ({navigation}) => {
                     <Dropdown
                       style={[
                         styles.dropdown,
-                        { width: '95%', paddingLeft: 12, color: '#71727a' },
+                        {width: '95%', paddingLeft: 12, color: '#71727a'},
                       ]}
                       placeholderStyle={styles.placeholderStyle}
                       selectedTextStyle={styles.selectedTextStyle}
@@ -1428,7 +1428,7 @@ const FillByYourSelf = ({navigation}) => {
                     <Dropdown
                       style={[
                         styles.dropdown,
-                        { width: '95%', paddingLeft: 12, color: '#71727a' },
+                        {width: '95%', paddingLeft: 12, color: '#71727a'},
                       ]}
                       placeholderStyle={styles.placeholderStyle}
                       selectedTextStyle={styles.selectedTextStyle}
@@ -1510,7 +1510,7 @@ const FillByYourSelf = ({navigation}) => {
                             onChangeText={text =>
                               handleTextChange(index, 'Vehicle_Number', text)
                             }
-                            autoCapitalize='characters'
+                            autoCapitalize="characters"
                           />
 
                           <TouchableOpacity
@@ -1525,7 +1525,7 @@ const FillByYourSelf = ({navigation}) => {
                           <Text
                             style={[
                               styles.errorText,
-                              { marginTop: -10, paddingLeft: 30 },
+                              {marginTop: -10, paddingLeft: 30},
                             ]}>
                             {vehicleErrorMessages[vehicle.ID]}
                           </Text>
@@ -1538,9 +1538,9 @@ const FillByYourSelf = ({navigation}) => {
                         onPress={handleAddVehicle}>
                         <Image
                           source={require('../assets/add.png')}
-                          style={{ width: 15, height: 15 }}
+                          style={{width: 15, height: 15}}
                         />
-                        <Text style={{ color: 'black', fontSize: 15 }}>
+                        <Text style={{color: 'black', fontSize: 15}}>
                           Add Vehicle Information
                         </Text>
                       </TouchableOpacity>
