@@ -43,7 +43,7 @@ const L2Denied = ({ navigation }) => {
     if (result.data === undefined) {
       setL2Denieds(null);
       setL2DeniedsData(null);
-      setL2DeniedDataFetched(false);
+      //setL2DeniedDataFetched(false);
       setLoading(false);
     }
     else {
@@ -57,15 +57,17 @@ const L2Denied = ({ navigation }) => {
       setL2Denieds(all_L2denieds)
       setL2DeniedsData(all_L2denieds)
       setLoading(false)
-      setL2DeniedDataFetched(true)
+      //setL2DeniedDataFetched(true)
     }
   };
 
   useEffect(() => {
 
-    if (!L2DeniedDataFetched) {
-      fetchData();
+    const fetchLatest = async () => {
+      await fetchData(); 
     }
+
+    fetchLatest();
 
   }, [L2DeniedDataFetched]);
 
@@ -96,6 +98,7 @@ const L2Denied = ({ navigation }) => {
   useFocusEffect(useCallback(() => {
     onRefresh();
   }, [L2Denied]));
+
   return (
     <><View style={{ flex: 1, paddingTop: 10, backgroundColor: '#FFF' }}>
       {loading ? (
