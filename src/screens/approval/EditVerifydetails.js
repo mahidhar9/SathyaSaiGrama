@@ -682,7 +682,7 @@ const EditVerifyDetails = ({navigation, route}) => {
               borderColor: 'gray',
               borderRadius: 6,
               padding: 10,
-            }}
+            }} 
             multiline={true}
             value={remarks}
             onChangeText={txt => setRemarks(txt)}

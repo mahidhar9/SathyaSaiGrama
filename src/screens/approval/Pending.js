@@ -16,6 +16,17 @@ import { useFocusEffect } from '@react-navigation/native';
 import Filter from '../../components/Filter';
 import Sort from '../../components/Sort'
 import DotsBlinkingLoaderEllipsis from '../../components/DotsBlinkingLoaderEllipsis'
+import moment from 'moment';
+
+const defaultSort = (data) => {
+
+  let sortedData = [...data];
+  sortedData.sort((a, b) =>
+    (new Date(moment(a.Modified_Time, 'DD-MMM-YYYY HH:mm:ss')) -
+      new Date(moment(b.Modified_Time, 'DD-MMM-YYYY HH:mm:ss'))) * -1
+  );
+  return sortedData
+}
 
 const Pending = ({ navigation }) => {
   const { L1ID, getAccessToken, pendingDataFetched, setPendingDataFetched } =
@@ -44,19 +55,14 @@ const Pending = ({ navigation }) => {
     }
     // sorting the pendings data by date
     else {
-      // all_pendings.sort((a, b) => {
-      //   // Parse the date strings into Date objects
-      //   const dateA = new parseDate(a.Date_of_Visit);
-      //   const dateB = new parseDate(b.Date_of_Visit);
-      //   // Compare the Date objects
-      //   return dateB - dateA;
-      // });
-      setPendings(all_pendings);
-      setPendingsData(all_pendings);
-      //setPendingDataFetched(true);
+      const sortedData = defaultSort(all_pendings)
+      setPendings(sortedData);
+      setPendingsData(sortedData);
+      setPendingDataFetched(true);
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
 
@@ -93,8 +99,10 @@ const Pending = ({ navigation }) => {
       //   // Compare the Date objects
       //   return dateB - dateA;
       // });
-      setPendings(all_pendings);
-      setPendingsData(all_pendings);
+
+      const sortedData = defaultSort(all_pendings)
+      setPendings(sortedData);
+      setPendingsData(sortedData);
       setRefreshing(false);
     }
   };

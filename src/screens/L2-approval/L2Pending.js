@@ -9,6 +9,17 @@ import Filter from '../../components/Filter';
 import DotsBlinkingLoaderEllipsis from '../../components/DotsBlinkingLoaderEllipsis'
 import Sort from '../../components/Sort';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import moment from 'moment';
+
+const defaultSort = (data) => {
+
+  let sortedData = [...data];
+  sortedData.sort((a, b) =>
+    (new Date(moment(a.Modified_Time, 'DD-MMM-YYYY HH:mm:ss')) -
+      new Date(moment(b.Modified_Time, 'DD-MMM-YYYY HH:mm:ss'))) * -1
+  );
+  return sortedData
+}
 
 const L2Pending = ({ navigation }) => {
 
@@ -50,16 +61,9 @@ const L2Pending = ({ navigation }) => {
       setLoading(false);
     }
     else {
-      // sorting the pendings data by date
-      all_L2pendings.sort((a, b) => {
-        // Parse the date strings into Date objects
-        const dateA = new parseDate(a.Date_of_Visit);
-        const dateB = new parseDate(b.Date_of_Visit);
-        // Compare the Date objects
-        return dateB - dateA;
-      });
-      setL2Pendings(all_L2pendings)
-      setL2PendingsData(all_L2pendings);
+      const sortedData = defaultSort(all_L2pendings)
+      setL2Pendings(sortedData)
+      setL2PendingsData(sortedData);
       setLoading(false)
       //setL2PendingDataFetched(true)
     }
@@ -88,16 +92,9 @@ const L2Pending = ({ navigation }) => {
 
 
     } else {
-      // sorting the pendings data by date
-      all_L2pendings.sort((a, b) => {
-        // Parse the date strings into Date objects
-        const dateA = new parseDate(a.Date_of_Visit);
-        const dateB = new parseDate(b.Date_of_Visit);
-        // Compare the Date objects
-        return dateB - dateA;
-      });
-      setL2Pendings(all_L2pendings)
-      setL2PendingsData(all_L2pendings)
+      const sortedData = defaultSort(all_L2pendings)
+      setL2Pendings(sortedData)
+      setL2PendingsData(sortedData)
       setRefreshing(false);
     }
     //console.log("object:: ", L2Pendings)

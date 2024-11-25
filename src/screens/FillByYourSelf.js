@@ -20,9 +20,9 @@ import {
   GestureHandlerRootView,
   TouchableOpacity,
 } from 'react-native-gesture-handler';
-import {encode} from 'base64-arraybuffer';
+import { encode } from 'base64-arraybuffer';
 import RNFS from 'react-native-fs';
-import {Picker} from '@react-native-picker/picker';
+import { Picker } from '@react-native-picker/picker';
 
 import DatePicker from 'react-native-modern-datepicker';
 import { getToday, getFormatedDate } from 'react-native-modern-datepicker';
@@ -40,8 +40,8 @@ import {launchImageLibrary} from 'react-native-image-picker';
 
 import SentForApproval from './SentForApproval';
 
-import {updateRecord} from './approval/VerifyDetails';
-import {isJSDocCommentContainingNode} from 'typescript';
+import { updateRecord } from './approval/VerifyDetails';
+import { isJSDocCommentContainingNode } from 'typescript';
 import dayjs from 'dayjs';
 import { CalendarList } from 'react-native-calendars';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -73,6 +73,7 @@ const FillByYourSelf = ({ navigation }) => {
   const [priority, setPriority] = useState('');
   const [vehicleType, setVehicleType] = useState('');
   const [isVehicle, setIsVehicle] = useState(false);
+  const [remarks, setRemarks] = useState('');
   const [vehicleNumber, setVehicleNumber] = useState('');
   //just so that the othe code gets commited can delete after
 
@@ -452,7 +453,7 @@ const FillByYourSelf = ({ navigation }) => {
       womenCount = women === '' ? '0' : women;
     }
 
-    const uppercaseVehicles = vehicles.map(({ID, ...vehicle}) => ({
+    const uppercaseVehicles = vehicles.map(({ ID, ...vehicle }) => ({
       ...vehicle,
       Vehicle_Number: vehicle.Vehicle_Number.toUpperCase(),
     }));
@@ -478,6 +479,7 @@ const FillByYourSelf = ({ navigation }) => {
         Referrer_Approval: 'APPROVED',
         Department: DepartmentID,
         Phone_Number: formattedValue,
+        Remarks: remarks,
         Priority: priority,
         Date_of_Visit: convertDateFormat(date),
         Gender: selectedGender,
@@ -829,6 +831,7 @@ const FillByYourSelf = ({ navigation }) => {
   };
 
   const handleSubmit = async () => {
+    console.log('******** ', remarks)
     setSubmitFlag(true);
     if (validateForm()) {
       setIsSubmitted(true);
@@ -938,11 +941,11 @@ const FillByYourSelf = ({ navigation }) => {
       ) : (
         <SafeAreaView style={styles.container}>
           <GestureHandlerRootView>
-            <ScrollView style={{paddingStart: 8}}>
+            <ScrollView style={{ paddingStart: 8 }}>
               <View>
                 <View style={styles.namecontainer}>
-                  <Text style={[styles.label, {marginTop: 20}]}>
-                    Name <Text style={{color: 'red'}}>*</Text>
+                  <Text style={[styles.label, { marginTop: 20 }]}>
+                    Name <Text style={{ color: 'red' }}>*</Text>
                   </Text>
                   <View
                     style={{
@@ -951,7 +954,7 @@ const FillByYourSelf = ({ navigation }) => {
                       justifyContent: 'space-between',
                     }}>
                     <Dropdown
-                      style={[styles.dropdown, {width: '25%'}]}
+                      style={[styles.dropdown, { width: '25%' }]}
                       placeholderStyle={styles.placeholderStyle}
                       selectedTextStyle={styles.selectedTextStyle}
                       inputSearchStyle={styles.inputSearchStyle}
@@ -977,7 +980,7 @@ const FillByYourSelf = ({ navigation }) => {
                     <TextInput
                       style={[
                         styles.dropdown,
-                        {width: '32%', color: '#71727A'},
+                        { width: '32%', color: '#71727A' },
                         styles.input,
                       ]}
                       value={firstName}
@@ -993,7 +996,7 @@ const FillByYourSelf = ({ navigation }) => {
                     <TextInput
                       style={[
                         styles.dropdown,
-                        {width: '30%', color: '#71727A'},
+                        { width: '30%', color: '#71727A' },
                       ]}
                       value={lastName}
                       onChangeText={txt => {
@@ -1011,11 +1014,11 @@ const FillByYourSelf = ({ navigation }) => {
                       flex: 1,
                       flexDirection: 'row',
                     }}>
-                    <Text style={[styles.bottomtext, {marginRight: 75}]}>
+                    <Text style={[styles.bottomtext, { marginRight: 75 }]}>
                       Prefix
                     </Text>
 
-                    <Text style={[styles.bottomtext, {marginRight: 72}]}>
+                    <Text style={[styles.bottomtext, { marginRight: 72 }]}>
                       First Name
                     </Text>
 
@@ -1033,7 +1036,7 @@ const FillByYourSelf = ({ navigation }) => {
 
                 <View style={styles.namecontainer}>
                   <Text style={styles.label}>
-                    Phone <Text style={{color: 'red'}}>*</Text>
+                    Phone <Text style={{ color: 'red' }}>*</Text>
                   </Text>
                   <PhoneInput
                     defaultValue={value}
@@ -1052,7 +1055,7 @@ const FillByYourSelf = ({ navigation }) => {
                     onChangeFormattedText={text => {
                       setFormattedValue(text);
                     }}
-                    countryPickerProps={{withAlphaFilter: true}}
+                    countryPickerProps={{ withAlphaFilter: true }}
                     disabled={false}
                     withDarkTheme
                     withShadow
@@ -1064,7 +1067,7 @@ const FillByYourSelf = ({ navigation }) => {
                 </View>
                 <View style={styles.namecontainer}>
                   <Text style={styles.label}>
-                    Date of Visit <Text style={{color: 'red'}}>*</Text>
+                    Date of Visit <Text style={{ color: 'red' }}>*</Text>
                   </Text>
                   {Platform.OS === 'ios' ? (
                     <TouchableOpacity
@@ -1075,7 +1078,7 @@ const FillByYourSelf = ({ navigation }) => {
                       <TextInput
                         style={[
                           styles.phoneInputContainer,
-                          {paddingLeft: 12, color: '#71727A'},
+                          { paddingLeft: 12, color: '#71727A' },
                         ]}
                         value={convertDateFormat(date)}
                         editable={false}
@@ -1090,7 +1093,7 @@ const FillByYourSelf = ({ navigation }) => {
                       <TextInput
                         style={[
                           styles.phoneInputContainer,
-                          {paddingLeft: 12, color: '#71727A'},
+                          { paddingLeft: 12, color: '#71727A' },
                         ]}
                         value={convertDateFormat(date)}
                         editable={false}
@@ -1180,7 +1183,7 @@ const FillByYourSelf = ({ navigation }) => {
                 </View>
                 <View style={styles.namecontainer}>
                   <Text style={styles.label}>
-                    Single or Group Visit <Text style={{color: 'red'}}>*</Text>
+                    Single or Group Visit <Text style={{ color: 'red' }}>*</Text>
                   </Text>
                   <View style={styles.radioButtonContainer}>
                     {singleorgroup.map(optionss => {
@@ -1197,7 +1200,7 @@ const FillByYourSelf = ({ navigation }) => {
                               <View style={styles.innerCircle} />
                             ) : null}
                           </View>
-                          <Text style={{marginLeft: 10}}>{optionss}</Text>
+                          <Text style={{ marginLeft: 10 }}>{optionss}</Text>
                         </TouchableOpacity>
                       );
                     })}
@@ -1210,10 +1213,10 @@ const FillByYourSelf = ({ navigation }) => {
                   <View>
                     <View style={styles.namecontainer}>
                       <Text style={styles.label}>
-                        Number of Men <Text style={{color: 'red'}}>*</Text>
+                        Number of Men <Text style={{ color: 'red' }}>*</Text>
                       </Text>
                       <TextInput
-                        style={[styles.phoneInputContainer, {paddingLeft: 15}]}
+                        style={[styles.phoneInputContainer, { paddingLeft: 15 }]}
                         keyboardType="numeric"
                         value={men}
                         onChangeText={text => {
@@ -1224,7 +1227,7 @@ const FillByYourSelf = ({ navigation }) => {
                         selectionColor="#B21E2B"
                       />
                       {errType == 'MenCount' && (
-                        <Text style={{color: 'red'}}>
+                        <Text style={{ color: 'red' }}>
                           The selected gender is Male. Please enter a valid
                           number.
                         </Text>
@@ -1232,10 +1235,10 @@ const FillByYourSelf = ({ navigation }) => {
                     </View>
                     <View style={styles.namecontainer}>
                       <Text style={styles.label}>
-                        Number of Women <Text style={{color: 'red'}}>*</Text>
+                        Number of Women <Text style={{ color: 'red' }}>*</Text>
                       </Text>
                       <TextInput
-                        style={[styles.phoneInputContainer, {paddingLeft: 15}]}
+                        style={[styles.phoneInputContainer, { paddingLeft: 15 }]}
                         keyboardType="numeric"
                         value={women}
                         onChangeText={text => {
@@ -1246,7 +1249,7 @@ const FillByYourSelf = ({ navigation }) => {
                         selectionColor="#B21E2B"
                       />
                       {errType == 'WomenCount' && (
-                        <Text style={{color: 'red'}}>
+                        <Text style={{ color: 'red' }}>
                           The selected gender is Female. Please enter a valid
                           number.
                         </Text>
@@ -1254,10 +1257,10 @@ const FillByYourSelf = ({ navigation }) => {
                     </View>
                     <View style={styles.namecontainer}>
                       <Text style={styles.label}>
-                        Number of Boys <Text style={{color: 'red'}}>*</Text>
+                        Number of Boys <Text style={{ color: 'red' }}>*</Text>
                       </Text>
                       <TextInput
-                        style={[styles.phoneInputContainer, {paddingLeft: 15}]}
+                        style={[styles.phoneInputContainer, { paddingLeft: 15 }]}
                         keyboardType="numeric"
                         value={boys}
                         onChangeText={text => {
@@ -1270,10 +1273,10 @@ const FillByYourSelf = ({ navigation }) => {
                     </View>
                     <View style={styles.namecontainer}>
                       <Text style={styles.label}>
-                        Number of Girls <Text style={{color: 'red'}}>*</Text>
+                        Number of Girls <Text style={{ color: 'red' }}>*</Text>
                       </Text>
                       <TextInput
-                        style={[styles.phoneInputContainer, {paddingLeft: 15}]}
+                        style={[styles.phoneInputContainer, { paddingLeft: 15 }]}
                         keyboardType="numeric"
                         value={girls}
                         onChangeText={text => {
@@ -1287,11 +1290,11 @@ const FillByYourSelf = ({ navigation }) => {
                   </View>
                 ) : null}
                 {loggedUser.resident === true &&
-                loggedUser.employee === true ? (
+                  loggedUser.employee === true ? (
                   <View style={styles.namecontainer}>
                     <Text style={styles.label}>
                       Is the Guest being invited to Home or Office
-                      <Text style={{color: 'red'}}> *</Text>
+                      <Text style={{ color: 'red' }}> *</Text>
                     </Text>
                     <View style={styles.radioButtonContainer}>
                       {homeoroffice.map(option => {
@@ -1308,7 +1311,7 @@ const FillByYourSelf = ({ navigation }) => {
                                 <View style={styles.innerCircle} />
                               ) : null}
                             </View>
-                            <Text style={{marginLeft: 10}}>{option}</Text>
+                            <Text style={{ marginLeft: 10 }}>{option}</Text>
                           </TouchableOpacity>
                         );
                       })}
@@ -1353,24 +1356,24 @@ const FillByYourSelf = ({ navigation }) => {
                     <View
                       style={[
                         styles.dropdown,
-                        {flexDirection: 'row', justifyContent: 'space-between'},
+                        { flexDirection: 'row', justifyContent: 'space-between' },
                       ]}>
-                      <Text style={{color: 'gray', marginHorizontal: 10}}>
+                      <Text style={{ color: 'gray', marginHorizontal: 10 }}>
                         {imageUri ? image.name : 'Select Image'}
                       </Text>
-                      <View style={{paddingHorizontal: 10}}>
+                      <View style={{ paddingHorizontal: 10 }}>
                         {imageUri ? (
                           <TouchableOpacity onPress={removeImage}>
                             <Image
                               source={require('../assets/close_icon.png')}
-                              style={{width: 20, height: 20}}
+                              style={{ width: 20, height: 20 }}
                             />
                           </TouchableOpacity>
                         ) : (
                           <TouchableOpacity onPress={selectImage}>
                             <Image
                               source={require('../assets/upload.png')}
-                              style={{width: 20, height: 20}}
+                              style={{ width: 20, height: 20 }}
                             />
                           </TouchableOpacity>
                         )}
@@ -1385,8 +1388,8 @@ const FillByYourSelf = ({ navigation }) => {
                   {imageUri && (
                     <>
                       <Image
-                        source={{uri: imageUri}}
-                        style={{width: 100, height: 100}}
+                        source={{ uri: imageUri }}
+                        style={{ width: 100, height: 100 }}
                       />
                       {/* <Button title="Remove Image" onPress={removeImage} /> */}
                     </>
@@ -1396,7 +1399,7 @@ const FillByYourSelf = ({ navigation }) => {
                     <Dropdown
                       style={[
                         styles.dropdown,
-                        {width: '95%', paddingLeft: 12, color: '#71727a'},
+                        { width: '95%', paddingLeft: 12, color: '#71727a' },
                       ]}
                       placeholderStyle={styles.placeholderStyle}
                       selectedTextStyle={styles.selectedTextStyle}
@@ -1421,7 +1424,7 @@ const FillByYourSelf = ({ navigation }) => {
                     <Dropdown
                       style={[
                         styles.dropdown,
-                        {width: '95%', paddingLeft: 12, color: '#71727a'},
+                        { width: '95%', paddingLeft: 12, color: '#71727a' },
                       ]}
                       placeholderStyle={styles.placeholderStyle}
                       selectedTextStyle={styles.selectedTextStyle}
@@ -1439,6 +1442,15 @@ const FillByYourSelf = ({ navigation }) => {
                         setPriority(item.value);
                         setFocus(false);
                       }}
+                    />
+                  </View>
+
+                  <View style={styles.namecontainer}>
+                    <Text style={styles.label}>Remark</Text>
+                    <TextInput
+                    style={[styles.input, { height: 100 }]}
+                      multiline={true}
+                      onChangeText={txt => setRemarks(txt)}
                     />
                   </View>
 
@@ -1518,7 +1530,7 @@ const FillByYourSelf = ({ navigation }) => {
                           <Text
                             style={[
                               styles.errorText,
-                              {marginTop: -10, paddingLeft: 30},
+                              { marginTop: -10, paddingLeft: 30 },
                             ]}>
                             {vehicleErrorMessages[vehicle.ID]}
                           </Text>
@@ -1531,9 +1543,9 @@ const FillByYourSelf = ({ navigation }) => {
                         onPress={handleAddVehicle}>
                         <Image
                           source={require('../assets/add.png')}
-                          style={{width: 15, height: 15}}
+                          style={{ width: 15, height: 15 }}
                         />
-                        <Text style={{color: 'black', fontSize: 15}}>
+                        <Text style={{ color: 'black', fontSize: 15 }}>
                           Add Vehicle Information
                         </Text>
                       </TouchableOpacity>
@@ -2308,6 +2320,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 15,
   },
+
   singleOptionContainer: {
     flexDirection: 'row', // ensure the circle and text are in a row
     alignItems: 'center', // vertically center align the circle and text
