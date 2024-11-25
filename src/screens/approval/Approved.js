@@ -49,13 +49,6 @@ const Approved = ({ navigation }) => {
     }
   };
 
-
-  useEffect(() => {
-    if (!approveDataFetched) {
-      fetchData();
-    }
-  }, [approveDataFetched]);
-
   const onRefresh = async () => {
     setRefreshing(true);
     const result = await getDataWithIntAndString('Approval_to_Visitor_Report', 'Referrer_App_User_lookup', L1ID, "Referrer_Approval", "APPROVED", getAccessToken());
