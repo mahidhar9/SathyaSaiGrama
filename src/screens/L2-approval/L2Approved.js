@@ -9,6 +9,16 @@ import Filter from '../../components/Filter';
 import DotsBlinkingLoaderEllipsis from '../../components/DotsBlinkingLoaderEllipsis'
 import Sort from '../../components/Sort';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import moment from 'moment';
+
+const defaultSort = (data) => {
+  let sortedData = [...data];
+  sortedData.sort((a, b) =>
+    (new Date(moment(a.Modified_Time, 'DD-MMM-YYYY HH:mm:ss')) -
+      new Date(moment(b.Modified_Time, 'DD-MMM-YYYY HH:mm:ss'))) * -1
+  );
+  return sortedData
+}
 
 const L2Approved = ({ navigation }) => {
 
@@ -48,15 +58,10 @@ const L2Approved = ({ navigation }) => {
       setLoading(false);
 
     } else {
-      all_L2approveds.sort((a, b) => {
-        // Parse the date strings into Date objects
-        const dateA = new parseDate(a.Date_of_Visit);
-        const dateB = new parseDate(b.Date_of_Visit);
-        // Compare the Date objects
-        return dateB - dateA;
-      });
-      setL2Approveds(all_L2approveds)
-      setL2ApprovedsData(all_L2approveds)
+ 
+      const sortedData = defaultSort(all_L2approveds)
+      setL2Approveds(sortedData)
+      setL2ApprovedsData(sortedData)
       setLoading(false)
       setL2ApproveDataFetched(true)
     }
@@ -83,15 +88,9 @@ const L2Approved = ({ navigation }) => {
 
 
     } else {
-      all_L2approveds.sort((a, b) => {
-        // Parse the date strings into Date objects
-        const dateA = new parseDate(a.Date_of_Visit);
-        const dateB = new parseDate(b.Date_of_Visit);
-        // Compare the Date objects
-        return dateB - dateA;
-      });
-      setL2Approveds(all_L2approveds)
-      setL2ApprovedsData(all_L2approveds)
+      const sortedData = defaultSort(all_L2approveds)
+      setL2Approveds(sortedData)
+      setL2ApprovedsData(sortedData)
       setRefreshing(false);
     }
   };

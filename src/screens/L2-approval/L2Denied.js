@@ -9,6 +9,17 @@ import Filter from '../../components/Filter';
 import DotsBlinkingLoaderEllipsis from '../../components/DotsBlinkingLoaderEllipsis'
 import Sort from '../../components/Sort';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import moment from 'moment';
+
+const defaultSort = (data) => {
+
+  let sortedData = [...data];
+  sortedData.sort((a, b) =>
+    (new Date(moment(a.Modified_Time, 'DD-MMM-YYYY HH:mm:ss')) -
+      new Date(moment(b.Modified_Time, 'DD-MMM-YYYY HH:mm:ss'))) * -1
+  );
+  return sortedData
+}
 
 const L2Denied = ({ navigation }) => {
  // console.log("Logged user name in L2 denied: ", loggedUser.name)
@@ -47,15 +58,9 @@ const L2Denied = ({ navigation }) => {
       setLoading(false);
     }
     else {
-      all_L2denieds.sort((a, b) => {
-        // Parse the date strings into Date objects
-        const dateA = new parseDate(a.Date_of_Visit);
-        const dateB = new parseDate(b.Date_of_Visit);
-        // Compare the Date objects
-        return dateB - dateA;
-      });
-      setL2Denieds(all_L2denieds)
-      setL2DeniedsData(all_L2denieds)
+      const sortedData = defaultSort(all_L2denieds)
+      setL2Denieds(sortedData)
+      setL2DeniedsData(sortedData)
       setLoading(false)
       setL2DeniedDataFetched(true)
     }
@@ -79,15 +84,9 @@ const L2Denied = ({ navigation }) => {
       setRefreshing(false);
       setLoading(false);
     } else {
-      all_L2denieds.sort((a, b) => {
-        // Parse the date strings into Date objects
-        const dateA = new parseDate(a.Date_of_Visit);
-        const dateB = new parseDate(b.Date_of_Visit);
-        // Compare the Date objects
-        return dateB - dateA;
-      });
-      setL2Denieds(all_L2denieds)
-      setL2DeniedsData(all_L2denieds);
+      const sortedData = defaultSort(all_L2denieds)
+      setL2Denieds(sortedData)
+      setL2DeniedsData(sortedData);
       setRefreshing(false);
     }
 

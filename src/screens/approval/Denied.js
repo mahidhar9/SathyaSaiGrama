@@ -8,7 +8,18 @@ import parseDate from "../../components/ParseDate"
 import Filter from '../../components/Filter';
 import DotsBlinkingLoaderEllipsis from '../../components/DotsBlinkingLoaderEllipsis';
 import Sort from '../../components/Sort';
+import { all } from 'axios';
+import moment from 'moment';
 
+const defaultSort = (data) => {
+
+  let sortedData = [...data];
+  sortedData.sort((a, b) =>
+    (new Date(moment(a.Modified_Time, 'DD-MMM-YYYY HH:mm:ss')) -
+      new Date(moment(b.Modified_Time, 'DD-MMM-YYYY HH:mm:ss'))) * -1
+  );
+  return sortedData
+}
 
 const Denied = ({ navigation }) => {
   const { L1ID, getAccessToken, deniedDataFetched, setDeniedDataFetched } = useContext(UserContext);
@@ -29,19 +40,14 @@ const Denied = ({ navigation }) => {
       setLoading(false);
     }
     else {
-      // all_denieds.sort((a, b) => {
-      //   // Parse the date strings into Date objects
-      //   const dateA = new parseDate(a.Date_of_Visit);
-      //   const dateB = new parseDate(b.Date_of_Visit);
-      //   // Compare the Date objects
-      //   return dateB - dateA;
-      // });
-      setDenieds(all_denieds);
-      setDeniedsData(all_denieds);
+      const sortedData = defaultSort(all_denieds)
+      setDenieds(sortedData);
+      setDeniedsData(sortedData);
       setLoading(false);
       setDeniedDataFetched(true);
     }
   };
+
 
   useEffect(() => {
     if (!deniedDataFetched) {
@@ -61,15 +67,9 @@ const Denied = ({ navigation }) => {
 
 
     } else {
-      // all_denieds.sort((a, b) => {
-      //   // Parse the date strings into Date objects
-      //   const dateA = new parseDate(a.Date_of_Visit);
-      //   const dateB = new parseDate(b.Date_of_Visit);
-      //   // Compare the Date objects
-      //   return dateB - dateA;
-      // });
-      setDenieds(all_denieds);
-      setDeniedsData(all_denieds);
+      const sortedData = defaultSort(all_denieds)
+      setDenieds(sortedData);
+      setDeniedsData(sortedData);
       setRefreshing(false);
     }
   };
@@ -84,11 +84,11 @@ const Denied = ({ navigation }) => {
       {loading ? (
         <View style={styles.loadingContainer}>
           {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
-          <DotsBlinkingLoaderEllipsis/>
+          <DotsBlinkingLoaderEllipsis />
         </View>
       ) : ((refreshing ? (<View style={styles.loadingContainer}>
         {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
-        <DotsBlinkingLoaderEllipsis/>
+        <DotsBlinkingLoaderEllipsis />
       </View>) : (
         <>
           <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
@@ -108,7 +108,7 @@ const Denied = ({ navigation }) => {
         </>
       )))}
     </View>
-    {deniedsData?.length<1 && denieds?.length>0  && !loading && <View style={styles.noDeniedTextView}><Text style={{ flex: 10 }}>No Visitors found</Text></View>}
+      {deniedsData?.length < 1 && denieds?.length > 0 && !loading && <View style={styles.noDeniedTextView}><Text style={{ flex: 10 }}>No Visitors found</Text></View>}
       {!refreshing && denieds === null && !loading && <View style={styles.noDeniedTextView}><Text style={{ flex: 10 }}>No Denied visitors</Text></View>}</>
   );
 };
