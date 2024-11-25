@@ -1,4 +1,4 @@
-import React, {useState, useContext, useRef, useEffect} from 'react';
+import React, { useState, useContext, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -25,17 +25,17 @@ import RNFS from 'react-native-fs';
 import { Picker } from '@react-native-picker/picker';
 
 import DatePicker from 'react-native-modern-datepicker';
-import {getToday, getFormatedDate} from 'react-native-modern-datepicker';
+import { getToday, getFormatedDate } from 'react-native-modern-datepicker';
 import PhoneInput from 'react-native-phone-number-input';
-import {parsePhoneNumberFromString} from 'libphonenumber-js';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import UserContext from '../../context/UserContext';
-import {Dropdown} from 'react-native-element-dropdown';
-import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME, SECRET_KEY} from '@env';
+import { Dropdown } from 'react-native-element-dropdown';
+import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME, SECRET_KEY } from '@env';
 import moment from 'moment';
 
 
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {launchImageLibrary} from 'react-native-image-picker';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { launchImageLibrary } from 'react-native-image-picker';
 
 
 import SentForApproval from './SentForApproval';
@@ -43,13 +43,13 @@ import SentForApproval from './SentForApproval';
 import { updateRecord } from './approval/VerifyDetails';
 import { isJSDocCommentContainingNode } from 'typescript';
 import dayjs from 'dayjs';
-import {CalendarList} from 'react-native-calendars';
+import { CalendarList } from 'react-native-calendars';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 LogBox.ignoreLogs(['Warnings...']);
 LogBox.ignoreAllLogs();
-const FillByYourSelf = ({navigation}) => {
-  const {height} = Dimensions.get('window');
+const FillByYourSelf = ({ navigation }) => {
+  const { height } = Dimensions.get('window');
   const [prefix, setPrefix] = useState(' ');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -94,16 +94,16 @@ const FillByYourSelf = ({navigation}) => {
     setApproveDataFetched,
   } = useContext(UserContext);
 
-  useEffect(()=>{
-    const settingLoggedUser = async() => {
+  useEffect(() => {
+    const settingLoggedUser = async () => {
       let existedUser = await AsyncStorage.getItem('existedUser');
       existedUser = JSON.parse(existedUser);
-      if(existedUser){
+      if (existedUser) {
         setLoggedUser(existedUser);
       }
     }
 
-    if(!loggedUser || loggedUser===null){
+    if (!loggedUser || loggedUser === null) {
       settingLoggedUser();
     }
   }, [])
@@ -118,7 +118,7 @@ const FillByYourSelf = ({navigation}) => {
 
   const [selectedHO, setSelectedHO] = useState("");
 
-  useEffect(()=>{
+  useEffect(() => {
     if (loggedUser.resident === true && loggedUser.employee === true) {
       setSelectedHO("");
     } else if (loggedUser.resident === true && loggedUser.employee === false) {
@@ -210,51 +210,51 @@ const FillByYourSelf = ({navigation}) => {
       : endMonth + 12 - MonthNumberCount;
 
   const prefixValues = [
-    {label: 'Mr.', value: 'Mr.'},
-    {label: 'Mrs.', value: 'Mrs.'},
-    {label: 'Ms.', value: 'Ms.'},
-    {label: 'Dr.', value: 'Dr.'},
-    {label: 'Prof.', value: 'Peof.'},
-    {label: 'Rtn.', value: 'Rtn.'},
-    {label: 'Sri', value: 'Sri.'},
-    {label: 'Smt.', value: 'Smt.'},
+    { label: 'Mr.', value: 'Mr.' },
+    { label: 'Mrs.', value: 'Mrs.' },
+    { label: 'Ms.', value: 'Ms.' },
+    { label: 'Dr.', value: 'Dr.' },
+    { label: 'Prof.', value: 'Peof.' },
+    { label: 'Rtn.', value: 'Rtn.' },
+    { label: 'Sri', value: 'Sri.' },
+    { label: 'Smt.', value: 'Smt.' },
   ];
   const guestCategoryValues = [
-    {label: 'Govt Officials', value: 'Govt Officials'},
-    {label: 'Politician', value: 'Politician'},
-    {label: 'Corporate', value: 'Corporate'},
-    {label: 'Press', value: 'Press'},
-    {label: 'Parent', value: 'Parent'},
-    {label: 'Devotee', value: 'Devotee'},
-    {label: 'Guest', value: 'Guest'},
-    {label: 'Staff', value: 'Staff'},
-    {label: 'Student', value: 'Student'},
-    {label: 'Intern', value: 'Intern'},
-    {label: 'Other', value: 'Other'},
+    { label: 'Govt Officials', value: 'Govt Officials' },
+    { label: 'Politician', value: 'Politician' },
+    { label: 'Corporate', value: 'Corporate' },
+    { label: 'Press', value: 'Press' },
+    { label: 'Parent', value: 'Parent' },
+    { label: 'Devotee', value: 'Devotee' },
+    { label: 'Guest', value: 'Guest' },
+    { label: 'Staff', value: 'Staff' },
+    { label: 'Student', value: 'Student' },
+    { label: 'Intern', value: 'Intern' },
+    { label: 'Other', value: 'Other' },
   ];
   const priorityValues = [
-    {label: 'P1', value: 'P1'},
-    {label: 'P2', value: 'P2'},
-    {label: 'P3', value: 'P3'},
+    { label: 'P1', value: 'P1' },
+    { label: 'P2', value: 'P2' },
+    { label: 'P3', value: 'P3' },
   ];
   const vehicleTypeValues = [
-    {label: '2-wheeler', value: '2-wheeler'},
-    {label: 'Car', value: 'Car'},
-    {label: 'Bus', value: 'Bus'},
-    {label: 'Taxi', value: 'Taxi'},
-    {label: 'School Bus', value: 'School Bus'},
-    {label: 'Police Van', value: 'Police Van'},
-    {label: 'Ambulence', value: 'Ambulence'},
-    {label: 'Van', value: 'Van'},
-    {label: 'Auto', value: 'Auto'},
-    {label: 'Truck', value: 'Truck'},
-    {label: 'Tractor', value: 'Tractor'},
-    {label: 'Cement Mixer', value: 'Cement Mixer'},
-    {label: 'Fire Engine', value: 'Fire Engine'},
-    {label: 'Transport Van', value: 'Transport Van'},
-    {label: 'Bulldozer', value: 'Bulldozer'},
-    {label: 'Roller Machine', value: 'Roller Machine'},
-    {label: 'Other', value: 'Other'},
+    { label: '2-wheeler', value: '2-wheeler' },
+    { label: 'Car', value: 'Car' },
+    { label: 'Bus', value: 'Bus' },
+    { label: 'Taxi', value: 'Taxi' },
+    { label: 'School Bus', value: 'School Bus' },
+    { label: 'Police Van', value: 'Police Van' },
+    { label: 'Ambulence', value: 'Ambulence' },
+    { label: 'Van', value: 'Van' },
+    { label: 'Auto', value: 'Auto' },
+    { label: 'Truck', value: 'Truck' },
+    { label: 'Tractor', value: 'Tractor' },
+    { label: 'Cement Mixer', value: 'Cement Mixer' },
+    { label: 'Fire Engine', value: 'Fire Engine' },
+    { label: 'Transport Van', value: 'Transport Van' },
+    { label: 'Bulldozer', value: 'Bulldozer' },
+    { label: 'Roller Machine', value: 'Roller Machine' },
+    { label: 'Other', value: 'Other' },
   ];
 
   let menCount = '0';
@@ -263,12 +263,10 @@ const FillByYourSelf = ({navigation}) => {
   let girlsCount = '0';
 
 
-  console.log("Logged usename in FillByYourSelf: ", loggedUser.name)
-
   const generateQR = async (passcodeData) => {
     try {
       console.log("Logged usename is generateQR in FillByYourSelf: ", loggedUser.name)
-      const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${loggedUser.name}&&passcode=${passcodeData}&&date=${date}&&key=${SECRET_KEY}`;
+      const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${loggedUser.name}&&passcode=${passcodeData}&&date=${convertDateFormat(date)}&&key=${SECRET_KEY}`;
       console.log('URL - ', qrUrl);
       const res = await fetch(qrUrl);
       console.log('res from fetch img : ', res);
@@ -311,6 +309,7 @@ const FillByYourSelf = ({navigation}) => {
       const payload = {
         data: {
           Generated_Passcode: passcodeData,
+          L2_Approval_Status: 'APPROVED',
         },
       };
 
@@ -324,41 +323,33 @@ const FillByYourSelf = ({navigation}) => {
           'Content-Type': 'application/json',
         },
       });
-      console.log('Posting to Zoho....');
+
       if (response1.ok) {
         console.log('Code posted successfully to Zoho.');
-        console.log('Response for the code is:', response1);
+        const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${approvalToVisitorID.current}/Generated_QR_Code/upload`;
+        console.log(url);
+        const response = await fetch(url, {
+          method: 'POST',
+          body: postData,
+          headers: {
+            Authorization: `Zoho-oauthtoken ${accessToken}`,
+            'Cache-Control': 'no-cache', // Prevent caching
+            Pragma: 'no-cache', // Prevent caching in older HTTP/1.0 proxies
+            Expires: '0',
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        if (response.ok) {
+          console.log('Image uploaded successfully to Zoho.', response);
+          return;
+        } else {
+          console.log('Failed to upload image to Zoho: ', response.status);
+          return;
+        }
       } else {
-        console.log(
-          'Failed to post code to Zoho:',
-          response1.status,
-          response1.statusText,
-        );
+        console.log('Failed to post code to Zoho:', response1.status, response1.statusText);
       }
 
-      // POST request to upload qrcode image to Zoho
-      const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${approvalToVisitorID.current}/Generated_QR_Code/upload`;
-      console.log(url);
-      const response = await fetch(url, {
-        method: 'POST',
-        body: postData,
-        headers: {
-          Authorization: `Zoho-oauthtoken ${accessToken}`,
-          'Cache-Control': 'no-cache', // Prevent caching
-          Pragma: 'no-cache', // Prevent caching in older HTTP/1.0 proxies
-          Expires: '0',
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      console.log('Posting image to Zoho....');
-
-      if (response.ok) {
-        console.log('Image uploaded successfully to Zoho.', response);
-        return;
-      } else {
-        console.log('Failed to upload image to Zoho: ', response.status);
-        return;
-      }
     } catch (error) {
       console.error('Error capturing and uploading QR code:', error);
     }
@@ -388,6 +379,8 @@ const FillByYourSelf = ({navigation}) => {
       break;
     }
 
+    generateQR(generatedPasscode);
+
     const payload = {
       data: {
         Passcode: generatedPasscode,
@@ -406,7 +399,6 @@ const FillByYourSelf = ({navigation}) => {
 
     const responseData = await passcodeResponse.json();
     console.log('response of posting passcode to zoho : ', responseData);
-    await generateQR(generatedPasscode);
     return;
   };
 
@@ -463,7 +455,7 @@ const FillByYourSelf = ({navigation}) => {
       ...vehicle,
       Vehicle_Number: vehicle.Vehicle_Number.toUpperCase(),
     }));
-  
+
     // Calculate the total number of people
     let people = parseInt(menCount) + parseInt(womenCount) + parseInt(boys) + parseInt(girls);
     console.log('Total people : ', people);
@@ -500,11 +492,7 @@ const FillByYourSelf = ({navigation}) => {
 
     if (loggedUser.role === 'L2') {
       if (
-        (selectedHO === 'Home' &&
-          (loggedUser.deptIds.includes('3318254000027832015') ||
-            loggedUser.deptIds.includes('3318254000031368009'))) ||
-        selectedHO === 'Office'
-      ) {
+        (selectedHO === 'Home' && (loggedUser.deptIds.includes('3318254000027832015') || loggedUser.deptIds.includes('3318254000031368009'))) || selectedHO === 'Office') {
         console.log('just before changing the L2 Approval status');
         formData.data.L2_Approval_Status = 'APPROVED';
         console.log(
@@ -575,7 +563,7 @@ const FillByYourSelf = ({navigation}) => {
   const handleAddVehicle = () => {
     setVehicles([
       ...vehicles,
-      {Vehicle_Type: '', Vehicle_Number: '', ID: Date.now()}, //Date now is used to create a unique id for each vehicle row
+      { Vehicle_Type: '', Vehicle_Number: '', ID: Date.now() }, //Date now is used to create a unique id for each vehicle row
     ]);
   };
 
@@ -586,7 +574,7 @@ const FillByYourSelf = ({navigation}) => {
   //  Function to handle vehicle number change
   const handleTextChange = (index, field, value) => {
     const updatedVehicles = vehicles.map((vehicle, i) =>
-      i === index ? {...vehicle, [field]: value} : vehicle,
+      i === index ? { ...vehicle, [field]: value } : vehicle,
     );
     setVehicles(updatedVehicles);
   };
@@ -600,8 +588,8 @@ const FillByYourSelf = ({navigation}) => {
 
     launchImageLibrary(options, response => {
       if (response.assets && response.assets.length > 0) {
-        const {uri, type, fileName} = response.assets[0];
-        setImage({uri, type, name: fileName});
+        const { uri, type, fileName } = response.assets[0];
+        setImage({ uri, type, name: fileName });
         setImageUri(uri); // For displaying the image preview
       }
     });
@@ -799,7 +787,7 @@ const FillByYourSelf = ({navigation}) => {
       valid = false
     }
     setErrType(tempErrType);
-    
+
 
     vehicles.forEach((vehicle, index) => {
       const vehicleNumber = vehicle.Vehicle_Number;
@@ -856,16 +844,12 @@ const FillByYourSelf = ({navigation}) => {
         console.log('responseFromVisitorDetails', responseFromVisitorDetails);
         if (loggedUser.role === 'L2') {
           await passcodeGenerator();
-          setIsSubmitted(false);
-          navigation.navigate('Invite');
-        } else if (loggedUser.role === 'L1') {
-          setIsSubmitted(false);
-          navigation.navigate('Invite');
         }
+        setIsSubmitted(false);
+        navigation.navigate('Invite');
       } catch (err) {
         Alert.alert(err);
       }
-      // Add form submission logic here
     }
   };
 
@@ -941,7 +925,7 @@ const FillByYourSelf = ({navigation}) => {
   return (
     <>
       {isSubmitted ? (
-        <SentForApproval style={{zIndex: 1}} />
+        <SentForApproval style={{ zIndex: 1 }} />
       ) : (
         <SafeAreaView style={styles.container}>
           <GestureHandlerRootView>
@@ -1326,7 +1310,7 @@ const FillByYourSelf = ({navigation}) => {
                 <View style={styles.namecontainer}>
                   <Text style={styles.label}>
 
-                    Select Gender <Text style={{color: 'red'}}>*</Text>
+                    Select Gender <Text style={{ color: 'red' }}>*</Text>
 
                   </Text>
                   <View style={styles.radioButtonContainer}>
@@ -1344,7 +1328,7 @@ const FillByYourSelf = ({navigation}) => {
                               <View style={styles.innerCircle} />
                             ) : null}
                           </View>
-                          <Text style={{marginLeft: 10}}>{option}</Text>
+                          <Text style={{ marginLeft: 10 }}>{option}</Text>
                         </TouchableOpacity>
                       );
                     })}
