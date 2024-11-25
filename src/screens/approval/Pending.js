@@ -50,7 +50,7 @@ const Pending = ({ navigation }) => {
     if (result.data === undefined) {
       setPendings(null);
       setPendingsData(null);
-      setPendingDataFetched(false);
+      //setPendingDataFetched(false);
       setLoading(false);
     }
     // sorting the pendings data by date
@@ -65,9 +65,13 @@ const Pending = ({ navigation }) => {
 
 
   useEffect(() => {
-    if (!pendingDataFetched) {
-      fetchData();
+
+    const fetchLatest = async () => {
+      await onRefresh();
     }
+
+    fetchLatest();
+    
   }, [pendingDataFetched]);
 
   const onRefresh = async () => {

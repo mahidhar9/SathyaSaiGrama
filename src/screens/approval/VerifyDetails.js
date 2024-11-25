@@ -89,7 +89,10 @@ const VerifyDetails = ({ navigation, route }) => {
   const [DialogVisible, setDialogVisible] = useState(false);
   const {
     setDeniedDataFetched,
+    deniedDataFetched,
     setApproveDataFetched,
+    pendingDataFetched,
+    approveDataFetched,
     setPendingDataFetched,
     setEditData,
     loggedUser,
@@ -97,17 +100,17 @@ const VerifyDetails = ({ navigation, route }) => {
     accessToken,
   } = useContext(UserContext);
 
-  
-  useEffect(()=>{
-    const settingLoggedUser = async() => {
+
+  useEffect(() => {
+    const settingLoggedUser = async () => {
       let existedUser = await AsyncStorage.getItem('existedUser');
       existedUser = JSON.parse(existedUser);
-      if(existedUser){
+      if (existedUser) {
         setLoggedUser(existedUser);
       }
     }
 
-    if(!loggedUser || loggedUser===null){
+    if (!loggedUser || loggedUser === null) {
       settingLoggedUser();
     }
   }, [])
@@ -246,43 +249,74 @@ const VerifyDetails = ({ navigation, route }) => {
           'Content-Type': 'application/json',
         },
       });
-      console.log('Posting to Zoho....');
+
+      const updateRes = await response1.json();
+
       if (response1.ok) {
-        console.log('Code posted successfully to Zoho.');
-        console.log('Response for the code is:', response1);
+        if (updateRes.data && updateRes.code === 3000) {
+          const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Generated_QR_Code/upload`;
+          const response = await fetch(url, {
+            method: 'POST',
+            body: postData,
+            headers: {
+              Authorization: `Zoho-oauthtoken ${accessToken}`,
+              'Cache-Control': 'no-cache', // Prevent caching
+              Pragma: 'no-cache', // Prevent caching in older HTTP/1.0 proxies
+              Expires: '0',
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+          if (response.ok) {
+            console.log('Image uploaded successfully to Zoho.', response);
+            return;
+          } else {
+            console.log('Failed to upload qr code image to Zoho: ', response.status,);
+            return;
+          }
+        }
+        else if (updateRes.error[0].alert_message[0] === "L2 is already approved." || updateRes.error[0].alert_message[0] === "Record cannot be edited after L2 Approved") {
+          setL2approvedalreadydialogVisible(true);
+          setErrorMessage(updateRes.error[0].alert_message[0]);
+        }
+        else if (updateRes.error[0].alert_message[0] === "You cannot approve the L1 Denied requests") {
+          setDialogVisible(true);
+        }
+        else {
+          Alert.alert('Error in approving: ', updateRes.code);
+        }
       } else {
         console.log('Failed to post code to Zoho:', response1.status, response1.statusText);
       }
 
       // POST request to upload image to Zoho
-      const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Generated_QR_Code/upload`;
-      console.log(url);
-      const response = await fetch(url, {
-        method: 'POST',
-        body: postData,
-        headers: {
-          Authorization: `Zoho-oauthtoken ${accessToken}`,
-          'Cache-Control': 'no-cache', // Prevent caching
-          Pragma: 'no-cache', // Prevent caching in older HTTP/1.0 proxies
-          Expires: '0',
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      console.log('Posting image to Zoho....');
+      // const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Generated_QR_Code/upload`;
+      // console.log(url);
+      // const response = await fetch(url, {
+      //   method: 'POST',
+      //   body: postData,
+      //   headers: {
+      //     Authorization: `Zoho-oauthtoken ${accessToken}`,
+      //     'Cache-Control': 'no-cache', // Prevent caching
+      //     Pragma: 'no-cache', // Prevent caching in older HTTP/1.0 proxies
+      //     Expires: '0',
+      //     'Content-Type': 'multipart/form-data',
+      //   },
+      // });
+      // console.log('Posting image to Zoho....');
 
-      if (response.ok) {
-        console.log('Image uploaded successfully to Zoho.', response);
-        return;
-      } else {
-        console.log('Failed to upload image to Zoho: ', response.status,);
-        return;
-      }
+      // if (response.ok) {
+      //   console.log('Image uploaded successfully to Zoho.', response);
+      //   return;
+      // } else {
+      //   console.log('Failed to upload image to Zoho: ', response.status,);
+      //   return;
+      // }
     } catch (error) {
       console.error('Error capturing and uploading QR code:', error);
     }
   };
 
-  const passcodeGenerator = async () => {
+  const passcodeGenerator = async (status) => {
     let generatedPasscode;
     while (true) {
       const newCode = Math.floor(100000 + Math.random() * (999999 - 100001 + 1),).toString();
@@ -304,6 +338,8 @@ const VerifyDetails = ({ navigation, route }) => {
       break;
     }
 
+    generateQR(generatedPasscode);
+
     const payload = {
       data: {
         Passcode: generatedPasscode,
@@ -320,11 +356,10 @@ const VerifyDetails = ({ navigation, route }) => {
       },
     });
 
-    const responseData = await passcodeResponse.json();
-    console.log("response of posting passcode to zoho : ", responseData);
-
-    await generateQR(generatedPasscode);
-    return;
+    if (!passcodeResponse.ok) {
+      console.log("Error is posting passcode to zoho")
+      Alert.alert("Error is posting passcode to zoho")
+    }
   };
 
   const onApprove = async () => {
@@ -332,33 +367,21 @@ const VerifyDetails = ({ navigation, route }) => {
 
     let updateField;
 
-    if (loggedUser.role === 'L2') {
-      if (
-        (user.Home_or_Office === 'Home' &&
-          (loggedUser.deptIds.includes('3318254000027832015') ||
-            loggedUser.deptIds.includes('3318254000031368009'))) ||
-        user.Home_or_Office === 'Office'
-      ) {
-        updateField = {
-          Referrer_Approval: 'APPROVED',
-          L2_Approval_Status: 'APPROVED',
-        };
-        setapprovingLoading(true);
-        await passcodeGenerator();
-      } else {
-        updateField = {
-          Referrer_Approval: 'APPROVED',
-          L2_Approval_Status: 'PENDING APPROVAL',
-        };
-        setapprovingLoading(true);
-      }
+    if (loggedUser.role === 'L2' && ((user.Home_or_Office === 'Home' && (loggedUser.deptIds.includes('3318254000027832015') || loggedUser.deptIds.includes('3318254000031368009'))) || user.Home_or_Office === 'Office')) {
+      updateField = {
+        Referrer_Approval: 'APPROVED',
+        L2_Approval_Status: 'APPROVED',
+      };
+
     } else {
       updateField = {
         Referrer_Approval: 'APPROVED',
         L2_Approval_Status: 'PENDING APPROVAL',
       };
-      setapprovingLoading(true);
+
     }
+
+    setapprovingLoading(true);
 
     const updateData = {
       data: updateField,
@@ -372,20 +395,28 @@ const VerifyDetails = ({ navigation, route }) => {
     );
 
     if (response.code === 3000) {
+      console.log("record is updated")
       if (status === 'PENDING APPROVAL') {
-        setPendingDataFetched(false);
-        setApproveDataFetched(false);
+        setPendingDataFetched(!pendingDataFetched);
+        setApproveDataFetched(!approveDataFetched);
       } else if (status === 'DENIED') {
-        setDeniedDataFetched(false);
-        setApproveDataFetched(false);
+        setDeniedDataFetched(!deniedDataFetched);
+        setApproveDataFetched(!approveDataFetched);
       }
       setapprovingLoading(false)
       navigation.navigate('Approved');
-      Alert.alert('Visitor Approved');
+      if (loggedUser.role === 'L2' && ((user.Home_or_Office === 'Home' && (loggedUser.deptIds.includes('3318254000027832015') || loggedUser.deptIds.includes('3318254000031368009'))) || user.Home_or_Office === 'Office')) {
+        Alert.alert('Visitor Approved');
+        await passcodeGenerator(status);
+      } else {
+        Alert.alert('Visitor Approved');
+      }
+
       return
     } else {
       Alert.alert('Error: ', response.code);
     }
+
   };
 
   const onReject = async () => {
@@ -688,17 +719,25 @@ const VerifyDetails = ({ navigation, route }) => {
                   <ActivityIndicator size="large" color="#0000ff" />
                 ) : (
                   QrCodephoto && (
-                    <TouchableOpacity onPress={() => setModalVisible(true)} style={{width: "98%", height: 200}}>
-                      <Image
-                        source={{ uri: QrCodephoto }}
-                        style={{ width: '100%', height: 200 }}
-                        resizeMode="contain"
-                      />
-                    </TouchableOpacity>
-
+                    <>
+                      <TouchableOpacity onPress={() => setModalVisible(true)} style={{ width: "98%", height: 200 }}>
+                        <Image
+                          source={{ uri: QrCodephoto }}
+                          style={{ width: '100%', height: 200 }}
+                          resizeMode="contain"
+                        />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.HomeButton, { backgroundColor: 'green' }]}
+                        onPress={() => {
+                          onShare();
+                        }}>
+                        <Text style={[styles.wewe, styles.wewe1]}>Share</Text>
+                      </TouchableOpacity>
+                    </>
                   )
                 )}
-                {loading ? null : (
+                {/* {loading ? null : (
                   <TouchableOpacity
                     style={[styles.HomeButton, { backgroundColor: 'green' }]}
                     onPress={() => {
@@ -706,7 +745,7 @@ const VerifyDetails = ({ navigation, route }) => {
                     }}>
                     <Text style={[styles.wewe, styles.wewe1]}>Share</Text>
                   </TouchableOpacity>
-                )}
+                )} */}
               </View>
             </View>
           ) : null}

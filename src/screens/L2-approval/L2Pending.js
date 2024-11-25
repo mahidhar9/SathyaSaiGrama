@@ -57,7 +57,7 @@ const L2Pending = ({ navigation }) => {
     if (result.data === undefined) {
       setL2Pendings(null);
       setL2PendingsData(null);
-      setL2PendingDataFetched(false);
+      //setL2PendingDataFetched(false);
       setLoading(false);
     }
     else {
@@ -65,16 +65,18 @@ const L2Pending = ({ navigation }) => {
       setL2Pendings(sortedData)
       setL2PendingsData(sortedData);
       setLoading(false)
-      setL2PendingDataFetched(true)
+      //setL2PendingDataFetched(true)
     }
-    console.log("object:: ", L2Pendings)
+    //console.log("object:: ", L2Pendings)
   };
 
   useEffect(() => {
 
-    if (!L2PendingDataFetched) {
-      fetchData();
+    const fetchLatest = async () => {
+      await fetchData(); 
     }
+
+    fetchLatest();
 
   }, [L2PendingDataFetched]);
 
@@ -95,7 +97,7 @@ const L2Pending = ({ navigation }) => {
       setL2PendingsData(sortedData)
       setRefreshing(false);
     }
-    console.log("object:: ", L2Pendings)
+    //console.log("object:: ", L2Pendings)
   };
 
 

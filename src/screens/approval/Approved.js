@@ -37,7 +37,7 @@ const Approved = ({ navigation }) => {
     if (result.data === undefined) {
       setApproveds(null);
       setApprovedsData(null);
-      setApproveDataFetched(false);
+      //setApproveDataFetched(false);
       setLoading(false);
     } else {
       
@@ -45,7 +45,7 @@ const Approved = ({ navigation }) => {
       setApproveds(sortedData);
       setApprovedsData(sortedData)
       setLoading(false);
-      setApproveDataFetched(true);
+      //setApproveDataFetched(true);
     }
   };
 
@@ -79,6 +79,16 @@ const Approved = ({ navigation }) => {
     onRefresh();
   }, [Approved]));
 
+  useEffect(() => {
+
+    const fetchLatest = async () => {
+      await onRefresh();
+    }
+
+    fetchLatest();
+
+  }, [approveDataFetched]);
+
 
   return (
     <><View style={{ flex: 1, paddingTop: 10, backgroundColor: "#FFFF" }}>
@@ -86,12 +96,12 @@ const Approved = ({ navigation }) => {
         <View style={styles.loadingContainer}>
           {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
           {/* <RequestSkeletonScreen/> */}
-          <DotsBlinkingLoaderEllipsis/>
+          <DotsBlinkingLoaderEllipsis />
         </View>
       ) : ((refreshing ? (<View style={styles.loadingContainer}>
         {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
         {/* <RequestSkeletonScreen/> */}
-        <DotsBlinkingLoaderEllipsis/>
+        <DotsBlinkingLoaderEllipsis />
       </View>) : (
         <>
           <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
@@ -111,8 +121,8 @@ const Approved = ({ navigation }) => {
         </>
       )))}
     </View>
-    {
-        approvedsData?.length<1 && approveds?.length>0  && !loading && <View style={styles.noApprovedTextView}><Text style={{ flex: 10 }}>No Visitors found</Text></View>
+      {
+        approvedsData?.length < 1 && approveds?.length > 0 && !loading && <View style={styles.noApprovedTextView}><Text style={{ flex: 10 }}>No Visitors found</Text></View>
       }
       {!refreshing && approveds === null && !loading && <View style={styles.noApprovedTextView}><Text style={{ flex: 10 }}>No Approved visitors</Text></View>}</>
   );

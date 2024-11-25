@@ -54,7 +54,7 @@ const L2Approved = ({ navigation }) => {
     if (result.data === undefined) {
       setL2Approveds(null);
       setL2ApprovedsData(null);
-      setL2ApproveDataFetched(false);
+      //setL2ApproveDataFetched(false);
       setLoading(false);
 
     } else {
@@ -63,16 +63,17 @@ const L2Approved = ({ navigation }) => {
       setL2Approveds(sortedData)
       setL2ApprovedsData(sortedData)
       setLoading(false)
-      setL2ApproveDataFetched(true)
+      //setL2ApproveDataFetched(true)
     }
 
   };
 
   useEffect(() => {
 
-    if (!L2ApproveDataFetched) {
-      fetchData();
+    const fetchLatest = async () => {
+      await fetchData(); 
     }
+    fetchLatest();
 
   }, [L2ApproveDataFetched]);
 

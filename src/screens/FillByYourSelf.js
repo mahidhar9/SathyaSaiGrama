@@ -33,8 +33,10 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME, SECRET_KEY } from '@env';
 import moment from 'moment';
 
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { launchImageLibrary } from 'react-native-image-picker';
+
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {launchImageLibrary} from 'react-native-image-picker';
+
 
 import SentForApproval from './SentForApproval';
 
@@ -261,15 +263,14 @@ const FillByYourSelf = ({ navigation }) => {
 
   console.log('Logged usename in FillByYourSelf: ', loggedUser.name);
 
-  const generateQR = async passcodeData => {
+
+  const generateQR = async (passcodeData) => {
     try {
-      console.log(
-        'Logged usename is generateQR in FillByYourSelf: ',
-        loggedUser.name,
-      );
-      const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${loggedUser.name}&&passcode=${passcodeData}&&date=${date}&&key=${SECRET_KEY}`;
-      const res = await fetch(qrUrl);
+      console.log("Logged usename is generateQR in FillByYourSelf: ", loggedUser.name)
+      const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${loggedUser.name}&&passcode=${passcodeData}&&date=${convertDateFormat(date)}&&key=${SECRET_KEY}`;
+
       console.log('URL - ', qrUrl);
+      const res = await fetch(qrUrl);
       console.log('res from fetch img : ', res);
 
       if (!res.ok) {
@@ -310,6 +311,7 @@ const FillByYourSelf = ({ navigation }) => {
       const payload = {
         data: {
           Generated_Passcode: passcodeData,
+          L2_Approval_Status: 'APPROVED',
         },
       };
 
@@ -323,41 +325,33 @@ const FillByYourSelf = ({ navigation }) => {
           'Content-Type': 'application/json',
         },
       });
-      console.log('Posting to Zoho....');
+
       if (response1.ok) {
         console.log('Code posted successfully to Zoho.');
-        console.log('Response for the code is:', response1);
+        const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${approvalToVisitorID.current}/Generated_QR_Code/upload`;
+        console.log(url);
+        const response = await fetch(url, {
+          method: 'POST',
+          body: postData,
+          headers: {
+            Authorization: `Zoho-oauthtoken ${accessToken}`,
+            'Cache-Control': 'no-cache', // Prevent caching
+            Pragma: 'no-cache', // Prevent caching in older HTTP/1.0 proxies
+            Expires: '0',
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        if (response.ok) {
+          console.log('Image uploaded successfully to Zoho.', response);
+          return;
+        } else {
+          console.log('Failed to upload image to Zoho: ', response.status);
+          return;
+        }
       } else {
-        console.log(
-          'Failed to post code to Zoho:',
-          response1.status,
-          response1.statusText,
-        );
+        console.log('Failed to post code to Zoho:', response1.status, response1.statusText);
       }
 
-      // POST request to upload image to Zoho
-      const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${approvalToVisitorID.current}/Generated_QR_Code/upload`;
-      console.log(url);
-      const response = await fetch(url, {
-        method: 'POST',
-        body: postData,
-        headers: {
-          Authorization: `Zoho-oauthtoken ${accessToken}`,
-          'Cache-Control': 'no-cache', // Prevent caching
-          Pragma: 'no-cache', // Prevent caching in older HTTP/1.0 proxies
-          Expires: '0',
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      console.log('Posting image to Zoho....');
-
-      if (response.ok) {
-        console.log('Image uploaded successfully to Zoho.', response);
-        return;
-      } else {
-        console.log('Failed to upload image to Zoho: ', response.status);
-        return;
-      }
     } catch (error) {
       console.error('Error capturing and uploading QR code:', error);
     }
@@ -387,6 +381,8 @@ const FillByYourSelf = ({ navigation }) => {
       break;
     }
 
+    generateQR(generatedPasscode);
+
     const payload = {
       data: {
         Passcode: generatedPasscode,
@@ -405,8 +401,6 @@ const FillByYourSelf = ({ navigation }) => {
 
     const responseData = await passcodeResponse.json();
     console.log('response of posting passcode to zoho : ', responseData);
-
-    await generateQR(generatedPasscode);
     return;
   };
 
@@ -500,15 +494,14 @@ const FillByYourSelf = ({ navigation }) => {
     };
 
     console.log('formData...: ', formData);
-    console.log('veh::::: ', formData.data.Vehicle_Information);
+
+    console.log("vehicles :  ", formData.data.Vehicle_Information);
+
+
 
     if (loggedUser.role === 'L2') {
       if (
-        (selectedHO === 'Home' &&
-          (loggedUser.deptIds.includes('3318254000027832015') ||
-            loggedUser.deptIds.includes('3318254000031368009'))) ||
-        selectedHO === 'Office'
-      ) {
+        (selectedHO === 'Home' && (loggedUser.deptIds.includes('3318254000027832015') || loggedUser.deptIds.includes('3318254000031368009'))) || selectedHO === 'Office') {
         console.log('just before changing the L2 Approval status');
         formData.data.L2_Approval_Status = 'APPROVED';
         console.log(
@@ -519,12 +512,14 @@ const FillByYourSelf = ({ navigation }) => {
     }
 
     try {
+
       const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Approval_to_Visitor`;
       console.log('url is :::::', url);
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           Authorization: `Zoho-oauthtoken ${getAccessToken()}`,
+
         },
         body: JSON.stringify(formData),
       });
@@ -533,7 +528,7 @@ const FillByYourSelf = ({ navigation }) => {
         res.data.ID,
         'Approval_to_Visitor_Report',
       );
-      console.log('', photoUploadRes);
+      console.log('photo upload response : ', photoUploadRes);
       return res;
     } catch (error) {
       Alert.alert('Error', 'Something went wrong');
@@ -804,6 +799,7 @@ const FillByYourSelf = ({ navigation }) => {
     }
     setErrType(tempErrType);
 
+
     vehicles.forEach((vehicle, index) => {
       const vehicleNumber = vehicle.Vehicle_Number;
       if (
@@ -840,7 +836,6 @@ const FillByYourSelf = ({ navigation }) => {
     if (validateForm()) {
       setIsSubmitted(true);
       let office_id;
-
       if (selectedHO === 'Home') {
         office_id = '3318254000027832015';
         if (loggedUser.testResident) {
@@ -861,16 +856,12 @@ const FillByYourSelf = ({ navigation }) => {
         console.log('responseFromVisitorDetails', responseFromVisitorDetails);
         if (loggedUser.role === 'L2') {
           await passcodeGenerator();
-          setIsSubmitted(false);
-          navigation.navigate('Invite');
-        } else if (loggedUser.role === 'L1') {
-          setIsSubmitted(false);
-          navigation.navigate('Invite');
         }
+        setIsSubmitted(false);
+        navigation.navigate('Invite');
       } catch (err) {
         Alert.alert(err);
       }
-      // Add form submission logic here
     }
   };
 
@@ -1332,7 +1323,9 @@ const FillByYourSelf = ({ navigation }) => {
                 ) : null}
                 <View style={styles.namecontainer}>
                   <Text style={styles.label}>
-                    Select Gender <Text style={{ color: 'red' }}>*</Text>
+
+                    Select Gender <Text style={{color: 'red'}}>*</Text>
+
                   </Text>
                   <View style={styles.radioButtonContainer}>
                     {options.map(option => {

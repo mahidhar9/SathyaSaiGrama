@@ -82,6 +82,9 @@ const ViewDetails = ({ navigation, route }) => {
     setL2DeniedDataFetched,
     setL2ApproveDataFetched,
     setL2PendingDataFetched,
+    L2DeniedDataFetched,
+    L2ApproveDataFetched,
+    L2PendingDataFetched
   } = useContext(UserContext);
   const token = accessToken;
   const [loading, setLoading] = useState(true);
@@ -139,7 +142,7 @@ const ViewDetails = ({ navigation, route }) => {
   }, []);
 
 
-  const generateQR = async (passcodeData) => {
+  const generateQR = async (passcodeData, status) => {
     try {
       const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${user.Referrer_App_User_lookup.Name_field}&&passcode=${passcodeData}&&date=${user.Date_of_Visit}&&key=${SECRET_KEY}`;
       const res = await fetch(qrUrl);
@@ -197,44 +200,59 @@ const ViewDetails = ({ navigation, route }) => {
           'Content-Type': 'application/json',
         },
       });
-      console.log('Posting to Zoho....');
+
+      const updateRes = await response1.json();
       if (response1.ok) {
-        console.log('Code posted successfully to Zoho.');
-        console.log('Response for the code is:', response1);
+        if (updateRes.data && updateRes.code === 3000) {
+          if (status === 'PENDING APPROVAL') {
+            setL2PendingDataFetched(false);
+            setL2ApproveDataFetched(false);
+          } else if (status === 'DENIED') {
+            setL2DeniedDataFetched(false);
+            setL2ApproveDataFetched(false);
+          }
+          const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Generated_QR_Code/upload`;
+          const response = await fetch(url, {
+            method: 'POST',
+            body: postData,
+            headers: {
+              Authorization: `Zoho-oauthtoken ${accessToken}`,
+              'Cache-Control': 'no-cache', // Prevent caching
+              Pragma: 'no-cache', // Prevent caching in older HTTP/1.0 proxies
+              Expires: '0',
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+          if (response.ok) {
+            console.log('Image uploaded successfully to Zoho.', response);
+            return;
+          } else {
+            console.log('Failed to upload qr code image to Zoho: ', response.status,);
+            return;
+          }
+        }
+        else if (updateRes.error[0].alert_message[0] === "L2 is already approved." || updateRes.error[0].alert_message[0] === "Record cannot be edited after L2 Approved") {
+          setL2approvedalreadydialogVisible(true);
+          setapprovingLoading(false);
+          setErrorMessage(updateRes.error[0].alert_message[0]);
+        }
+        else if (updateRes.error[0].alert_message[0] === "You cannot approve the L1 Denied requests") {
+          setDialogVisible(true);
+          setapprovingLoading(false);
+        }
+        else {
+          Alert.alert('Error in approving: ', updateRes.code);
+        }
       } else {
         console.log('Failed to post code to Zoho:', response1.status, response1.statusText);
       }
-
-      // POST request to upload image to Zoho
-      const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Generated_QR_Code/upload`;
-      console.log(url);
-      const response = await fetch(url, {
-        method: 'POST',
-        body: postData,
-        headers: {
-          Authorization: `Zoho-oauthtoken ${accessToken}`,
-          'Cache-Control': 'no-cache', // Prevent caching
-          Pragma: 'no-cache', // Prevent caching in older HTTP/1.0 proxies
-          Expires: '0',
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      console.log('Posting image to Zoho....');
-
-      if (response.ok) {
-        console.log('Image uploaded successfully to Zoho.', response);
-        return;
-      } else {
-        console.log('Failed to upload image to Zoho: ', response.status,);
-        return;
-      }
     } catch (error) {
-      console.error('Error capturing and uploading QR code:', error);
+      console.error('Error in generateQR function:', error);
     }
   };
 
 
-  const passcodeGenerator = async () => {
+  const passcodeGenerator = async (status) => {
     let generatedPasscode;
     while (true) {
       const newCode = Math.floor(100000 + Math.random() * (999999 - 100001 + 1),).toString();
@@ -256,6 +274,8 @@ const ViewDetails = ({ navigation, route }) => {
       break;
     }
 
+    generateQR(generatedPasscode, status);
+
     const payload = {
       data: {
         Passcode: generatedPasscode,
@@ -274,13 +294,13 @@ const ViewDetails = ({ navigation, route }) => {
 
     const responseData = await passcodeResponse.json();
     console.log("response of posting passcode to zoho : ", responseData);
-
-    await generateQR(generatedPasscode);
     return;
   };
 
   const onApprove = async () => {
+
     setapprovingLoading(true);
+
     const status = user.L2_Approval_Status;
 
     const updateField = {
@@ -297,32 +317,52 @@ const ViewDetails = ({ navigation, route }) => {
       updateData,
       accessToken,
     );
-    console.log('Data is updated: ', response);
-    if (response.data && response.code === 3000) {
+
+    if (response.code === 3000) {
       if (status === 'PENDING APPROVAL') {
-        setL2PendingDataFetched(false);
-        setL2ApproveDataFetched(false);
+        setL2PendingDataFetched(!L2PendingDataFetched);
+        setL2ApproveDataFetched(!L2ApproveDataFetched);
       } else if (status === 'DENIED') {
-        setL2DeniedDataFetched(false);
-        setL2ApproveDataFetched(false);
+        setL2DeniedDataFetched(!L2DeniedDataFetched);
+        setL2ApproveDataFetched(!L2ApproveDataFetched);
       }
-      await passcodeGenerator();
-      setapprovingLoading(false);
-      Alert.alert('Visitor Approved');
+      setapprovingLoading(false)
       navigation.navigate('L2Approved');
+      Alert.alert('Visitor Approved');
+      await passcodeGenerator();
+    } else {
+      Alert.alert('Error in approving');
     }
-    else if (response.error[0].alert_message[0] === "L2 is already approved." || response.error[0].alert_message[0] === "Record cannot be edited after L2 Approved") {
-      setL2approvedalreadydialogVisible(true);
-      setapprovingLoading(false);
-      setErrorMessage(response.error[0].alert_message[0]);
-    }
-    else if (response.error[0].alert_message[0] === "You cannot approve the L1 Denied requests") {
-      setDialogVisible(true);
-      setapprovingLoading(false);
-    }
-    else {
-      Alert.alert('Error in approving: ', response.code);
-    }
+
+
+    // if (status === 'PENDING APPROVAL') {
+    //   setL2PendingDataFetched(false);
+    //   setL2ApproveDataFetched(false);
+    // } else if (status === 'DENIED') {
+    //   setL2DeniedDataFetched(false);
+    //   setL2ApproveDataFetched(false);
+    // }
+    // await passcodeGenerator();
+    // setapprovingLoading(false);
+    // Alert.alert('Visitor Approved');
+    // now = new Date();
+    // currentTime = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+    // console.log(`+++++++++++++++++++++++============= end Current Time: ${currentTime}`);
+    // navigation.navigate('L2Approved');
+    // }
+    // else if (response.error[0].alert_message[0] === "L2 is already approved." || response.error[0].alert_message[0] === "Record cannot be edited after L2 Approved") {
+    //   setL2approvedalreadydialogVisible(true);
+    //   setapprovingLoading(false);
+    //   setErrorMessage(response.error[0].alert_message[0]);
+    // }
+    // else if (response.error[0].alert_message[0] === "You cannot approve the L1 Denied requests") {
+    //   setDialogVisible(true);
+    //   setapprovingLoading(false);
+    // }
+    // else {
+    //   Alert.alert('Error in approving: ', response.code);
+    // }
   };
 
   const onReject = async () => {

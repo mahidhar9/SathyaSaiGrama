@@ -36,7 +36,7 @@ const Denied = ({ navigation }) => {
     if (result.data === undefined) {
       setDenieds(null);
       setDeniedsData(null);
-      setDeniedDataFetched(false);
+      //setDeniedDataFetched(false);
       setLoading(false);
     }
     else {
@@ -44,15 +44,19 @@ const Denied = ({ navigation }) => {
       setDenieds(sortedData);
       setDeniedsData(sortedData);
       setLoading(false);
-      setDeniedDataFetched(true);
+      //setDeniedDataFetched(true);
     }
   };
 
 
   useEffect(() => {
-    if (!deniedDataFetched) {
-      fetchData();
+
+    const fetchLatest = async () => {
+      await onRefresh();
     }
+
+    fetchLatest();
+    
   }, [deniedDataFetched]);
 
   const onRefresh = async () => {
