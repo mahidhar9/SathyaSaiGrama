@@ -1,26 +1,13 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import Register from '../../src/screens/Register';
-import UserContext from '../../context/UserContext';
+import Register from '../../../src/screens/Register';
+import UserContext from '../../../context/UserContext';
 import { Alert } from 'react-native';
 
 jest.mock('react-native/Libraries/Alert/Alert', () => ({
   alert: jest.fn(),
 }));
 
-jest.mock('../../src/auth/firebaseConfig', () => ({
-  createUserWithEmailAndPassword: jest.fn().mockResolvedValue({}),
-  sendEmailVerification: jest.fn().mockResolvedValue({}),
-}));
-
-jest.mock('../../src/components/ApiRequest.js', () => ({
-  getDataWithString: jest.fn().mockResolvedValue({
-    data: [],
-  }),
-  isResident: jest.fn().mockResolvedValue(false),
-  isEmployee: jest.fn().mockResolvedValue(false),
-  isTestResident: jest.fn().mockResolvedValue(false),
-}));
 
 const mockNavigation = { navigate: jest.fn() };
 
@@ -45,28 +32,33 @@ const mockUserContextValue = {
 };
 
 describe('Register Screen', () => {
-  it("shows an error message when the email isn't registered", async () => {
-    const { getByText, getByPlaceholderText } = render(
+  it('shows an error message when the email is not registered as a resident or employee', async () => {
+    const { getByPlaceholderText, getByText } = render(
       <UserContext.Provider value={mockUserContextValue}>
         <Register navigation={mockNavigation} />
       </UserContext.Provider>
     );
 
-    // Enter an invalid email
-    fireEvent.changeText(getByPlaceholderText('Email Address'), 'invalid@example.com');
-    fireEvent.changeText(getByPlaceholderText('Name'), 'Test User');
-    fireEvent.changeText(getByPlaceholderText('Password'), 'password123');
-    fireEvent.changeText(getByPlaceholderText('Confirm Password'), 'password123');
+    // Step 1: Enter a name in the "Name" field
+    fireEvent.changeText(getByPlaceholderText('Name'), 'Teja');
 
-    // Press the register button
-    const registerButton = getByText('Register');
-    fireEvent.press(registerButton);
+    // Step 2: Enter a valid email in the "Email Address" field
+    fireEvent.changeText(getByPlaceholderText('Email Address'), 'saitejads2000@gmail.com');
 
-    // Check for the alert message
+    // Step 3: Enter a valid password in the "Password" field
+    fireEvent.changeText(getByPlaceholderText('Password'), '123456');
+
+    // Step 4: Enter the same password in the "Confirm Password" field
+    fireEvent.changeText(getByPlaceholderText('Confirm Password'), '123456');
+
+    // Step 5: Click on the "Register" button
+    fireEvent.press(getByText('Register'));
+
+    // Step 6: Verify that the error message is displayed
     await waitFor(() => {
       expect(Alert.alert).toHaveBeenCalledWith(
         'This email is not registered as a resident or employee. Please contact Admin'
       );
-    });
-  });
+    }, { timeout: 10000 });
+  }, 20000);
 });

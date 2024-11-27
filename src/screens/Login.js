@@ -69,7 +69,7 @@ const Login = ({navigation}) => {
     hasSpecialChar: false,
     isValidLength: false,
   });
-
+console.log('This is Starting of Login.js')
   // const validatePassword = (text) => {
   //   const hasNumber = /\d/.test(text);
   //   const hasUpperCase = /[A-Z]/.test(text);
@@ -284,7 +284,7 @@ const Login = ({navigation}) => {
           Expires: '0',
         },
       });
-
+        
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`HTTP error! status: ${response.status}, ${errorText}`);
@@ -293,7 +293,6 @@ const Login = ({navigation}) => {
       const buffer = await response.arrayBuffer();
       const base64Image = encode(buffer); // Use the encode function from base64-arraybuffer
       const dataUrl = `data:image/jpeg;base64,${base64Image}`;
-
       return dataUrl;
     } catch (error) {
       console.error('Error fetching image:', error);
@@ -337,7 +336,7 @@ const Login = ({navigation}) => {
 
             const reqUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${res.data[0].ID}/Profile_Photo/download`;
             const profileImgUrl = await getProfileImage(reqUrl);
-            if (profileImgUrl.length > 300) {
+            if (profileImgUrl?.length && profileImgUrl.length > 300 ) {
               setProfileImage(profileImgUrl);
               setCurrentUser({
                 id: res.data[0].ID,
@@ -391,8 +390,9 @@ const Login = ({navigation}) => {
             );
           else if (error.code === 'auth/invalid-email') {
             Alert.alert('That email address is invalid!');
-          } else {
-            setDialogVisible(true);
+          } else if(error.code === 'auth/wrong-password') {
+            Alert.alert('Password is incorrect!');
+            
           }
           console.log('Error in auth: ', error);
         }
@@ -413,8 +413,8 @@ const Login = ({navigation}) => {
   return (
     <>
       {loading ? dotsBlinkingLoaderEllipsis?(<DotsBlinkingLoaderEllipsis />): (
-        <ActivityIndicator
-          size="large"
+        <ActivityIndicator         
+        size="large"
           color="#752A26"
           style={styles.loadingContainer}
         />

@@ -2,12 +2,22 @@ import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import ForgotPassword from '../../../src/screens/ForgotPassword';
 import UserContext from '../../../context/UserContext';
-import { sendPasswordResetEmail } from 'firebase/auth';
+import { sendPasswordResetEmail, fetchSignInMethodsForEmail } from 'firebase/auth';
 import { auth } from '../../../src/auth/firebaseConfig';
-
+import { openInbox } from 'react-native-email-link';
 
 jest.mock('firebase/auth', () => ({
   sendPasswordResetEmail: jest.fn().mockResolvedValue({}),
+  fetchSignInMethodsForEmail: jest.fn().mockResolvedValue(['password']),
+}));
+
+jest.mock('react-native-email-link', () => jest.fn());
+
+jest.mock('../../../src/auth/firebaseConfig', () => ({
+  auth: {
+    sendPasswordResetEmail: jest.fn(),
+  },
+  getReactNativePersistence: jest.fn(),
 }));
 
 const mockNavigation = { navigate: jest.fn() };
@@ -39,18 +49,18 @@ test('Verify that the user can access the "Forgot Password" functionality', asyn
     </UserContext.Provider>
   );
 
-  // Step 2: Enter a valid email address
+  // Step 1: Enter a valid email address
   fireEvent.changeText(getByPlaceholderText('Email for Password Reset'), 'saitejads2000@gmail.com');
 
-  // Step 3: Submit the request
+  // Step 2: Submit the request
   fireEvent.press(getByText('Send'));
 
-  // Step 4: Verify the user receives a password reset link via email
+  // Step 3: Verify the user receives a password reset link via email
   await waitFor(() => {
     expect(sendPasswordResetEmail).toHaveBeenCalledWith(auth, 'saitejads2000@gmail.com');
   });
 
-  // Verify the success message is displayed
+  // Step 4: Verify the success message is displayed
   await waitFor(() => {
     expect(getByText('A password reset link is sent to your registered email')).toBeTruthy();
   });

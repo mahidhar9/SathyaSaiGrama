@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { Platform } from 'react-native'; 
-import Login from '../../src/screens/Login';
-import Register from '../../src/screens/Register';
-import UserContext from '../../context/UserContext'; 
-import { auth } from '../../src/auth/firebaseConfig';
+import Login from '../../../src/screens/Login';
+import Register from '../../../src/screens/Register';
+import UserContext from '../../../context/UserContext'; 
+import { auth } from '../../../src/auth/firebaseConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 

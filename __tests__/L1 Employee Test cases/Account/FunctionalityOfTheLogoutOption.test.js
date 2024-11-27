@@ -3,13 +3,13 @@ import { render, fireEvent } from '@testing-library/react-native';
 import Profile from '../../../src/screens/Profile';
 import UserContext from '../../../context/UserContext';
 import { AuthContext } from '../../../src/auth/AuthProvider';
-
 const mockNavigation = { navigate: jest.fn() };
 
 // Mock required libraries and dependencies
 jest.mock('react-native-permissions', () => jest.fn());
 jest.mock('react-native-image-picker', () => jest.fn());
 jest.mock('react-native-toast-message', () => jest.fn());
+jest.mock('react-native-safe-area-context',()=>jest.fn())
 jest.mock('react-native-shimmer-placeholder', () => ({
   createShimmerPlaceholder: jest.fn(() => (props) => jest.fn()),
 }));

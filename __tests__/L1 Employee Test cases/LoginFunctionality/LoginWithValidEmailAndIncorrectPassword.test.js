@@ -1,17 +1,11 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import UserContext from '../../../context/UserContext';
 import Login from '../../../src/screens/Login';
+import UserContext from '../../../context/UserContext';
 import { Alert } from 'react-native';
-import { encode } from 'base64-arraybuffer';
 
-// process.env.BASE_APP_URL = "https://example.com";
 jest.mock('react-native/Libraries/Alert/Alert', () => ({
   alert: jest.fn(),
-}));
-
-jest.mock('base64-arraybuffer', () => ({
-  encode: jest.fn().mockReturnValue('mockBase64Image'),
 }));
 
 jest.mock('../../../src/components/ApiRequest', () => ({
@@ -27,31 +21,23 @@ jest.mock('../../../src/components/ApiRequest', () => ({
   }),
 }));
 
-
-
-jest.spyOn(global, 'fetch').mockResolvedValue({
-  ok: true,
-  arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(8)),
-json: jest.fn().mockResolvedValue({
-    data: {
-      Device_Tokens: 'mockDeviceToken123',
-    },
-  }),
-});
-
-
 jest.mock('firebase/auth', () => ({
   getReactNativePersistence: jest.fn(),
   initializeAuth: jest.fn(() => ({
     currentUser: null,
   })),
-  signInWithEmailAndPassword: jest.fn().mockResolvedValue({
-    user: {
-      emailVerified: true,
-      email: 'saitejads2000@gmail.com',
-    },
+  signInWithEmailAndPassword: jest.fn().mockRejectedValue({
+    code: 'auth/wrong-password',
   }),
 }));
+beforeEach(() => {
+  jest.useFakeTimers();
+});
+
+afterEach(() => {
+  jest.clearAllTimers();
+  jest.restoreAllMocks();
+});
 
 const mockNavigation = { navigate: jest.fn() };
 
@@ -76,29 +62,21 @@ const mockUserContextValue = {
 };
 
 describe('Login', () => {
-  beforeEach(() => {
-    jest.useFakeTimers();
-  });
-  
-  afterEach(() => {
-    jest.clearAllTimers();
-    jest.restoreAllMocks();
-  });
-  
-  test('Verify that the user can log in with valid email and password', async () => {
+  test('Verify that an error message is displayed for email and  invalid password', async () => {
     const { getByPlaceholderText, getByText } = render(
-        <UserContext.Provider value={mockUserContextValue}>
-          <Login navigation={mockNavigation} />
-        </UserContext.Provider>
+      <UserContext.Provider value={mockUserContextValue}>
+        <Login navigation={mockNavigation} />
+      </UserContext.Provider>
     );
 
-    fireEvent.changeText(getByPlaceholderText('Email Address'), 'saitejads2000@gmail.com');
-    fireEvent.changeText(getByPlaceholderText('Password'), 'password');
+    fireEvent.changeText(getByPlaceholderText('Email Address'), '19211314310mca2@gmail.com');
+    fireEvent.changeText(getByPlaceholderText('Password'), '12345678');
     fireEvent.press(getByText('Login'));
 
     await waitFor(() => {
-      expect(mockNavigation.navigate).toHaveBeenCalledWith('FooterTab');
+      expect(Alert.alert).toHaveBeenCalledWith(
+        'Password is incorrect!'
+      );
     }, { timeout: 10000 });
-   
   }, 20000);
 });

@@ -1,15 +1,14 @@
 import React from 'react';
-import { render, fireEvent, waitFor, cleanup } from '@testing-library/react-native';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Profile from '../../../src/screens/Profile';
+import Invite from '../../../src/screens/Invite';
+import Home from '../../../src/screens/Home';
 import MyApprovals from '../../../src/screens/MyApprovals';
-import FooterTab from '../../../navigation/tab-navigation/FooterTab';
+import Account from '../../../src/screens/Account';
 import UserContext from '../../../context/UserContext';
 
 const Tab = createBottomTabNavigator();
-
-jest.mock('../../../navigation/tab-navigation/FooterTab', () => (props) => <div {...props} />);
 
 const mockUserContextValue = {
   userType: 'admin',
@@ -34,35 +33,35 @@ const mockUserContextValue = {
 const AppNavigator = () => (
   <UserContext.Provider value={mockUserContextValue}>
     <NavigationContainer>
-      <Tab.Navigator tabBar={(props) => <FooterTab {...props} />}>
-        <Tab.Screen name="Account" component={Profile} />
+      <Tab.Navigator>
+        <Tab.Screen name="Home" component={Home} />
         <Tab.Screen name="My Approvals" component={MyApprovals} />
+        <Tab.Screen name="Account" component={Account} />
+        <Tab.Screen name="Invite" component={Invite} />
       </Tab.Navigator>
     </NavigationContainer>
   </UserContext.Provider>
 );
 
-afterEach(() => {
-  cleanup();
-  jest.clearAllMocks();
-});
-
-test('Verify that the user can navigate between tabs', async () => {
+test('Verify that the "Office" button is visible and clickable on the Invite page', async () => {
   const { getByText } = render(<AppNavigator />);
 
-  // Step 1: Navigate to the "Account" tab
-  fireEvent.press(getByText('Account'));
+  // Step 1: Navigate to the "Invite" page
+  fireEvent.press(getByText('Invite'));
 
-  // Step 2: Verify the transition to the "Account" page
+  // Step 2: Click on the "Visitor fills the form" button
+  fireEvent.press(getByText('Visitor fills the form'));
+
+  // Step 3: Verify the "Office" button is displayed and clickable
   await waitFor(() => {
-    expect(getByText('Account Page')).toBeTruthy();
+    expect(getByText('Office')).toBeTruthy();
   });
 
-  // Step 3: Navigate to the "My Approvals" tab
-  fireEvent.press(getByText('My Approvals'));
+  // Step 4: Click on the "Office" button
+  fireEvent.press(getByText('Office'));
 
-  // Step 4: Verify the transition to the "My Approvals" page
+  // Verify the expected behavior after clicking the "Office" button
   await waitFor(() => {
-    expect(getByText('My Approvals Page')).toBeTruthy();
+    expect(getByText('Share link with the visitor')).toBeTruthy();
   });
 });

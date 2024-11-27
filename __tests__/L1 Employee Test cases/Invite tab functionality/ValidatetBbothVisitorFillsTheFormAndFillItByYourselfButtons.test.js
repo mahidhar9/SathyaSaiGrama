@@ -1,15 +1,14 @@
 import React from 'react';
-import { render, fireEvent, waitFor, cleanup } from '@testing-library/react-native';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Profile from '../../../src/screens/Profile';
+import Invite from '../../../src/screens/Invite';
+import Home from '../../../src/screens/Home';
 import MyApprovals from '../../../src/screens/MyApprovals';
-import FooterTab from '../../../navigation/tab-navigation/FooterTab';
+import Account from '../../../src/screens/Account';
 import UserContext from '../../../context/UserContext';
 
 const Tab = createBottomTabNavigator();
-
-jest.mock('../../../navigation/tab-navigation/FooterTab', () => (props) => <div {...props} />);
 
 const mockUserContextValue = {
   userType: 'admin',
@@ -34,35 +33,36 @@ const mockUserContextValue = {
 const AppNavigator = () => (
   <UserContext.Provider value={mockUserContextValue}>
     <NavigationContainer>
-      <Tab.Navigator tabBar={(props) => <FooterTab {...props} />}>
-        <Tab.Screen name="Account" component={Profile} />
+      <Tab.Navigator>
+        <Tab.Screen name="Home" component={Home} />
         <Tab.Screen name="My Approvals" component={MyApprovals} />
+        <Tab.Screen name="Account" component={Account} />
+        <Tab.Screen name="Invite" component={Invite} />
       </Tab.Navigator>
     </NavigationContainer>
   </UserContext.Provider>
 );
 
-afterEach(() => {
-  cleanup();
-  jest.clearAllMocks();
-});
-
-test('Verify that the user can navigate between tabs', async () => {
+test('Verify that both "Visitor fills the form" and "Fill it by yourself!" buttons respond properly without delay, double-click effects, or navigation issues', async () => {
   const { getByText } = render(<AppNavigator />);
 
-  // Step 1: Navigate to the "Account" tab
-  fireEvent.press(getByText('Account'));
+  // Step 1: Navigate to the "Invite" page
+  fireEvent.press(getByText('Invite'));
 
-  // Step 2: Verify the transition to the "Account" page
+  // Step 2: Verify the transition to the "Invite" page
   await waitFor(() => {
-    expect(getByText('Account Page')).toBeTruthy();
+    expect(getByText('Invite')).toBeTruthy();
   });
 
-  // Step 3: Navigate to the "My Approvals" tab
-  fireEvent.press(getByText('My Approvals'));
+  // Step 3: Tap on both the "Visitor fills the form" and "Fill it by yourself!" buttons multiple times rapidly
+  for (let i = 0; i < 5; i++) {
+    fireEvent.press(getByText('Visitor fills the form'));
+    fireEvent.press(getByText('Fill it by yourself!'));
+  }
 
-  // Step 4: Verify the transition to the "My Approvals" page
+  // Step 4: Observe any delays or improper behavior in navigation or loading
   await waitFor(() => {
-    expect(getByText('My Approvals Page')).toBeTruthy();
+    expect(getByText('Share link with the visitor')).toBeTruthy();
+    expect(getByText('Fill it by yourself!')).toBeTruthy();
   });
 });
