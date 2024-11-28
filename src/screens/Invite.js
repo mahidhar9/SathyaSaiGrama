@@ -18,7 +18,7 @@ import {AuthContext} from '../auth/AuthProvider';
 import {BASE_APP_URL, APP_OWNER_NAME, APP_LINK_NAME, YOURLS_KEY} from '@env';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { Platform } from 'react-native';
 const Invite = ({navigation}) => {
   const {user} = useContext(AuthContext);
 

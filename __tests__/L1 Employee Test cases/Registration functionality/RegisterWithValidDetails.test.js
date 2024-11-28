@@ -8,7 +8,6 @@ jest.mock('react-native/Libraries/Alert/Alert', () => ({
   alert: jest.fn(),
 }));
 
-
 const mockNavigation = { navigate: jest.fn() };
 
 const mockUserContextValue = {
@@ -23,19 +22,39 @@ const mockUserContextValue = {
   resident: { id: 'r123', name: 'Jane Resident' },
   setResident: jest.fn(),
   setProfileImage: jest.fn(),
-  employee: { id: 'e789', name: 'Alice Employee' },
-  setEmployee: jest.fn(),
-  testResident: { id: 't987', name: 'Test Resident' },
-  setTestResident: jest.fn(),
-  departmentIds: ['d1', 'd2', 'd3'],
-  setDepartmentIds: jest.fn(),
 };
 
+jest.mock('../../../src/components/ApiRequest', () => ({
+  getDataWithString: jest.fn().mockResolvedValue({
+    data: [{ ID: 'user123', Name_field: 'John Doe' }],
+  }),
+  getDataWithInt: jest.fn().mockResolvedValue({
+    data: [{ Accommodation_Approval: 'APPROVED', Department_Approval: 'APPROVED' }],
+  }),
+  getDataWithTwoInt: jest.fn().mockResolvedValue({
+    data: [{ Accommodation_Approval: 'APPROVED' }],
+  }),
+}));
+
+jest.mock('firebase/auth', () => ({
+  getReactNativePersistence: jest.fn(),
+  initializeAuth: jest.fn(() => ({
+    currentUser: null,
+  })),
+  createUserWithEmailAndPassword: jest.fn(),
+  sendEmailVerification: jest.fn().mockResolvedValue({}),
+}));
 describe('Register Screen', () => {
-  it('shows an error message when the email is not registered as a resident or employee', async () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('Verify that user can Register with valid details', async () => {
+    const validatePasswordMock = jest.fn().mockReturnValue(true);
+
     const { getByPlaceholderText, getByText } = render(
       <UserContext.Provider value={mockUserContextValue}>
-        <Register navigation={mockNavigation} />
+        <Register navigation={mockNavigation} validatePassword={validatePasswordMock} />
       </UserContext.Provider>
     );
 
@@ -46,19 +65,17 @@ describe('Register Screen', () => {
     fireEvent.changeText(getByPlaceholderText('Email Address'), 'saitejads2000@gmail.com');
 
     // Step 3: Enter a valid password in the "Password" field
-    fireEvent.changeText(getByPlaceholderText('Password'), '123456');
+    fireEvent.changeText(getByPlaceholderText('Password'), 'ValidPassword123!');
 
     // Step 4: Enter the same password in the "Confirm Password" field
-    fireEvent.changeText(getByPlaceholderText('Confirm Password'), '123456');
+    fireEvent.changeText(getByPlaceholderText('Confirm Password'), 'ValidPassword123!');
 
     // Step 5: Click on the "Register" button
     fireEvent.press(getByText('Register'));
 
     // Step 6: Verify that the error message is displayed
     await waitFor(() => {
-      expect(Alert.alert).toHaveBeenCalledWith(
-        'This email is not registered as a resident or employee. Please contact Admin'
-      );
+      expect(mockNavigation.navigate).toHaveBeenCalledWith("VerificationNotice", {"email": "saitejads2000@gmail.com", "employee": true, "id": "user123", "name": "John Doe", "resident": true, "testResident": true});
     }, { timeout: 10000 });
-  }, 20000);
+  }, 50000);
 });

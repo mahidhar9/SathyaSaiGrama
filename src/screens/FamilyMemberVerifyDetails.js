@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View,TouchableOpacity,Image } from 'react-native'
 import React from 'react'
-
+import {Platform} from 'react-native'
 const FamilyMemberVerifyDetails = ({navigation,route}) => {
   const familymember = route.params?.memberDetails
   return (

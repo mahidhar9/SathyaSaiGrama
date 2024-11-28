@@ -19,7 +19,7 @@ import {
 } from '../components/ApiRequest';
 import UserContext from '../../context/UserContext';
 import PhoneInput from 'react-native-phone-number-input';
-
+import {Platform} from 'react-native';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';

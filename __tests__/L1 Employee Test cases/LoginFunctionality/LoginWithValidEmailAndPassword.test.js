@@ -5,7 +5,6 @@ import Login from '../../../src/screens/Login';
 import { Alert } from 'react-native';
 import { encode } from 'base64-arraybuffer';
 
-// process.env.BASE_APP_URL = "https://example.com";
 jest.mock('react-native/Libraries/Alert/Alert', () => ({
   alert: jest.fn(),
 }));
@@ -84,12 +83,11 @@ describe('Login', () => {
     jest.clearAllTimers();
     jest.restoreAllMocks();
   });
-  
   test('Verify that the user can log in with valid email and password', async () => {
     const { getByPlaceholderText, getByText } = render(
-        <UserContext.Provider value={mockUserContextValue}>
-          <Login navigation={mockNavigation} />
-        </UserContext.Provider>
+      <UserContext.Provider value={mockUserContextValue}>
+        <Login navigation={mockNavigation} />
+      </UserContext.Provider>
     );
 
     fireEvent.changeText(getByPlaceholderText('Email Address'), 'saitejads2000@gmail.com');

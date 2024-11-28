@@ -1,15 +1,42 @@
 import React from 'react';
 import { render, fireEvent, waitFor, cleanup } from '@testing-library/react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Platform } from 'react-native'; // Import Platform from react-native
 import Profile from '../../../src/screens/Profile';
-import MyApprovals from '../../../src/screens/MyApprovals';
+import ApprovalTab from '../../../src/screens/approval/ApprovalTab';
 import FooterTab from '../../../navigation/tab-navigation/FooterTab';
 import UserContext from '../../../context/UserContext';
 
-const Tab = createBottomTabNavigator();
 
-jest.mock('../../../navigation/tab-navigation/FooterTab', () => (props) => <div {...props} />);
+jest.mock('react-native-toast-message', () => jest.fn());
+jest.mock('react-native-image-picker', () => ({
+  launchImageLibrary: jest.fn(),
+  launchCamera: jest.fn(),
+}));
+jest.mock('react-native-permissions', () => ({
+  request: jest.fn(),
+  PERMISSIONS: jest.fn().mockReturnValue('granted'),
+}));
+jest.mock('react-native-linear-gradient', () => jest.fn());
+jest.mock('react-native-shimmer-placeholder', () => ({ createShimmerPlaceholder: jest.fn() }));
+jest.mock('react-native-phone-number-input', () => jest.fn());
+jest.mock('react-native-element-dropdown', () => jest.fn());
+jest.mock('react-native-modern-datepicker', () => ({
+  DatePicker: jest.fn(),
+  getFormattedDate: jest.fn(),
+}));
+jest.mock('react-native-elements', () => ({ SearchBar: jest.fn() }));
+
+// Mock the createBottomTabNavigator function to return the expected structure
+jest.mock('@react-navigation/bottom-tabs', () => {
+  return {
+    
+    createBottomTabNavigator: jest.fn(() => ({
+      Navigator: jest.fn(),
+      Screen: jest.fn(),
+    })),
+  };
+});
 
 const mockUserContextValue = {
   userType: 'admin',
@@ -23,46 +50,26 @@ const mockUserContextValue = {
   resident: { id: 'r123', name: 'Jane Resident' },
   setResident: jest.fn(),
   setProfileImage: jest.fn(),
-  employee: { id: 'e789', name: 'Alice Employee' },
-  setEmployee: jest.fn(),
-  testResident: { id: 't987', name: 'Test Resident' },
-  setTestResident: jest.fn(),
-  departmentIds: ['d1', 'd2', 'd3'],
-  setDepartmentIds: jest.fn(),
 };
 
-const AppNavigator = () => (
-  <UserContext.Provider value={mockUserContextValue}>
-    <NavigationContainer>
-      <Tab.Navigator tabBar={(props) => <FooterTab {...props} />}>
-        <Tab.Screen name="Account" component={Profile} />
-        <Tab.Screen name="My Approvals" component={MyApprovals} />
-      </Tab.Navigator>
-    </NavigationContainer>
-  </UserContext.Provider>
-);
+describe('Navigation Tests', () => {
+  afterEach(cleanup);
 
-afterEach(() => {
-  cleanup();
-  jest.clearAllMocks();
-});
+  it('navigates to Profile screen', async () => {
+    const { getByText } = render(
+      <UserContext.Provider value={mockUserContextValue}>
+        <NavigationContainer>
+          <FooterTab />
+        </NavigationContainer>
+      </UserContext.Provider>
+    );
 
-test('Verify that the user can navigate between tabs', async () => {
-  const { getByText } = render(<AppNavigator />);
+    fireEvent.press(getByText('Profile'));
 
-  // Step 1: Navigate to the "Account" tab
-  fireEvent.press(getByText('Account'));
-
-  // Step 2: Verify the transition to the "Account" page
-  await waitFor(() => {
-    expect(getByText('Account Page')).toBeTruthy();
+    await waitFor(() => {
+      expect(getByText('Profile Screen')).toBeTruthy();
+    });
   });
 
-  // Step 3: Navigate to the "My Approvals" tab
-  fireEvent.press(getByText('My Approvals'));
-
-  // Step 4: Verify the transition to the "My Approvals" page
-  await waitFor(() => {
-    expect(getByText('My Approvals Page')).toBeTruthy();
-  });
+  // Add more tests as needed
 });

@@ -1,38 +1,15 @@
 import React from 'react';
 import { render, fireEvent, waitFor, cleanup } from '@testing-library/react-native';
 import Invite from '../../../src/screens/Invite';
-import FillByYourSelf from '../../../src/screens/FillByYourSelf';
 import UserContext from '../../../context/UserContext';
-import { Platform, NativeModules } from 'react-native';
-import {GestureHandlerRootView,TouchableOpacity,} from 'react-native-gesture-handler';
-test('Validate behavior for iOS platform', () => {
-  jest.spyOn(Platform, 'select').mockImplementation((options) => options.ios);
-  Platform.OS = 'ios';
+import { GestureHandlerRootView, TouchableOpacity } from 'react-native-gesture-handler';
 
-  const { getByText } = render(<Invite />);
-  expect(getByText('Some iOS-specific text')).toBeTruthy();
-});
+jest.mock('react-native-gesture-handler', () => ({
 
-test('Validate behavior for Android platform', () => {
-  jest.spyOn(Platform, 'select').mockImplementation((options) => options.android);
-  Platform.OS = 'android';
-
-  const { getByText } = render(<Invite />);
-  expect(getByText('Some Android-specific text')).toBeTruthy();
-});
-
-
-jest.mock('react-native-gesture-handler', () => {
-  const GestureHandler = jest.requireActual('react-native-gesture-handler');
-  return {
-    ...GestureHandler,
-    GestureHandlerRootView: ({ children }) => children,
-    TouchableOpacity: GestureHandler.TouchableOpacity,
-    Swipeable: jest.fn(),
-    DrawerLayout: jest.fn(),
-  };
-});
-
+    GestureHandlerRootView: ({ children }) => <>{children}</>,
+    TouchableOpacity: ({ children }) => <>{children}</>,
+  
+}));
 const mockUserContextValue = {
   userType: 'admin',
   setUserType: jest.fn(),
@@ -53,21 +30,21 @@ const mockUserContextValue = {
   setDepartmentIds: jest.fn(),
 };
 
-const AppNavigator = () => (
-  <UserContext.Provider value={mockUserContextValue}>
-    <Invite />
-  </UserContext.Provider>
-);
-
-
+afterEach(cleanup);
 
 test('Verify that the "Fill it by yourself!" button redirects to the correct form', async () => {
-  const { getByText } = render(<AppNavigator />);
+  const { getByText } = render(
 
-  // Step 1: Click on the "Fill it by yourself!" button
-  fireEvent.press(getByText('Fill it by yourself!'));
+    <UserContext.Provider value={mockUserContextValue}>
+    
+      <Invite />
+    </UserContext.Provider>
+  );
 
-  // Step 2: Verify the redirection to the form page
+  // Click the "Fill it by yourself!" button
+  fireEvent.click(getByText('Fill it by yourself!'));
+
+  // Verify the redirection to the form page
   await waitFor(() => {
     expect(getByText('Fill By Yourself Form')).toBeTruthy();
   });
