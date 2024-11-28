@@ -50,6 +50,7 @@ function buildDeepLinkFromNotificationData(data) {
     return 'myapp://Profile';
   }
   if (navigationId === 'VerifyDetails') {
+    console.log('inside verify details deep link');
     const dataString = JSON.stringify(data);
     return `myapp://VerifyDetails?user=${dataString}&stringified=true`;
   }
@@ -57,6 +58,22 @@ function buildDeepLinkFromNotificationData(data) {
     const dataString = JSON.stringify(data);
     return `myapp://ViewDetails?user=${dataString}&stringified=true`;
   }
+  // if (navigationId === 'Approved') {
+  //   return `myapp://Approved`;
+  // }
+  // if (navigationId === 'L2Approved') {
+  //   return `myapp://L2Approved`;
+  // }
+  // if (navigationId === 'Denied') {
+  //   return `myapp://Denied`;
+  // }
+  // if (navigationId === 'L2Denied') {
+  //   return `myapp://L2Denied`;
+  // }
+
+  // if (navigationId === 'L2Pending') {
+  //   return `myapp://L2Pending`;
+  // }
   // const postId = data?.postId;
   // if (typeof postId === 'string') {
   //   return `myapp://post/${postId}`;
@@ -86,6 +103,12 @@ const linking = {
               ApprovalStack: {
                 screens: {
                   VerifyDetails: 'VerifyDetails',
+                  ApprovalTab: {
+                    screens: {
+                      Approved: 'Approved',
+                      Denied: 'Denied',
+                    },
+                  },
                 },
               },
             },
@@ -93,6 +116,13 @@ const linking = {
           L2ApprovalStack: {
             screens: {
               ViewDetails: 'ViewDetails',
+              L2ApprovalTab: {
+                screens: {
+                  L2Approved: 'L2Approved',
+                  L2Denied: 'L2Denied',
+                  L2Pending: 'L2Pending',
+                },
+              },
             },
           },
         },
@@ -186,7 +216,7 @@ const BaseRoute = () => {
   //     checkUserExist();
   //   }
   // }, []);
-  
+
   // console.log("Existed user in base route ", loggedUser)
 
   return (

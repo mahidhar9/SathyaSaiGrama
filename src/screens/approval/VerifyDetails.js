@@ -10,22 +10,18 @@ import {
   ActivityIndicator,
   Alert,
   Dimensions,
-  Modal
+  Modal,
+  Linking,
 } from 'react-native';
-import React, {
-  useContext,
-  useEffect,
-  useState,
-  useCallback,
-} from 'react';
-import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME, SECRET_KEY } from '@env';
+import React, {useContext, useEffect, useState, useCallback} from 'react';
+import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME, SECRET_KEY} from '@env';
 
 import UserContext from '../../../context/UserContext';
-import { encode } from 'base64-arraybuffer';
+import {encode} from 'base64-arraybuffer';
 import RNFS from 'react-native-fs';
 import Share from 'react-native-share';
 import Dialog from 'react-native-dialog';
-import { useFocusEffect } from '@react-navigation/native';
+import {useFocusEffect} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const updateRecord = async (reportName, modified_data, token, id) => {
@@ -53,11 +49,11 @@ export const updateRecord = async (reportName, modified_data, token, id) => {
   }
 };
 
-const VerifyDetails = ({ navigation, route }) => {
-  const { height } = Dimensions.get('window');
-  const { stringified } = route.params;
+const VerifyDetails = ({navigation, route}) => {
+  const {height} = Dimensions.get('window');
+  const {stringified} = route.params;
   //console.log('stringified', stringified);
-  let { user } = route.params;
+  let {user} = route.params;
   // console.log('user outside stringified', user);
 
   if (stringified) {
@@ -100,7 +96,6 @@ const VerifyDetails = ({ navigation, route }) => {
     accessToken,
   } = useContext(UserContext);
 
-
   useEffect(() => {
     const settingLoggedUser = async () => {
       let existedUser = await AsyncStorage.getItem('existedUser');
@@ -108,12 +103,12 @@ const VerifyDetails = ({ navigation, route }) => {
       if (existedUser) {
         setLoggedUser(existedUser);
       }
-    }
+    };
 
     if (!loggedUser || loggedUser === null) {
       settingLoggedUser();
     }
-  }, [])
+  }, []);
 
   const onPressOk = () => {
     setDialogVisible(false);
@@ -125,7 +120,6 @@ const VerifyDetails = ({ navigation, route }) => {
   const [loading, setLoading] = useState(true);
   const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Photo/download`;
   const qrCodeurl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Generated_QR_Code/download`;
-
 
   const [approvingLoading, setapprovingLoading] = useState(false);
   const [deniedLoading, setdeniedLoading] = useState(false);
@@ -191,12 +185,12 @@ const VerifyDetails = ({ navigation, route }) => {
     fetchImage();
   }, []);
 
-  const generateQR = async (passcodeData) => {
+  const generateQR = async passcodeData => {
     try {
       const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${user.Referrer_App_User_lookup.Name_field}&&passcode=${passcodeData}&&date=${user.Date_of_Visit}&&key=${SECRET_KEY}`;
       const res = await fetch(qrUrl);
       console.log('URL - ', qrUrl);
-      console.log("res from fetch img : ", res)
+      console.log('res from fetch img : ', res);
 
       if (!res.ok) {
         console.error('Error fetching image:', res.statusText);
@@ -213,7 +207,7 @@ const VerifyDetails = ({ navigation, route }) => {
           const result = reader.result.split(',')[1]; // Extract the base64 part only
           resolve(result);
         };
-        reader.onerror = (error) => {
+        reader.onerror = error => {
           console.error('Error reading blob:', error);
           reject(error);
         };
@@ -270,22 +264,33 @@ const VerifyDetails = ({ navigation, route }) => {
             console.log('Image uploaded successfully to Zoho.', response);
             return;
           } else {
-            console.log('Failed to upload qr code image to Zoho: ', response.status,);
+            console.log(
+              'Failed to upload qr code image to Zoho: ',
+              response.status,
+            );
             return;
           }
-        }
-        else if (updateRes.error[0].alert_message[0] === "L2 is already approved." || updateRes.error[0].alert_message[0] === "Record cannot be edited after L2 Approved") {
+        } else if (
+          updateRes.error[0].alert_message[0] === 'L2 is already approved.' ||
+          updateRes.error[0].alert_message[0] ===
+            'Record cannot be edited after L2 Approved'
+        ) {
           setL2approvedalreadydialogVisible(true);
           setErrorMessage(updateRes.error[0].alert_message[0]);
-        }
-        else if (updateRes.error[0].alert_message[0] === "You cannot approve the L1 Denied requests") {
+        } else if (
+          updateRes.error[0].alert_message[0] ===
+          'You cannot approve the L1 Denied requests'
+        ) {
           setDialogVisible(true);
-        }
-        else {
+        } else {
           Alert.alert('Error in approving: ', updateRes.code);
         }
       } else {
-        console.log('Failed to post code to Zoho:', response1.status, response1.statusText);
+        console.log(
+          'Failed to post code to Zoho:',
+          response1.status,
+          response1.statusText,
+        );
       }
 
       // POST request to upload image to Zoho
@@ -316,11 +321,13 @@ const VerifyDetails = ({ navigation, route }) => {
     }
   };
 
-  const passcodeGenerator = async (status) => {
+  const passcodeGenerator = async status => {
     let generatedPasscode;
     while (true) {
-      const newCode = Math.floor(100000 + Math.random() * (999999 - 100001 + 1),).toString();
-      const codeurl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Passcode_Report?criteria=Passcode==${newCode}`
+      const newCode = Math.floor(
+        100000 + Math.random() * (999999 - 100001 + 1),
+      ).toString();
+      const codeurl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Passcode_Report?criteria=Passcode==${newCode}`;
       const response = await fetch(codeurl, {
         method: 'GET',
         headers: {
@@ -334,7 +341,7 @@ const VerifyDetails = ({ navigation, route }) => {
       if (response.ok) {
         continue;
       }
-      generatedPasscode = newCode
+      generatedPasscode = newCode;
       break;
     }
 
@@ -357,8 +364,8 @@ const VerifyDetails = ({ navigation, route }) => {
     });
 
     if (!passcodeResponse.ok) {
-      console.log("Error is posting passcode to zoho")
-      Alert.alert("Error is posting passcode to zoho")
+      console.log('Error is posting passcode to zoho');
+      Alert.alert('Error is posting passcode to zoho');
     }
   };
 
@@ -367,18 +374,22 @@ const VerifyDetails = ({ navigation, route }) => {
 
     let updateField;
 
-    if (loggedUser.role === 'L2' && ((user.Home_or_Office === 'Home' && (loggedUser.deptIds.includes('3318254000027832015') || loggedUser.deptIds.includes('3318254000031368009'))) || user.Home_or_Office === 'Office')) {
+    if (
+      loggedUser.role === 'L2' &&
+      ((user.Home_or_Office === 'Home' &&
+        (loggedUser.deptIds.includes('3318254000027832015') ||
+          loggedUser.deptIds.includes('3318254000031368009'))) ||
+        user.Home_or_Office === 'Office')
+    ) {
       updateField = {
         Referrer_Approval: 'APPROVED',
         L2_Approval_Status: 'APPROVED',
       };
-
     } else {
       updateField = {
         Referrer_Approval: 'APPROVED',
         L2_Approval_Status: 'PENDING APPROVAL',
       };
-
     }
 
     setapprovingLoading(true);
@@ -395,7 +406,7 @@ const VerifyDetails = ({ navigation, route }) => {
     );
 
     if (response.code === 3000) {
-      console.log("record is updated")
+      console.log('record is updated');
       if (status === 'PENDING APPROVAL') {
         setPendingDataFetched(!pendingDataFetched);
         setApproveDataFetched(!approveDataFetched);
@@ -403,20 +414,26 @@ const VerifyDetails = ({ navigation, route }) => {
         setDeniedDataFetched(!deniedDataFetched);
         setApproveDataFetched(!approveDataFetched);
       }
-      setapprovingLoading(false)
-      navigation.navigate('Approved');
-      if (loggedUser.role === 'L2' && ((user.Home_or_Office === 'Home' && (loggedUser.deptIds.includes('3318254000027832015') || loggedUser.deptIds.includes('3318254000031368009'))) || user.Home_or_Office === 'Office')) {
+      setapprovingLoading(false);
+      // navigation.navigate('Approved');
+      Linking.openURL('myapp://Approved');
+      if (
+        loggedUser.role === 'L2' &&
+        ((user.Home_or_Office === 'Home' &&
+          (loggedUser.deptIds.includes('3318254000027832015') ||
+            loggedUser.deptIds.includes('3318254000031368009'))) ||
+          user.Home_or_Office === 'Office')
+      ) {
         Alert.alert('Visitor Approved');
         await passcodeGenerator(status);
       } else {
         Alert.alert('Visitor Approved');
       }
 
-      return
+      return;
     } else {
       Alert.alert('Error: ', response.code);
     }
-
   };
 
   const onReject = async () => {
@@ -459,16 +476,15 @@ const VerifyDetails = ({ navigation, route }) => {
       const deletePayload = {
         criteria: `Passcode==\"${user.Generated_Passcode}\"`,
         result: {
-          "message": true,
-          "tasks": true
-        }
+          message: true,
+          tasks: true,
+        },
       };
       try {
         const deletePasscodeResponse = await fetch(PasscodeDeleteUrl, {
           method: 'DELETE',
           headers: {
             Authorization: `Zoho-oauthtoken ${accessToken}`,
-
           },
           body: JSON.stringify(deletePayload),
         });
@@ -486,7 +502,6 @@ const VerifyDetails = ({ navigation, route }) => {
       }
     }
 
-
     if (response.code === 3000) {
       if (status === 'PENDING APPROVAL') {
         setPendingDataFetched(false);
@@ -495,9 +510,10 @@ const VerifyDetails = ({ navigation, route }) => {
         setDeniedDataFetched(false);
         setApproveDataFetched(false);
       }
-      console.log("Reject is called")
+      console.log('Reject is called');
       Alert.alert('Visitor Rejected');
-      navigation.navigate('Denied');
+      // navigation.navigate('Denied');
+      Linking.openURL('myapp://Denied');
       setdeniedLoading(false);
     } else {
       Alert.alert('Error in rejecting: ', response.code);
@@ -534,7 +550,6 @@ const VerifyDetails = ({ navigation, route }) => {
     }
   };
 
-
   let heightStyles;
   if (height > 900) {
     heightStyles = normalScreen;
@@ -544,10 +559,9 @@ const VerifyDetails = ({ navigation, route }) => {
     heightStyles = smallScreen;
   }
 
-
   useFocusEffect(
     useCallback(() => {
-      const { triggerDialog } = route.params || {};
+      const {triggerDialog} = route.params || {};
       if (triggerDialog) {
         setDialogVisible(true);
       }
@@ -562,7 +576,7 @@ const VerifyDetails = ({ navigation, route }) => {
 
   return (
     <>
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF', zIndex: 1 }}>
+      <SafeAreaView style={{flex: 1, backgroundColor: '#FFF', zIndex: 1}}>
         {/* <View style={styles.header}>
       <View style={styles.headerContainer}>
         <Text style={styles.headertxt}>Visitor details</Text>
@@ -596,7 +610,7 @@ const VerifyDetails = ({ navigation, route }) => {
             </View>
           ) : null} */}
           {user?.Referrer_Approval === 'PENDING APPROVAL' ? (
-            <View style={[styles.container, { marginTop: 20 }]}>
+            <View style={[styles.container, {marginTop: 20}]}>
               {approvingLoading || deniedLoading ? (
                 <View>
                   {approvingLoading ? (
@@ -605,7 +619,7 @@ const VerifyDetails = ({ navigation, route }) => {
                       <Text
                         style={[
                           heightStyles.ActivityIndicatorText,
-                          { color: 'white' },
+                          {color: 'white'},
                         ]}>
                         Approving
                       </Text>
@@ -631,7 +645,7 @@ const VerifyDetails = ({ navigation, route }) => {
                 </View>
               ) : (
                 <>
-                  <View style={[styles.left, { width: '50%' }]}>
+                  <View style={[styles.left, {width: '50%'}]}>
                     <TouchableOpacity
                       style={[styles.btnAccept, heightStyles.apprejBtnPosition]}
                       onPress={onApprove}>
@@ -662,7 +676,7 @@ const VerifyDetails = ({ navigation, route }) => {
                   />
                 </View>
               ) : (
-                <View style={{ width: '100%', padding: 10, marginLeft: '30%' }}>
+                <View style={{width: '100%', padding: 10, marginLeft: '30%'}}>
                   <TouchableOpacity
                     style={[styles.btnReject]}
                     onPress={onReject}>
@@ -678,7 +692,7 @@ const VerifyDetails = ({ navigation, route }) => {
                   <Text
                     style={[
                       heightStyles.ActivityIndicatorText,
-                      { color: 'white' },
+                      {color: 'white'},
                     ]}>
                     Approving
                   </Text>
@@ -689,7 +703,7 @@ const VerifyDetails = ({ navigation, route }) => {
                   />
                 </View>
               ) : (
-                <View style={{ width: '100%', padding: 10, marginLeft: '15%' }}>
+                <View style={{width: '100%', padding: 10, marginLeft: '15%'}}>
                   <TouchableOpacity
                     style={styles.btnAccept}
                     onPress={onApprove}>
@@ -700,9 +714,9 @@ const VerifyDetails = ({ navigation, route }) => {
             </View>
           ) : null}
           {user.Referrer_Approval === 'APPROVED' &&
-            user.L2_Approval_Status == 'APPROVED' &&
-            user.Referrer_App_User_lookup.ID == loggedUser.userId ? (
-            <View style={[styles.container, { marginTop: 20, marginBottom: 20 }]}>
+          user.L2_Approval_Status == 'APPROVED' &&
+          user.Referrer_App_User_lookup.ID == loggedUser.userId ? (
+            <View style={[styles.container, {marginTop: 20, marginBottom: 20}]}>
               <View style={styles.left}>
                 <Text style={styles.label}>Generated QR Code</Text>
               </View>
@@ -720,15 +734,17 @@ const VerifyDetails = ({ navigation, route }) => {
                 ) : (
                   QrCodephoto && (
                     <>
-                      <TouchableOpacity onPress={() => setModalVisible(true)} style={{ width: "98%", height: 200 }}>
+                      <TouchableOpacity
+                        onPress={() => setModalVisible(true)}
+                        style={{width: '98%', height: 200}}>
                         <Image
-                          source={{ uri: QrCodephoto }}
-                          style={{ width: '100%', height: 200 }}
+                          source={{uri: QrCodephoto}}
+                          style={{width: '100%', height: 200}}
                           resizeMode="contain"
                         />
                       </TouchableOpacity>
                       <TouchableOpacity
-                        style={[styles.HomeButton, { backgroundColor: 'green' }]}
+                        style={[styles.HomeButton, {backgroundColor: 'green'}]}
                         onPress={() => {
                           onShare();
                         }}>
@@ -749,7 +765,7 @@ const VerifyDetails = ({ navigation, route }) => {
               </View>
             </View>
           ) : null}
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Name</Text>
             </View>
@@ -759,7 +775,7 @@ const VerifyDetails = ({ navigation, route }) => {
               </Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Phone</Text>
             </View>
@@ -767,7 +783,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.value}>{user.Phone_Number}</Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Single or Group Visit</Text>
             </View>
@@ -775,7 +791,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.value}>{user.Single_or_Group_Visit}</Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Date of Visit</Text>
             </View>
@@ -783,7 +799,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.value}>{user.Date_of_Visit}</Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Guest Category</Text>
             </View>
@@ -791,7 +807,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.value}>{user.Guest_Category}</Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Priority</Text>
             </View>
@@ -799,7 +815,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.value}>{user.Priority}</Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Remarks</Text>
             </View>
@@ -807,7 +823,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.value}>{user.Remarks}</Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Gender</Text>
             </View>
@@ -815,7 +831,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.value}>{user.Gender}</Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Photo</Text>
             </View>
@@ -825,14 +841,14 @@ const VerifyDetails = ({ navigation, route }) => {
               ) : (
                 photo && (
                   <Image
-                    source={{ uri: photo }}
-                    style={{ width: '98%', height: 200 }}
+                    source={{uri: photo}}
+                    style={{width: '98%', height: 200}}
                   />
                 )
               )}
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Referrer</Text>
             </View>
@@ -845,7 +861,7 @@ const VerifyDetails = ({ navigation, route }) => {
               </Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Department</Text>
             </View>
@@ -853,7 +869,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.value}>{user.Department.Department}</Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Number of Men</Text>
             </View>
@@ -861,7 +877,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.value}>{user.Number_of_Men}</Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Number of Women</Text>
             </View>
@@ -869,7 +885,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.value}>{user.Number_of_Women}</Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Number of Boys</Text>
             </View>
@@ -877,7 +893,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.value}>{user.Number_of_Boys}</Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Number of Girls</Text>
             </View>
@@ -885,7 +901,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.value}>{user.Number_of_Girls}</Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Vehicle Information</Text>
             </View>
@@ -893,14 +909,14 @@ const VerifyDetails = ({ navigation, route }) => {
             <View style={styles.right}>
               {user?.Vehicle_Information?.length > 0
                 ? user.Vehicle_Information.map((vehicle, index) => (
-                  <Text key={index} style={styles.value}>
-                    {vehicle.zc_display_value}
-                  </Text>
-                ))
+                    <Text key={index} style={styles.value}>
+                      {vehicle.zc_display_value}
+                    </Text>
+                  ))
                 : null}
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20, marginBottom: 20 }]}>
+          <View style={[styles.container, {marginTop: 20, marginBottom: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>
                 Is the guest being invited to your Home or Office
@@ -915,15 +931,23 @@ const VerifyDetails = ({ navigation, route }) => {
         <Modal visible={modalVisible} transparent={true} animationType="fade">
           <View style={styles.modalContainer}>
             {/* Full-Screen Image */}
-            <Image source={{ uri: QrCodephoto }} style={styles.fullScreenImage} />
+            <Image source={{uri: QrCodephoto}} style={styles.fullScreenImage} />
 
             {/* Close and Share Button */}
-            <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
-              <Image source={require('../../../src/assets/cancel.png')} style={styles.closeButtonText} />
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}>
+              <Image
+                source={require('../../../src/assets/cancel.png')}
+                style={styles.closeButtonText}
+              />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.shareButton} onPress={onShare}>
-              <Image source={require('../../../src/assets/share.png')} style={styles.shareButtonText} />
+              <Image
+                source={require('../../../src/assets/share.png')}
+                style={styles.shareButtonText}
+              />
             </TouchableOpacity>
           </View>
         </Modal>
@@ -934,7 +958,7 @@ const VerifyDetails = ({ navigation, route }) => {
         contentStyle={styles.detailsNotEditableDialogue}>
         <Image
           source={require('../../../src/assets/Denied.png')}
-          style={{ width: '15%', height: '25%', alignSelf: 'center', top: -85 }} // adjust as needed
+          style={{width: '15%', height: '25%', alignSelf: 'center', top: -85}} // adjust as needed
         />
         <Dialog.Title style={styles.detailsNotEditableTitle}>
           Can not edit details once Visitor is L2 approved
@@ -1483,7 +1507,7 @@ const styles = StyleSheet.create({
     padding: 15,
     ...Platform.select({
       ios: {
-        shadowOffset: { width: 2, height: 2 },
+        shadowOffset: {width: 2, height: 2},
         shadowColor: '#333',
         shadowOpacity: 0.3,
         shadowRadius: 4,
@@ -1593,7 +1617,7 @@ const styles = StyleSheet.create({
   closeButtonText: {
     width: 25,
     height: 25,
-    tintColor: '#B21E2B'
+    tintColor: '#B21E2B',
   },
   shareButton: {
     position: 'absolute',
@@ -1607,6 +1631,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     width: 30,
     height: 30,
-    tintColor: "#B21E2B"
+    tintColor: '#B21E2B',
   },
 });
