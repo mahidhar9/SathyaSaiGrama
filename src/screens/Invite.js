@@ -242,7 +242,8 @@ const Invite = ({navigation}) => {
                 animationType="fade"
                 transparent={true}
                 visible={modal}
-                onRequestClose={() => setModal(false)}>
+                onRequestClose={() => setModal(false)}
+                testID="modal">
                 <TouchableWithoutFeedback onPress={handleModal}>
                   <View style={styles.centeredView}>
                     <View style={styles.modalView}>

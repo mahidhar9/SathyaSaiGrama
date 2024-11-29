@@ -1,14 +1,14 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { render, fireEvent, waitFor, cleanup } from '@testing-library/react-native';
 import Invite from '../../../src/screens/Invite';
-import Home from '../../../src/screens/Home';
-import MyApprovals from '../../../src/screens/MyApprovals';
-import Account from '../../../src/screens/Account';
 import UserContext from '../../../context/UserContext';
+import { AuthContext } from '../../../src/auth/AuthProvider';
+import { GestureHandlerRootView, TouchableOpacity } from 'react-native-gesture-handler';
 
-const Tab = createBottomTabNavigator();
+jest.mock('react-native-gesture-handler', () => ({
+  GestureHandlerRootView: ({ children }) => <>{children}</>,
+  TouchableOpacity: ({ children }) => <>{children}</>,
+}));
 
 const mockUserContextValue = {
   userType: 'admin',
@@ -29,32 +29,27 @@ const mockUserContextValue = {
   departmentIds: ['d1', 'd2', 'd3'],
   setDepartmentIds: jest.fn(),
 };
+const mockNavigation = { navigate: jest.fn() };
+const mockAuthContextValue = {
+  user: { email: 'test@example.com' },
+  setUser: jest.fn(),
+};
+afterEach(() => {
+  jest.clearAllMocks();
+  cleanup();
+});
 
-const AppNavigator = () => (
-  <UserContext.Provider value={mockUserContextValue}>
-    <NavigationContainer>
-      <Tab.Navigator>
-        {/* <Tab.Screen name="Home" component={Home} />
-        <Tab.Screen name="My Approvals" component={MyApprovals} />
-        <Tab.Screen name="Account" component={Account} /> */}
-        <Tab.Screen name="Invite" component={Invite} />
-      </Tab.Navigator>
-    </NavigationContainer>
-  </UserContext.Provider>
-);
 
-test('Verify if the "Invite" icon at the bottom is clickable and functional', async () => {
-  const { getByText } = render(<AppNavigator />);
+test('Verify that the "Fill it by yourself!" button redirects to the correct form', async () => {
+  const { getByText } = render(
+    <AuthContext.Provider value={mockAuthContextValue}>
+      <UserContext.Provider value={mockUserContextValue}>
+        <Invite navigation={mockNavigation} />
+      </UserContext.Provider>
+    </AuthContext.Provider>
+  );
 
-  // Step 1: Navigate to the "Invite" page
-  fireEvent.press(getByText('Invite'));
 
-  // Step 2: Verify the transition to the "Invite" page
-  await waitFor(() => {
-    expect(getByText('Invite')).toBeTruthy();
-  });
-
-  // Step 3: Check if both options "Visitor fills the form" and "Fill it by yourself!" are available and selectable
   expect(getByText('Visitor fills the form')).toBeTruthy();
   expect(getByText('Fill it by yourself!')).toBeTruthy();
 

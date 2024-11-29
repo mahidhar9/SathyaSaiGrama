@@ -2,14 +2,14 @@ import React from 'react';
 import { render, fireEvent, waitFor, cleanup } from '@testing-library/react-native';
 import Invite from '../../../src/screens/Invite';
 import UserContext from '../../../context/UserContext';
+import { AuthContext } from '../../../src/auth/AuthProvider';
 import { GestureHandlerRootView, TouchableOpacity } from 'react-native-gesture-handler';
 
 jest.mock('react-native-gesture-handler', () => ({
-
-    GestureHandlerRootView: ({ children }) => <>{children}</>,
-    TouchableOpacity: ({ children }) => <>{children}</>,
-  
+  GestureHandlerRootView: ({ children }) => <>{children}</>,
+  TouchableOpacity: ({ children }) => <>{children}</>,
 }));
+
 const mockUserContextValue = {
   userType: 'admin',
   setUserType: jest.fn(),
@@ -29,23 +29,25 @@ const mockUserContextValue = {
   departmentIds: ['d1', 'd2', 'd3'],
   setDepartmentIds: jest.fn(),
 };
-
+const mockNavigation = { navigate: jest.fn() };
+const mockAuthContextValue = {
+  user: { email: 'test@example.com' },
+  setUser: jest.fn(),
+};
 afterEach(cleanup);
 
 test('Verify that the "Fill it by yourself!" button redirects to the correct form', async () => {
   const { getByText } = render(
-
-    <UserContext.Provider value={mockUserContextValue}>
-    
-      <Invite />
-    </UserContext.Provider>
+    <AuthContext.Provider value={mockAuthContextValue}>
+      <UserContext.Provider value={mockUserContextValue}>
+        <Invite navigation={mockNavigation} />
+      </UserContext.Provider>
+    </AuthContext.Provider>
   );
 
-  // Click the "Fill it by yourself!" button
-  fireEvent.click(getByText('Fill it by yourself!'));
+  fireEvent.press(getByText('Fill it by yourself!'));
 
-  // Verify the redirection to the form page
   await waitFor(() => {
-    expect(getByText('Fill By Yourself Form')).toBeTruthy();
+    expect(mockNavigation.navigate).toHaveBeenCalledWith('FillByYourSelf');
   });
 });

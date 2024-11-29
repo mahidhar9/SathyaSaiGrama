@@ -32,7 +32,7 @@ import UserContext from '../../context/UserContext';
 import {Dropdown} from 'react-native-element-dropdown';
 import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME, SECRET_KEY} from '@env';
 import moment from 'moment';
-
+import {Platform} from 'react-native';
 
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {launchImageLibrary} from 'react-native-image-picker';

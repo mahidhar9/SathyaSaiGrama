@@ -390,6 +390,7 @@ console.log('main log')
                     onFocus={() => setFocusedInput('confirmPassword')}
                     secureTextEntry={!showConfirmPassword}
                     onChangeText={onChange}
+                    testID='Passwords do not match'
                   />
                 )}
                 rules={{

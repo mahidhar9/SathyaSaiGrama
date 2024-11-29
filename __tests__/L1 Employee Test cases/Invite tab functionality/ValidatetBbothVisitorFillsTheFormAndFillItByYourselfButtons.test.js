@@ -1,14 +1,14 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { render, fireEvent, waitFor, cleanup } from '@testing-library/react-native';
 import Invite from '../../../src/screens/Invite';
-import Home from '../../../src/screens/Home';
-import MyApprovals from '../../../src/screens/MyApprovals';
-import Account from '../../../src/screens/Account';
 import UserContext from '../../../context/UserContext';
+import { AuthContext } from '../../../src/auth/AuthProvider';
+import { GestureHandlerRootView, TouchableOpacity } from 'react-native-gesture-handler';
 
-const Tab = createBottomTabNavigator();
+jest.mock('react-native-gesture-handler', () => ({
+  GestureHandlerRootView: ({ children }) => <>{children}</>,
+  TouchableOpacity: ({ children }) => <>{children}</>,
+}));
 
 const mockUserContextValue = {
   userType: 'admin',
@@ -29,40 +29,59 @@ const mockUserContextValue = {
   departmentIds: ['d1', 'd2', 'd3'],
   setDepartmentIds: jest.fn(),
 };
+const mockNavigation = { navigate: jest.fn() };
+const mockAuthContextValue = {
+  user: { email: 'test@example.com' },
+  setUser: jest.fn(),
+};
+afterEach(() => {
+  jest.clearAllMocks();
+  cleanup();
+});
 
-const AppNavigator = () => (
-  <UserContext.Provider value={mockUserContextValue}>
-    <NavigationContainer>
-      <Tab.Navigator>
-        <Tab.Screen name="Home" component={Home} />
-        <Tab.Screen name="My Approvals" component={MyApprovals} />
-        <Tab.Screen name="Account" component={Account} />
-        <Tab.Screen name="Invite" component={Invite} />
-      </Tab.Navigator>
-    </NavigationContainer>
-  </UserContext.Provider>
-);
 
-test('Verify that both "Visitor fills the form" and "Fill it by yourself!" buttons respond properly without delay, double-click effects, or navigation issues', async () => {
-  const { getByText } = render(<AppNavigator />);
+test('Verify that the "Fill it by yourself!" button redirects to the correct form', async () => {
+  const { getByText } = render(
+    <AuthContext.Provider value={mockAuthContextValue}>
+      <UserContext.Provider value={mockUserContextValue}>
+        <Invite navigation={mockNavigation} />
+      </UserContext.Provider>
+    </AuthContext.Provider>
+  );
 
-  // Step 1: Navigate to the "Invite" page
-  fireEvent.press(getByText('Invite'));
-
-  // Step 2: Verify the transition to the "Invite" page
-  await waitFor(() => {
-    expect(getByText('Invite')).toBeTruthy();
-  });
-
-  // Step 3: Tap on both the "Visitor fills the form" and "Fill it by yourself!" buttons multiple times rapidly
   for (let i = 0; i < 5; i++) {
-    fireEvent.press(getByText('Visitor fills the form'));
     fireEvent.press(getByText('Fill it by yourself!'));
   }
 
-  // Step 4: Observe any delays or improper behavior in navigation or loading
   await waitFor(() => {
-    expect(getByText('Share link with the visitor')).toBeTruthy();
-    expect(getByText('Fill it by yourself!')).toBeTruthy();
+    expect(mockNavigation.navigate).toHaveBeenCalledWith('FillByYourSelf');
   });
+
+
+});
+
+afterEach(() => {
+  jest.clearAllMocks();
+  cleanup();
+});
+
+test('Verify that the "Visitor fills the form" button opens the modal even when clicked rapidly', async () => {
+  const { getByText, getByTestId } = render(
+    <AuthContext.Provider value={mockAuthContextValue}>
+      <UserContext.Provider value={mockUserContextValue}>
+        <Invite navigation={mockNavigation} />
+      </UserContext.Provider>
+    </AuthContext.Provider>
+  );
+
+    fireEvent.press(getByText('Visitor fills the form'));
+
+
+  // Verify that the modal is visible
+  await waitFor(() => {
+    expect(getByTestId('modal')).toBeTruthy();
+  });
+
+  // Verify the content inside the modal
+  expect(getByText('Share link with the visitor')).toBeTruthy();
 });

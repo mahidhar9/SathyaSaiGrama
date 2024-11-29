@@ -1,89 +1,29 @@
 import React from 'react';
-import { render, fireEvent, waitFor, cleanup, act } from '@testing-library/react-native';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import ApprovalTab from '../../../src/screens/approval/ApprovalTab';
-import UserContext from '../../../context/UserContext';
 import { NavigationContainer } from '@react-navigation/native';
-import { Animated } from 'react-native';
+import UserContext from '../../../context/UserContext';
 
-jest.mock('react-native/Libraries/Alert/Alert', () => ({
-  alert: jest.fn(),
+jest.mock('react-native-elements', () => ({
+  SearchBar: jest.fn(),
+}));
+jest.mock('react-native-modern-datepicker', () => ({
+  getFormatedDate: jest.fn(),
+  DatePicker: jest.fn(),
+}));
+jest.mock('react-native-phone-number-input', () => ({
+  PhoneInput: jest.fn(),
+  parsePhoneNumberFromString: jest.fn(),
 }));
 
-jest.mock('@react-navigation/native', () => {
-  const actualNav = jest.requireActual('@react-navigation/native');
-  return {
-    ...actualNav,
-    useNavigation: () => ({
-      navigate: jest.fn(),
-    }),
-  };
-});
+jest.mock('react-native-fs', () => ({
+  RNFS: {
+    writeFile: jest.fn(),
+    Share: jest.fn(),
+  },
+}));
 
-jest.mock('react-native-phone-number-input', () => {
-  return {
-    __esModule: true,
-    default: jest.fn().mockImplementation(({ children }) => {
-      return <>{children}</>;
-    }),
-  };
-});
-
-jest.mock('react-native-element-dropdown', () => {
-  return {
-    __esModule: true,
-    Dropdown: jest.fn().mockImplementation(({ children }) => {
-      return <>{children}</>;
-    }),
-  };
-});
-
-jest.mock('react-native-modern-datepicker', () => {
-  return {
-    __esModule: true,
-    default: jest.fn().mockImplementation(({ children }) => {
-      return <>{children}</>;
-    }),
-    getFormatedDate: jest.fn().mockReturnValue('2023-10-01'),
-  };
-});
-
-jest.mock('react-native-elements', () => {
-  return {
-    __esModule: true,
-    SearchBar: jest.fn().mockImplementation(({ children }) => {
-      return <>{children}</>;
-    }),
-  };
-});
-
-jest.mock('moment', () => {
-  return jest.fn(() => ({
-    format: jest.fn().mockReturnValue('2023-10-01'),
-  }));
-});
-
-jest.mock('../../../src/components/Filter', () => {
-  return {
-    __esModule: true,
-    default: jest.fn().mockImplementation(({ children }) => {
-      return <>{children}</>;
-    }),
-  };
-});
-
-// Mock Animated.loop to prevent it from running during the test
-jest.mock('react-native', () => {
-  const actualReactNative = jest.requireActual('react-native');
-  return {
-    ...actualReactNative,
-    Animated: {
-      ...actualReactNative.Animated,
-      loop: jest.fn((animation) => ({
-        start: jest.fn(),
-      })),
-    },
-  };
-});
+const mockNavigation = { navigate: jest.fn() };
 
 const mockUserContextValue = {
   userType: 'admin',
@@ -91,7 +31,7 @@ const mockUserContextValue = {
   accessToken: 'mockAccessToken123',
   setUserEmail: jest.fn(),
   setL1ID: jest.fn(),
-  loggedUser: { name: 'John Doe' },
+  loggedUser: { name: 'John Doe', role: 'L1' },
   setLoggedUser: jest.fn(),
   deviceToken: 'mockDeviceToken456',
   resident: { id: 'r123', name: 'Jane Resident' },
@@ -103,45 +43,112 @@ const mockUserContextValue = {
   setTestResident: jest.fn(),
   departmentIds: ['d1', 'd2', 'd3'],
   setDepartmentIds: jest.fn(),
+  getAccessToken: jest.fn(),
+  setPendingDataFetched: jest.fn(),
+  pendingDataFetched: false,
 };
 
-const AppNavigator = () => (
-  <UserContext.Provider value={mockUserContextValue}>
-    <NavigationContainer>
-      <ApprovalTab />
-    </NavigationContainer>
-  </UserContext.Provider>
-);
-
-afterEach(() => {
-  cleanup();
-  jest.clearAllMocks();
-});
-
-test('Verify that the My Approvals tab responds properly without delay, double-click effects', async () => {
-  const { getByText } = render(<AppNavigator />);
-
-  // Step 1: Open the application and navigate to My Approvals tab
-  fireEvent.press(getByText('My Approvals'));
-
-  // Step 2: Observe the Pending, Approved, and Rejected tabs
-  await waitFor(() => {
-    expect(getByText('Pending')).toBeTruthy();
-    expect(getByText('Approved')).toBeTruthy();
-    expect(getByText('Rejected')).toBeTruthy();
+describe('ApprovalTab', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
   });
+  
+  afterEach(() => {
+    jest.clearAllTimers();
+    jest.restoreAllMocks();
+  });
+  test('Verify that the Pending, Approved, and Denied tabs are working properly', async () => {
+    const { getByText ,getByTestId,screen,getByRole} = render(
+      <NavigationContainer>
+        <UserContext.Provider value={mockUserContextValue}>
+          <ApprovalTab />
+        </UserContext.Provider>
+      </NavigationContainer>
+    );
+    
+    
+    expect(getByText('Pending')).toBeTruthy();
 
-  // Step 3: Tap on each tab multiple times rapidly to check for delays or double-click effects
-  for (let i = 0; i < 5; i++) {
-    fireEvent.press(getByText('Pending'));
     fireEvent.press(getByText('Approved'));
+    await waitFor(() => {
+      expect(getByText('Approved')).toBeTruthy();
+    });
     fireEvent.press(getByText('Rejected'));
-  }
-
-  // Step 4: Verify that all tabs respond properly without delay or double-click effects
-  await waitFor(() => {
-    expect(getByText('Pending')).toBeTruthy();
-    expect(getByText('Approved')).toBeTruthy();
-    expect(getByText('Rejected')).toBeTruthy();
+    await waitFor(() => {
+      expect(getByText('Denied')).toBeTruthy();
+    });
+    fireEvent.press(getByText('Pending'));
+    await waitFor(() => {
+      expect(getByText('Pending')).toBeTruthy();
+    });
   });
 });
+
+// import React from 'react';
+// import { render, fireEvent, waitFor } from '@testing-library/react-native';
+// import ApprovalTab from '../../../src/screens/approval/ApprovalTab';
+// import Pending from '../../../src/screens/approval/Pending';
+// import Approved from '../../../src/screens/approval/Approved';
+// import Denied from '../../../src/screens/approval/Denied';
+// import { NavigationContainer } from '@react-navigation/native';
+// import PhoneInput from 'react-native-phone-number-input';
+// import DatePicker, { getFormatedDate } from 'react-native-modern-datepicker';
+// import { SearchBar } from 'react-native-elements';
+// import UserContext from '../../../context/UserContext';
+
+// const mockValues = {
+//   L1ID: '123456789',
+//   loggedUser.role:'L1'
+//   getAccessToken: jest.fn(),
+//   pendingDataFetched: false,
+//   setPendingDataFetched: jest.fn(),
+//   approvedDataFetched: false,
+//   setApprovedDataFetched: jest.fn(),
+//   deniedDataFetched: false,
+//   setDeniedDataFetched: jest.fn(),
+// };
+
+// jest.mock('react-native-elements', () => ({
+//   SearchBar: jest.fn(),
+// }));
+// jest.mock('react-native-modern-datepicker', () => ({
+//   getFormatedDate: jest.fn(),
+//   DatePicker: jest.fn(),
+// }))
+// jest.mock('react-native-phone-number-input', () => ({
+//   PhoneInput: jest.fn(),
+//   parsePhoneNumberFromString: jest.fn(),
+// }));
+// describe('ApprovalTab', () => {
+//   test('Verify that the Pending, Approved, and Denied tabs are working properly', async () => {
+//     // Render the ApprovalTab component inside NavigationContainer
+//     const { getByText } = render(
+//       <NavigationContainer>
+//       <UserContext.Provider value={mockValues}>
+//         <ApprovalTab />
+//         </UserContext.Provider>
+//       </NavigationContainer>
+//     );
+
+//     // Verify that the Pending component is rendered by default
+//     expect(getByText('Pending Component')).toBeTruthy();
+
+//     // Navigate to the Approved tab by clicking the 'Approved' tab
+//     fireEvent.press(getByText('Approved'));
+//     await waitFor(() => {
+//       expect(getByText('Approved Component')).toBeTruthy();
+//     });
+
+//     // Navigate to the Denied tab by clicking the 'Rejected' tab (assuming 'Rejected' is the text of the tab)
+//     fireEvent.press(getByText('Rejected'));
+//     await waitFor(() => {
+//       expect(getByText('Denied Component')).toBeTruthy();
+//     });
+
+//     // Navigate back to the Pending tab by clicking the 'Pending' tab
+//     fireEvent.press(getByText('Pending'));
+//     await waitFor(() => {
+//       expect(getByText('Pending Component')).toBeTruthy();
+//     });
+//   });
+// });

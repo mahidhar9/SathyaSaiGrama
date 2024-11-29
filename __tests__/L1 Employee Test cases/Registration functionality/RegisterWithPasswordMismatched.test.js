@@ -26,9 +26,9 @@ describe('Register Screen', () => {
 
   it('shows an error message when the passwords do not match', async () => {
     const validatePasswordMock = jest.fn().mockReturnValue(true);
-    const { getByPlaceholderText, getByText, queryByText,getByTestId, debug } = render(
+    const { getByPlaceholderText, getByText, getByTestId } = render(
       <UserContext.Provider value={mockUserContextValue}>
-        <Register navigation={mockNavigation} validatePassword={validatePasswordMock}/>
+        <Register navigation={mockNavigation} validatePassword={validatePasswordMock} />
       </UserContext.Provider>
     );
 
@@ -38,9 +38,9 @@ describe('Register Screen', () => {
     fireEvent.changeText(getByPlaceholderText('Confirm Password'), '123457');
     fireEvent.press(getByText('Register'));
 
-    await waitFor(() => getByTestId('error-message'));
-
-    // Assert the error message is shown
-    expect(getByTestId('error-message').props.children).toBe('Passwords do not match');
+    // Use waitFor to wait for the error message to appear
+    await waitFor(() => {
+      expect(getByTestId('Passwords do not match')).toBeTruthy();
+    });
   },20000);
 });

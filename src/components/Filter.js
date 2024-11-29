@@ -8,6 +8,7 @@ import moment from 'moment';
 import filterIcon from "../assets/filter.png"
 import UserContext from '../../context/UserContext';
 import { ScrollView } from 'react-native';
+import {Platform} from 'react-native';
 
 const Filter = ({ setFilteredData, ToFilterData, comingFrom }) => {
   const [filterModalVisible, setFilterModalVisible] = useState(false);

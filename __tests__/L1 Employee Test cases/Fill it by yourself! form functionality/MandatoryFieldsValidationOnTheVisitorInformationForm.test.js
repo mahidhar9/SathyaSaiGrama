@@ -3,44 +3,56 @@ import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import FillByYourSelf from '../../../src/screens/FillByYourSelf';
 import UserContext from '../../../context/UserContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import RNFS from 'react-native-fs';
-import { Picker } from '@react-native-picker/picker';
-import DatePicker from 'react-native-modern-datepicker';
-import PhoneInput from 'react-native-phone-number-input';
-import { parsePhoneNumberFromString } from 'libphonenumber-js';
-import { Dropdown } from 'react-native-element-dropdown';
-import { launchImageLibrary } from 'react-native-image-picker';
-import Share from 'react-native-share';
-import Dialog from 'react-native-dialog';
-import { CalendarList } from 'react-native-calendars';
-import { Platform } from 'react-native'; // Import Platform
-import { SafeAreaView } from 'react-native-safe-area-context'; // Import SafeAreaView
+
+jest.spyOn(global, 'fetch').mockImplementation((url, options) => {
+  ok: true;
+  passcodeData: jest.fn().mockResolvedValue({ ok: true });
+  return Promise.resolve({
+    json: () => Promise.resolve({ ok: true }),
+  });
+  
+});
+
+jest.mock('react-native-calendars', () => ({
+  CalendarList: jest.fn(),
+}));
+jest.mock('react-native-share', () => ({
+  Share: jest.fn(),
+}));
+jest.mock('react-native-image-picker', () => ({
+  launchImageLibrary: jest.fn(),
+}));
+jest.mock('react-native-phone-number-input', () => ({
+  PhoneInput: jest.fn(),
+  parsePhoneNumberFromString: jest.fn(),
+}));
+jest.mock('react-native-modern-datepicker', () => ({
+  DatePicker: jest.fn(),
+  getFormattedDate: jest.fn(),
+}));
+jest.mock('react-native-fs', () => ({
+  RNFS: {
+    writeFile: jest.fn(),
+    Share: jest.fn(),
+  },
+}));
+jest.mock('react-native-gesture-handler', () => ({
+  GestureHandlerRootView: ({ children }) => children,
+  TouchableOpacity: ({ children }) => children,
+  Swipeable: ({ children }) => children,
+  DrawerLayout: ({ children }) => children,
+  State: {},
+  ScrollView: ({ children }) => children,
+  PanGestureHandler: ({ children }) => children,
+  BaseButton: ({ children }) => children,
+  RectButton: ({ children }) => children,
+  BorderlessButton: ({ children }) => children,
+  FlatList: ({ children }) => children,
+  gestureHandlerRootHOC: jest.fn(),
+  Directions: {},
+}));
 const mockNavigation = { navigate: jest.fn() };
 
-jest.mock('react-native-gesture-handler', () => ({
-  GestureHandlerRootView: ({ children }) => <>{children}</>,
-  TouchableOpacity: ({ children }) => <>{children}</>,
-}));
-jest.mock('react-native-safe-area-context', () => ({
-  SafeAreaView: ({ children }) => <>{children}</>,
-}));
-jest.mock('react-native-fs', () => jest.fn());
-jest.mock('@react-native-picker/picker', () => jest.fn());
-jest.mock('react-native-modern-datepicker', () => jest.fn());
-jest.mock('react-native-element-dropdown', () => jest.fn());
-jest.mock('react-native-share', () => jest.fn());
-jest.mock('react-native-dialog', () => jest.fn());
-jest.mock('react-native-calendars', () => jest.fn());
-jest.mock('react-native-image-picker', () => jest.fn());
-jest.mock('react-native-phone-number-input', () => jest.fn());
-jest.mock('libphonenumber-js', () => jest.fn());
-jest.mock('react-native', () => {
-  const actualReactNative = jest.requireActual('react-native');
-  return {
-    ...actualReactNative,
-    Platform: { OS: 'ios' },
-  };
-});
 const mockUserContextValue = {
   userType: 'admin',
   setUserType: jest.fn(),
@@ -61,7 +73,6 @@ const mockUserContextValue = {
   setDepartmentIds: jest.fn(),
 };
 
-describe('Visitor Information Form', () => {
   test('Verify that validation messages appear below all mandatory fields when left empty', async () => {
     const { getByText } = render(
       <GestureHandlerRootView>
@@ -74,9 +85,8 @@ describe('Visitor Information Form', () => {
     fireEvent.press(getByText('Submit'));
 
     await waitFor(() => {
-      expect(getByText('Name is required')).toBeTruthy();
-      expect(getByText('Phone is required')).toBeTruthy();
+      expect(getByText('Prefix, First Name and Last Name are required')).toBeTruthy();
+      expect(getByText('Phone number is required')).toBeTruthy();
       expect(getByText('Date of visit is required')).toBeTruthy();
     });
   });
-});
