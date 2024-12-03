@@ -71,7 +71,7 @@ const VerifyDetails = ({navigation, route}) => {
     try {
       // Parse the formatted string
       user.Vehicle_Information = JSON.parse(formattedString);
-      console.log(parsedArray);
+      // console.log(parsedArray);
     } catch (error) {
       console.error('Parsing error:', error.message);
     }
@@ -177,7 +177,11 @@ const VerifyDetails = ({navigation, route}) => {
   useEffect(() => {
     const fetchImage = async () => {
       const dataUrl = await getImage();
-      const qrCodeDataUrl = await getQrCodeImage();
+      let qrCodeDataUrl = await getQrCodeImage();
+      if (qrCodeDataUrl.length === 135) {
+        qrCodeDataUrl = await getQrCodeImage();
+      }
+      console.log('qrCodeDataUrl', qrCodeDataUrl);
       setPhoto(dataUrl);
       setQrCodephoto(qrCodeDataUrl);
       setLoading(false);
@@ -414,9 +418,7 @@ const VerifyDetails = ({navigation, route}) => {
         setDeniedDataFetched(!deniedDataFetched);
         setApproveDataFetched(!approveDataFetched);
       }
-      setapprovingLoading(false);
-      // navigation.navigate('Approved');
-      Linking.openURL('myapp://Approved');
+
       if (
         loggedUser.role === 'L2' &&
         ((user.Home_or_Office === 'Home' &&
@@ -429,6 +431,9 @@ const VerifyDetails = ({navigation, route}) => {
       } else {
         Alert.alert('Visitor Approved');
       }
+      setapprovingLoading(false);
+      // navigation.navigate('Approved');
+      Linking.openURL('myapp://Approved');
 
       return;
     } else {
