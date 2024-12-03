@@ -174,20 +174,53 @@ const VerifyDetails = ({navigation, route}) => {
     }
   };
 
-  useEffect(() => {
-    const fetchImage = async () => {
-      const dataUrl = await getImage();
-      let qrCodeDataUrl = await getQrCodeImage();
-      if (qrCodeDataUrl.length === 135) {
-        qrCodeDataUrl = await getQrCodeImage();
-      }
-      console.log('qrCodeDataUrl', qrCodeDataUrl);
-      setPhoto(dataUrl);
-      setQrCodephoto(qrCodeDataUrl);
-      setLoading(false);
-    };
-    fetchImage();
-  }, []);
+  // useEffect(() => {
+  //   const fetchImage = async () => {
+  //     const dataUrl = await getImage();
+  //     let qrCodeDataUrl = await getQrCodeImage();
+  //     if (qrCodeDataUrl.length === 135) {
+  //       qrCodeDataUrl = await getQrCodeImage();
+  //     }
+  //     console.log('qrCodeDataUrl', qrCodeDataUrl);
+  //     setPhoto(dataUrl);
+  //     setQrCodephoto(qrCodeDataUrl);
+  //     setLoading(false);
+  //   };
+  //   fetchImage();
+  // }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchImage = async () => {
+        try {
+          const dataUrl = await getImage();
+          let qrCodeDataUrl = await getQrCodeImage();
+
+          // Retry if QR Code Data URL is of unexpected length
+          if (qrCodeDataUrl.length === 135) {
+            qrCodeDataUrl = await getQrCodeImage();
+          }
+
+          console.log('qrCodeDataUrl', qrCodeDataUrl);
+          setPhoto(dataUrl);
+          setQrCodephoto(qrCodeDataUrl);
+        } catch (error) {
+          console.error('Error fetching images:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchImage();
+
+      // Cleanup function (if necessary)
+      return () => {
+        console.log('Screen unfocused, cleaning up if needed');
+        // setPhoto(null);
+        // setQrCodephoto(null);
+        // setLoading(true);
+      };
+    }, []),
+  );
 
   const generateQR = async passcodeData => {
     try {
