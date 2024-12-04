@@ -31,7 +31,7 @@ function ApprovalTab() {
                         tabBarInactiveTintColor: 'gray',
                     }}
                 />
-                <Tab.Screen name="Approved" component={Approved}
+                <Tab.Screen testID="Approval" name="Approved" component={Approved}
                     options={
                         {
                             tabBarActiveTintColor: '#008000',
@@ -39,7 +39,7 @@ function ApprovalTab() {
                         }
                     }
                 />
-                <Tab.Screen name="Denied" component={Denied} options={{
+                <Tab.Screen testID="denied" name="Denied" component={Denied} options={{
                     title: "Rejected", tabBarActiveTintColor: '#B21E2B',
                     tabBarInactiveTintColor: 'gray',
                 }} />

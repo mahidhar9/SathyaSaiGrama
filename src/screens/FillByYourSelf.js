@@ -1046,6 +1046,7 @@ const FillByYourSelf = ({navigation}) => {
                   </Text>
                   <PhoneInput
                     defaultValue={value}
+                    testID="phoneInput"
                     defaultCode="IN"
                     layout="first"
                     containerStyle={styles.phoneInputContainer}
@@ -1547,9 +1548,10 @@ const FillByYourSelf = ({navigation}) => {
                     )}
                   </View>
                 </View>
-
+{console.log('submit')}
                 <View style={styles.footer}>
                   <TouchableOpacity
+                  testID="submitButton"
                     onPress={handleSubmit}
                     style={styles.submit}>
                     <Text style={styles.buttonText}>Submit</Text>

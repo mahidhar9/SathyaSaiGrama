@@ -1,93 +1,127 @@
+
 import React from 'react';
-import { Text as MockText}  from 'react-native';
 import { render, fireEvent, waitFor, cleanup } from '@testing-library/react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { Platform } from 'react-native'; // Import Platform from react-native
-import Profile from '../../../src/screens/Profile';
-import ApprovalTab from '../../../src/screens/approval/ApprovalTab';
 import FooterTab from '../../../navigation/tab-navigation/FooterTab';
 import UserContext from '../../../context/UserContext';
-import {GestureHandlerRootView , TouchableOpacity} from 'react-native-gesture-handler'; 
+import { Text } from 'react-native';
+import Toast from 'react-native-toast-message';
+import {launchImageLibrary, launchCamera} from 'react-native-image-picker';
+import {PERMISSIONS, request} from 'react-native-permissions';
+import LinearGradient from 'react-native-linear-gradient';
+import {createShimmerPlaceholder} from 'react-native-shimmer-placeholder'
+import Invite from '../../../src/screens/Invite';
+import Profile from '../../../src/screens/Profile';
+import {
+  GestureHandlerRootView,
+  TouchableOpacity,
+} from 'react-native-gesture-handler';
 import RNFS from 'react-native-fs';
 import { Picker } from '@react-native-picker/picker';
-import DatePicker from 'react-native-modern-datepicker'
-import { SearchBar } from 'react-native-elements';
+import DatePicker from 'react-native-modern-datepicker';
 import Share from 'react-native-share';
-import {CalendarList} from 'react-native-calendars'; 
+import {CalendarList} from 'react-native-calendars';
 
-
-
-
-jest.mock('../../../src/screens/approval/Pending', () => {
-  return jest.fn().mockImplementation ((props) => {
-      return (<MockText>Pending Screen</MockText>)
-    })});
-jest.mock('../../../src/screens/approval/Approved', () =>{
-  return jest.fn().mockImplementation ((props) => {
-      return (<MockText>Approved  Screen</MockText>)
-    })});
-jest.mock('../../../src/screens/approval/Denied', () => {
-  return jest.fn().mockImplementation ((props) => {
-      return (<MockText>Denied Screen</MockText>)
-    })});
-
-jest.mock('react-native-calendars',()=>({
-  CalendarList:jest.fn(),
-}))
-jest.mock('react-native-share', () => jest.fn());
-jest.mock('react-native-elements',()=>{
-  return{
-    SearchBar: jest.fn()
-  }
-})
-jest.mock('react-native-modern-datepicker',()=>jest.fn({
+jest.mock('react-native-calendars', () => {
+  return {
+    CalendarList: jest.fn(),
+  };
+});
+jest.mock('react-native-fs', () => {
+  return {
+    RNFS: {
+      readDir: jest.fn(),
+    },
+  };
+});
+jest.mock('@react-native-picker/picker', () => {
+  return {
+    Picker: jest.fn(),
+  };
+});
+jest.mock('react-native-modern-datepicker', () => {
+  return {
     DatePicker: jest.fn(),
-}))
-jest.mock('@react-native-picker/picker', () => jest.fn({
-  Picker: jest.fn(),
-}));
-jest.mock('react-native-fs',()=>{
+  };
+});
+jest.mock('react-native-share', () => {
   return {
-    RNFS : jest.fn()
-  }
-})
-jest.mock('react-native-gesture-handler',()=>{
-  return{
-    GestureHandlerRootView : jest.fn(),
-    TouchableOpacity: jest.fn()
-  }
-})
-
-jest.mock('react-native-toast-message', () => jest.fn());
-jest.mock('react-native-image-picker', () => ({
-  launchImageLibrary: jest.fn(),
-  launchCamera: jest.fn(),
-}));
-jest.mock('react-native-permissions', () => ({
-  request: jest.fn(),
-  PERMISSIONS: jest.fn().mockReturnValue('granted'),
-}));
-jest.mock('react-native-linear-gradient', () => jest.fn());
-jest.mock('react-native-shimmer-placeholder', () => ({ createShimmerPlaceholder: jest.fn() }));
-jest.mock('react-native-phone-number-input', () => jest.fn());
-jest.mock('react-native-element-dropdown', () => jest.fn());
-jest.mock('react-native-modern-datepicker', () => ({
-  DatePicker: jest.fn(),
-  getFormattedDate: jest.fn(),
-}));
-jest.mock('react-native-elements', () => ({ SearchBar: jest.fn() }));
-
-// Mock the createBottomTabNavigator function to return the expected structure
-jest.mock('@react-navigation/bottom-tabs', () => {
-  return {
-    
-    createBottomTabNavigator: jest.fn(() => ({
-      Navigator: jest.fn(),
-      Screen: jest.fn(),
-    })),
+    Share: jest.fn(),
   };
 });
 
+jest.mock('react-native-gesture-handler', () => {
+  const View = require('react-native/Libraries/Components/View/View');
+  return {
+    GestureHandlerRootView: View,
+    TouchableOpacity: View,
+  };
+});
+jest.mock('react-native-shimmer-placeholder', () => ({
+  
+  ShimmerPlaceholder : jest.fn({
+    createShimmerPlaceholder : jest.fn({
+      LinearGradient : jest.fn(),
+
+    }),
+  })
+}));
+jest.mock('react-native-linear-gradient', () => ({
+ 
+  LinearGradient : jest.fn()
+}));
+jest.mock('react-native-permissions', () => {
+  return {
+    PERMISSIONS: {
+      CAMERA: 'camera',
+      PHOTO_LIBRARY: 'photo',
+    },
+    check: jest.fn().mockResolvedValue('granted'),
+    request: jest.fn().mockResolvedValue('granted'),
+  };
+});
+jest.mock('react-native-image-picker',()=>({
+  launchImageLibrary: jest.fn(),
+  launchCamera: jest.fn()
+}))
+jest.mock('react-native-toast-message', () => ({
+  default: jest.fn(),
+  Toast:jest.fn()
+}))
+jest.mock('../../../src/screens/Invite.js', () => {
+  const {Text} = require('react-native');
+  return () => <Text>Invite Screen</Text>;
+});
+jest.mock('../../../src/screens/approval/ApprovalTab.js', () => {
+  const {Text} = require('react-native');
+  return () => <Text>ApprovalTab Screen</Text>;
+});
+jest.mock('../../../src/screens/Profile.js', () => {
+  const {Text} = require('react-native');
+  return () => <Text>Account Screen</Text>;
+});
+
+
+jest.mock('react-native-modern-datepicker', () => {	
+  return {
+    default: jest.fn(),
+    getFormatedDate: jest.fn(),
+    DatePicker : jest.fn(),
+  }
+  });
+
+jest.mock('react-native-phone-number-input', () => {	
+  const { TextInput } = require('react-native');
+  return {
+    default: jest.fn(),
+    TextInput,
+  };
+});
+jest.mock('react-native-elements', () => {
+  return {
+    SearchBar: jest.fn(),
+  };
+});
 const mockUserContextValue = {
   userType: 'admin',
   setUserType: jest.fn(),
@@ -102,52 +136,78 @@ const mockUserContextValue = {
   setProfileImage: jest.fn(),
 };
 
-describe('ApprovalTab Navigation Tests', () => {
+describe('FooterTab Navigation Tests', () => {
   afterEach(cleanup);
 
-  it('navigates to Pending tab by default', async () => {
+  it('navigates to Invite screen by default', async () => {
     const { getByText } = render(
       <UserContext.Provider value={mockUserContextValue}>
         <NavigationContainer>
-          <ApprovalTab />
+          <FooterTab />
         </NavigationContainer>
       </UserContext.Provider>
     );
+
+    await waitFor(() => {
+      expect(getByText('Invite Screen')).toBeTruthy();
+    });
+  });
+
+  it('navigates to My Approvals tab and shows Pending screen by default', async () => {
+    const { getByText,getAllByRole } = render(
+      <UserContext.Provider value={mockUserContextValue}>
+        <NavigationContainer>
+          <FooterTab />
+        </NavigationContainer>
+      </UserContext.Provider>
+    );
+    expect(getAllByRole('button')).toHaveLength(2);
+   
+    // Simulate navigating to the My Approvals tab
+    fireEvent.press(getAllByRole('button')[1]);
 
     await waitFor(() => {
       expect(getByText('Pending Screen')).toBeTruthy();
     });
   });
 
-  it('navigates to Approved tab when clicked', async () => {
-    const { getByText } = render(
+  it('navigates to Account tab and shows Account screen', async () => {
+    const { getByText,getAllByRole } = render(
       <UserContext.Provider value={mockUserContextValue}>
         <NavigationContainer>
-          <ApprovalTab />
+          <FooterTab />
         </NavigationContainer>
       </UserContext.Provider>
     );
-
-    fireEvent.press(getByText('Approved'));
+     expect(getAllByRole('button')).toHaveLength(2);
+    // Simulate navigating to the Account tab
+    fireEvent.getAllByRole(getByText('button')[1]);
 
     await waitFor(() => {
-      expect(getByText('Approved Screen')).toBeTruthy();
+      expect(getByText('Account Screen')).toBeTruthy();
     });
   });
 
-  it('navigates to Denied tab when clicked', async () => {
-    const { getByText } = render(
-      <UserContext.Provider value={mockUserContextValue}>
-        <NavigationContainer>
-          <ApprovalTab />
-        </NavigationContainer>
-      </UserContext.Provider>
-    );
+  // it('ensures tabs respond properly without delay or double-click effects', async () => {
+  //   const { getByText } = render(
+  //     <UserContext.Provider value={mockUserContextValue}>
+  //       <NavigationContainer>
+  //         <FooterTab />
+  //       </NavigationContainer>
+  //     </UserContext.Provider>
+  //   );
 
-    fireEvent.press(getByText('Rejected'));
+  //   // Simulate rapid clicks on the tabs
+  //   for (let i = 0; i < 5; i++) {
+  //     fireEvent.press(getByText('Invite'));
+  //     fireEvent.press(getByText('My Approvals'));
+  //     fireEvent.press(getByText('Account'));
+  //   }
 
-    await waitFor(() => {
-      expect(getByText('Denied Screen')).toBeTruthy();
-    });
-  });
+  //   await waitFor(() => {
+  //     expect(getByText('Invite Screen')).toBeTruthy();
+  //     expect(getByText('Pending Screen')).toBeTruthy();
+  //     expect(getByText('Account Screen')).toBeTruthy();
+  //   });
+  // });
 });

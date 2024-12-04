@@ -1,15 +1,55 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, fireEvent, waitFor, cleanup } from '@testing-library/react-native';
 import FillByYourSelf from '../../../src/screens/FillByYourSelf';
 import UserContext from '../../../context/UserContext';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { TextInput,TouchableOpacity as MockTouchableOpacity} from 'react-native';
+import {  GestureHandlerRootView,   } from 'react-native-gesture-handler';
 
-jest.spyOn(global, 'fetch').mockImplementation((url, options) => {
-  return Promise.resolve({
-    ok: true,
-    json: () => Promise.resolve({ ok: true }),
-  });
+import RNFS from 'react-native-fs';
+import { Picker } from '@react-native-picker/picker';
+import DatePicker from 'react-native-modern-datepicker';
+
+
+jest.mock('react-native-modern-datepicker', () => {
+  return {
+    DatePicker: jest.fn(),
+  };
 });
+jest.mock('@react-native-picker/picker', () => {
+  return {
+    Picker: jest.fn(),
+  }
+});
+jest.mock('react-native-fs', () => {
+  return {
+    RNFS: {
+      writeFile: jest.fn(),
+    },
+  };
+});
+
+
+jest.mock('react-native-gesture-handler',()=>{
+  return {
+    GestureHandlerRootView : jest.fn((props)=>{
+      console.log(props)
+      return props.children
+      
+    }),
+    
+    TouchableOpacity:jest.fn((props)=>{
+      
+      console.log(props)
+      return <MockTouchableOpacity {...props}/>
+      
+    }),
+  }
+})
+// jest.spyOn(global, 'fetch').mockImplementation(() => {
+//   return Promise.resolve({
+//     ok: true,
+//   });
+// });
 
 jest.mock('react-native-calendars', () => ({
   CalendarList: jest.fn(),
@@ -20,26 +60,19 @@ jest.mock('react-native-share', () => ({
 jest.mock('react-native-image-picker', () => ({
   launchImageLibrary: jest.fn(),
 }));
-jest.mock('react-native-phone-number-input', () => ({
-  PhoneInput: jest.fn(),
-  parsePhoneNumberFromString: jest.fn(),
-}));
-jest.mock('react-native-modern-datepicker', () => ({
-  DatePicker: jest.fn(),
-  getFormattedDate: jest.fn(),
-}));
-jest.mock('react-native-fs', () => ({
-  RNFS: {
-    writeFile: jest.fn(),
-    Share: jest.fn(),
-  },
-}));
-jest.mock('react-native-gesture-handler', () => ({
-  GestureHandlerRootView: ({ children }) => children,
-  TouchableOpacity: ({ children }) => children,
-}));
-
-const mockNavigation = { navigate: jest.fn() };
+jest.mock('react-native-phone-number-input', () => {
+  const { TextInput } = require('react-native');
+  return {
+    __esModule: true,
+    default: ({ onChangeFormattedText }) => (
+      <TextInput
+        testID="phoneInput"
+        onChangeText={onChangeFormattedText}
+        placeholder="Phone Input"
+      />
+    ),
+  };
+});
 
 const mockUserContextValue = {
   userType: 'admin',
@@ -53,28 +86,30 @@ const mockUserContextValue = {
   resident: { id: 'r123', name: 'Jane Resident' },
   setResident: jest.fn(),
   setProfileImage: jest.fn(),
-  employee: { id: 'e789', name: 'Alice Employee' },
-  setEmployee: jest.fn(),
-  testResident: { id: 't987', name: 'Test Resident' },
-  setTestResident: jest.fn(),
-  departmentIds: ['d1', 'd2', 'd3'],
-  setDepartmentIds: jest.fn(),
 };
 
+const mockNavigation = { navigate: jest.fn() };
+  
 describe('Visitor Information Form', () => {
+  afterEach(cleanup);
+
   test('Verify that validation messages appear below all mandatory fields when left empty', async () => {
-    const { getByText } = render(
-      <GestureHandlerRootView>
+    const { getByText, getByTestId, getByPlaceholderText,screen ,debug} = render(
+      
         <UserContext.Provider value={mockUserContextValue}>
           <FillByYourSelf navigation={mockNavigation} />
         </UserContext.Provider>
-      </GestureHandlerRootView>
+  
     );
+debug();
 
-    // Step 1: Click on the Submit button without filling any fields
-    fireEvent.press(getByText('Submit'));
+    await waitFor(() => {
+      expect(getByTestId('submitButton')).toBeTruthy();
+    });
+    // Simulate pressing the Submit button
+    fireEvent.press(getByTestId('submitButton'));
 
-    // Step 2: Observe if validation messages are shown
+    // Verify that validation messages appear
     await waitFor(() => {
       expect(getByText('Prefix, First Name and Last Name are required')).toBeTruthy();
       expect(getByText('Phone number is required')).toBeTruthy();

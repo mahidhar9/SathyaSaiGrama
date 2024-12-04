@@ -25,7 +25,7 @@ jest.mock('react-native-element-dropdown', () => ({
       console.log(`Mock Dropdown testID: ${testID}`);
       return (
         <select
-          data-testid={testID} // Ensure this is assigned correctly.
+          data-testid={testID}
           value={value}
           onChange={e => onChange(data.find(item => item.value === e.target.value))}
         >
