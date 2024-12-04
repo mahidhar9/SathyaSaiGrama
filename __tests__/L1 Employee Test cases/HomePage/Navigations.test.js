@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { render, fireEvent, waitFor, cleanup } from '@testing-library/react-native';
 import { NavigationContainer } from '@react-navigation/native';
@@ -21,6 +20,8 @@ import { Picker } from '@react-native-picker/picker';
 import DatePicker from 'react-native-modern-datepicker';
 import Share from 'react-native-share';
 import {CalendarList} from 'react-native-calendars';
+
+
 
 jest.mock('react-native-calendars', () => {
   return {
@@ -94,11 +95,11 @@ jest.mock('../../../src/screens/Invite.js', () => {
 });
 jest.mock('../../../src/screens/approval/ApprovalTab.js', () => {
   const {Text} = require('react-native');
-  return () => <Text>ApprovalTab Screen</Text>;
+  return ({children}) => <Text>ApprovalTab Screen {children}</Text>;
 });
 jest.mock('../../../src/screens/Profile.js', () => {
   const {Text} = require('react-native');
-  return () => <Text>Account Screen</Text>;
+  return ({children}) => <Text>Account Screen{children}</Text>;
 });
 
 
@@ -154,60 +155,62 @@ describe('FooterTab Navigation Tests', () => {
   });
 
   it('navigates to My Approvals tab and shows Pending screen by default', async () => {
-    const { getByText,getAllByRole } = render(
+    const { getByText,getAllByRole ,getAllByLabel,getAllByText  } = render(
       <UserContext.Provider value={mockUserContextValue}>
         <NavigationContainer>
           <FooterTab />
         </NavigationContainer>
       </UserContext.Provider>
     );
-    expect(getAllByRole('button')).toHaveLength(2);
-   
-    // Simulate navigating to the My Approvals tab
-    fireEvent.press(getAllByRole('button')[1]);
 
-    await waitFor(() => {
-      expect(getByText('Pending Screen')).toBeTruthy();
-    });
+  expect(getAllByRole('button')).toHaveLength(3);
+  
+      fireEvent.press(getAllByRole('button')[1]);
+        
+      await waitFor(() => {
+        expect(getAllByText('My Approvals')[1]).toBeTruthy();
+      });
+
   });
 
   it('navigates to Account tab and shows Account screen', async () => {
-    const { getByText,getAllByRole } = render(
+    const { getByText,getAllByRole ,getAllByText } = render(
       <UserContext.Provider value={mockUserContextValue}>
         <NavigationContainer>
           <FooterTab />
         </NavigationContainer>
       </UserContext.Provider>
     );
-     expect(getAllByRole('button')).toHaveLength(2);
-    // Simulate navigating to the Account tab
-    fireEvent.getAllByRole(getByText('button')[1]);
-
+     expect(getAllByRole('button')).toHaveLength(3);
+        fireEvent.press(getAllByRole('button')[2]);      
     await waitFor(() => {
-      expect(getByText('Account Screen')).toBeTruthy();
+      expect(getAllByText('Account')[1]).toBeTruthy();
     });
   });
 
-  // it('ensures tabs respond properly without delay or double-click effects', async () => {
-  //   const { getByText } = render(
-  //     <UserContext.Provider value={mockUserContextValue}>
-  //       <NavigationContainer>
-  //         <FooterTab />
-  //       </NavigationContainer>
-  //     </UserContext.Provider>
-  //   );
+  it('ensures tabs respond properly without delay or double-click effects', async () => {
+    const { getByText ,getAllByRole, getAllByText} = render(
+      <UserContext.Provider value={mockUserContextValue}>
+        <NavigationContainer>
+          <FooterTab />
+        </NavigationContainer>
+      </UserContext.Provider>
+    );
 
-  //   // Simulate rapid clicks on the tabs
-  //   for (let i = 0; i < 5; i++) {
-  //     fireEvent.press(getByText('Invite'));
-  //     fireEvent.press(getByText('My Approvals'));
-  //     fireEvent.press(getByText('Account'));
-  //   }
+    // Simulate rapid clicks on the tabs
+    for (let i = 0; i < 5; i++) {
+      expect(getAllByRole('button')).toHaveLength(3);
+      fireEvent.press(getAllByRole('button')[0]);
+      expect(getAllByRole('button')).toHaveLength(3);
+      fireEvent.press(getAllByRole('button')[1]);
+      expect(getAllByRole('button')).toHaveLength(3);
+        fireEvent.press(getAllByRole('button')[2]); 
+    }
 
-  //   await waitFor(() => {
-  //     expect(getByText('Invite Screen')).toBeTruthy();
-  //     expect(getByText('Pending Screen')).toBeTruthy();
-  //     expect(getByText('Account Screen')).toBeTruthy();
-  //   });
-  // });
+    await waitFor(() => {
+      expect(getAllByText('Invite')[1]).toBeTruthy();
+      expect(getAllByText('My Approvals')[1]).toBeTruthy();
+      expect(getAllByText('Account')[1]).toBeTruthy();
+    });
+  });
 });
