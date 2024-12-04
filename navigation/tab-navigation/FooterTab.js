@@ -168,7 +168,8 @@ const ApprovalStack = ({navigation}) => {
             </TouchableOpacity>
           ),
           headerRight: () => (
-            <TouchableOpacity
+            <TouchableOpacity       
+               testID="editButton"
               onPress={() =>
                 navigation.navigate('EditVerifydetails', {user: editData})
               }>

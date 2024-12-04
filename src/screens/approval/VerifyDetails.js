@@ -55,9 +55,9 @@ export const updateRecord = async (reportName, modified_data, token, id) => {
 
 const VerifyDetails = ({ navigation, route }) => {
   const { height } = Dimensions.get('window');
-  const { stringified } = route.params;
+  const { stringified } = route?.params || {};
   //console.log('stringified', stringified);
-  let { user } = route.params;
+  let { user } = route?.params || {};
   // console.log('user outside stringified', user);
 
   if (stringified) {
@@ -120,8 +120,8 @@ const VerifyDetails = ({ navigation, route }) => {
     setEditData(user);
   }, []);
   const [loading, setLoading] = useState(true);
-  const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Photo/download`;
-  const qrCodeurl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Generated_QR_Code/download`;
+  const url =user?.ID? `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Photo/download` : null;
+  const qrCodeurl =user?.ID? `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Generated_QR_Code/download` :null;
 
 
   const [approvingLoading, setapprovingLoading] = useState(false);
@@ -516,7 +516,7 @@ const VerifyDetails = ({ navigation, route }) => {
 
   useFocusEffect(
     useCallback(() => {
-      const { triggerDialog } = route.params || {};
+      const { triggerDialog } = route?.params || {};
       if (triggerDialog) {
         setDialogVisible(true);
       }
@@ -524,7 +524,7 @@ const VerifyDetails = ({ navigation, route }) => {
       return () => {
         setDialogVisible(false);
       };
-    }, [route.params]),
+    }, [route?.params]),
   );
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -668,9 +668,9 @@ const VerifyDetails = ({ navigation, route }) => {
               )}
             </View>
           ) : null}
-          {user.Referrer_Approval === 'APPROVED' &&
-            user.L2_Approval_Status == 'APPROVED' &&
-            user.Referrer_App_User_lookup.ID == loggedUser.userId ? (
+          {user?.Referrer_Approval === 'APPROVED' &&
+            user?.L2_Approval_Status == 'APPROVED' &&
+            user?.Referrer_App_User_lookup.ID == loggedUser.userId ? (
             <View style={[styles.container, { marginTop: 20, marginBottom: 20 }]}>
               <View style={styles.left}>
                 <Text style={styles.label}>Generated QR Code</Text>
@@ -716,7 +716,7 @@ const VerifyDetails = ({ navigation, route }) => {
             </View>
             <View style={styles.right}>
               <Text style={styles.value}>
-                {user.Name_field.zc_display_value}
+                {user?.Name_field.zc_display_value}
               </Text>
             </View>
           </View>
@@ -725,7 +725,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.label}>Phone</Text>
             </View>
             <View style={styles.right}>
-              <Text style={styles.value}>{user.Phone_Number}</Text>
+              <Text style={styles.value}>{user?.Phone_Number}</Text>
             </View>
           </View>
           <View style={[styles.container, { marginTop: 20 }]}>
@@ -733,7 +733,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.label}>Single or Group Visit</Text>
             </View>
             <View style={styles.right}>
-              <Text style={styles.value}>{user.Single_or_Group_Visit}</Text>
+              <Text style={styles.value}>{user?.Single_or_Group_Visit}</Text>
             </View>
           </View>
           <View style={[styles.container, { marginTop: 20 }]}>
@@ -741,7 +741,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.label}>Date of Visit</Text>
             </View>
             <View style={styles.right}>
-              <Text style={styles.value}>{user.Date_of_Visit}</Text>
+              <Text style={styles.value}>{user?.Date_of_Visit}</Text>
             </View>
           </View>
           <View style={[styles.container, { marginTop: 20 }]}>
@@ -749,7 +749,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.label}>Guest Category</Text>
             </View>
             <View style={styles.right}>
-              <Text style={styles.value}>{user.Guest_Category}</Text>
+              <Text style={styles.value}>{user?.Guest_Category}</Text>
             </View>
           </View>
           <View style={[styles.container, { marginTop: 20 }]}>
@@ -757,7 +757,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.label}>Priority</Text>
             </View>
             <View style={styles.right}>
-              <Text style={styles.value}>{user.Priority}</Text>
+              <Text style={styles.value}>{user?.Priority}</Text>
             </View>
           </View>
           <View style={[styles.container, { marginTop: 20 }]}>
@@ -765,7 +765,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.label}>Remarks</Text>
             </View>
             <View style={styles.right}>
-              <Text style={styles.value}>{user.Remarks}</Text>
+              <Text style={styles.value}>{user?.Remarks}</Text>
             </View>
           </View>
           <View style={[styles.container, { marginTop: 20 }]}>
@@ -773,7 +773,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.label}>Gender</Text>
             </View>
             <View style={styles.right}>
-              <Text style={styles.value}>{user.Gender}</Text>
+              <Text style={styles.value}>{user?.Gender}</Text>
             </View>
           </View>
           <View style={[styles.container, { marginTop: 20 }]}>
@@ -799,7 +799,7 @@ const VerifyDetails = ({ navigation, route }) => {
             </View>
             <View style={styles.right}>
               <Text style={styles.value}>
-                {user.Referrer_App_User_lookup.Name_field} -{' '}
+                {user?.Referrer_App_User_lookup.Name_field} -{' '}
               </Text>
               <Text style={styles.value}>
                 {user.Referrer_App_User_lookup.Email}
@@ -811,7 +811,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.label}>Department</Text>
             </View>
             <View style={styles.right}>
-              <Text style={styles.value}>{user.Department.Department}</Text>
+              <Text style={styles.value}>{user?.Department.Department}</Text>
             </View>
           </View>
           <View style={[styles.container, { marginTop: 20 }]}>
@@ -819,7 +819,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.label}>Number of Men</Text>
             </View>
             <View style={styles.right}>
-              <Text style={styles.value}>{user.Number_of_Men}</Text>
+              <Text style={styles.value}>{user?.Number_of_Men}</Text>
             </View>
           </View>
           <View style={[styles.container, { marginTop: 20 }]}>
@@ -827,7 +827,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.label}>Number of Women</Text>
             </View>
             <View style={styles.right}>
-              <Text style={styles.value}>{user.Number_of_Women}</Text>
+              <Text style={styles.value}>{user?.Number_of_Women}</Text>
             </View>
           </View>
           <View style={[styles.container, { marginTop: 20 }]}>
@@ -835,7 +835,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.label}>Number of Boys</Text>
             </View>
             <View style={styles.right}>
-              <Text style={styles.value}>{user.Number_of_Boys}</Text>
+              <Text style={styles.value}>{user?.Number_of_Boys}</Text>
             </View>
           </View>
           <View style={[styles.container, { marginTop: 20 }]}>
@@ -843,7 +843,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.label}>Number of Girls</Text>
             </View>
             <View style={styles.right}>
-              <Text style={styles.value}>{user.Number_of_Girls}</Text>
+              <Text style={styles.value}>{user?.Number_of_Girls}</Text>
             </View>
           </View>
           <View style={[styles.container, { marginTop: 20 }]}>
@@ -868,7 +868,7 @@ const VerifyDetails = ({ navigation, route }) => {
               </Text>
             </View>
             <View style={styles.right}>
-              <Text style={styles.value}>{user.Home_or_Office}</Text>
+              <Text style={styles.value}>{user?.Home_or_Office}</Text>
             </View>
           </View>
         </ScrollView>

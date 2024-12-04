@@ -74,9 +74,9 @@ const Pending = ({ navigation }) => {
       'PENDING APPROVAL',
       getAccessToken(),
     );
-    const all_pendings = result.data;
+    const all_pendings = result?.data||null;
     // sorting the pendings data by date
-    if (result.data === undefined) {
+    if (result?.data === undefined) {
       setPendings(null);
       setPendingsData(null);
       setRefreshing(false);
@@ -102,7 +102,7 @@ const Pending = ({ navigation }) => {
   );
 
   return (
-    <View style={{ flex: 1 }}>
+    <View testID="Pending" style={{ flex: 1 }}>
       <View style={{ flex: 1, paddingTop: 10, backgroundColor: '#FFFF' }}>
         {loading ? (
           <View style={styles.loadingContainer}>

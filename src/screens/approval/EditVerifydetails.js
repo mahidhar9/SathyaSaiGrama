@@ -34,7 +34,8 @@ const EditVerifyDetails = ({navigation, route}) => {
   } else {
     heightStyles = smallScreen;
   }
-  const {user} = route.params;
+  const { user: userParam } = route?.params || {};
+  let user = userParam;
   if (typeof user === 'string') {
     console.log('inside if stringified');
     // const {user} = route.params;

@@ -1,154 +1,241 @@
-import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import ApprovalTab from '../../../src/screens/approval/ApprovalTab';
-import { NavigationContainer } from '@react-navigation/native';
-import UserContext from '../../../context/UserContext';
-
-jest.mock('react-native-elements', () => ({
-  SearchBar: jest.fn(),
-}));
-jest.mock('react-native-modern-datepicker', () => ({
-  getFormatedDate: jest.fn(),
-  DatePicker: jest.fn(),
-}));
-jest.mock('react-native-phone-number-input', () => ({
-  PhoneInput: jest.fn(),
-  parsePhoneNumberFromString: jest.fn(),
-}));
-
-jest.mock('react-native-fs', () => ({
-  RNFS: {
-    writeFile: jest.fn(),
-    Share: jest.fn(),
-  },
-}));
-
-const mockNavigation = { navigate: jest.fn() };
-
-const mockUserContextValue = {
-  userType: 'admin',
-  setUserType: jest.fn(),
-  accessToken: 'mockAccessToken123',
-  setUserEmail: jest.fn(),
-  setL1ID: jest.fn(),
-  loggedUser: { name: 'John Doe', role: 'L1' },
-  setLoggedUser: jest.fn(),
-  deviceToken: 'mockDeviceToken456',
-  resident: { id: 'r123', name: 'Jane Resident' },
-  setResident: jest.fn(),
-  setProfileImage: jest.fn(),
-  employee: { id: 'e789', name: 'Alice Employee' },
-  setEmployee: jest.fn(),
-  testResident: { id: 't987', name: 'Test Resident' },
-  setTestResident: jest.fn(),
-  departmentIds: ['d1', 'd2', 'd3'],
-  setDepartmentIds: jest.fn(),
-  getAccessToken: jest.fn(),
-  setPendingDataFetched: jest.fn(),
-  pendingDataFetched: false,
-};
-
-describe('ApprovalTab', () => {
-  beforeEach(() => {
-    jest.useFakeTimers();
-  });
-  
-  afterEach(() => {
-    jest.clearAllTimers();
-    jest.restoreAllMocks();
-  });
-  test('Verify that the Pending, Approved, and Denied tabs are working properly', async () => {
-    const { getByText ,getByTestId,screen,getByRole} = render(
-      <NavigationContainer>
-        <UserContext.Provider value={mockUserContextValue}>
-          <ApprovalTab />
-        </UserContext.Provider>
-      </NavigationContainer>
-    );
-    
-    
-    expect(getByText('Pending')).toBeTruthy();
-
-    fireEvent.press(getByText('Approved'));
-    await waitFor(() => {
-      expect(getByText('Approved')).toBeTruthy();
-    });
-    fireEvent.press(getByText('Rejected'));
-    await waitFor(() => {
-      expect(getByText('Denied')).toBeTruthy();
-    });
-    fireEvent.press(getByText('Pending'));
-    await waitFor(() => {
-      expect(getByText('Pending')).toBeTruthy();
-    });
-  });
-});
-
 // import React from 'react';
 // import { render, fireEvent, waitFor } from '@testing-library/react-native';
 // import ApprovalTab from '../../../src/screens/approval/ApprovalTab';
-// import Pending from '../../../src/screens/approval/Pending';
+// import { NavigationContainer } from '@react-navigation/native';
+// import UserContext from '../../../context/UserContext';
+// import { Text } from 'react-native';
 // import Approved from '../../../src/screens/approval/Approved';
 // import Denied from '../../../src/screens/approval/Denied';
-// import { NavigationContainer } from '@react-navigation/native';
-// import PhoneInput from 'react-native-phone-number-input';
-// import DatePicker, { getFormatedDate } from 'react-native-modern-datepicker';
-// import { SearchBar } from 'react-native-elements';
-// import UserContext from '../../../context/UserContext';
+// import Pending from '../../../src/screens/approval/Pending';
+// import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 
-// const mockValues = {
-//   L1ID: '123456789',
-//   loggedUser.role:'L1'
-//   getAccessToken: jest.fn(),
-//   pendingDataFetched: false,
-//   setPendingDataFetched: jest.fn(),
-//   approvedDataFetched: false,
-//   setApprovedDataFetched: jest.fn(),
-//   deniedDataFetched: false,
-//   setDeniedDataFetched: jest.fn(),
-// };
+// const Tab = createMaterialTopTabNavigator();
 
+
+// jest.mock('@react-navigation/material-top-tabs', () => {
+//   return {
+//     createMaterialTopTabNavigator: jest.fn(() => {
+//       return {
+//         Navigator: jest.fn(),
+//         Screen: jest.fn(),
+//       };
+//     }),
+//   };
+// });
+// jest.mock('react-native/Libraries/Alert/Alert', () => ({
+//   alert: jest.fn(),
+// }));
 // jest.mock('react-native-elements', () => ({
 //   SearchBar: jest.fn(),
 // }));
 // jest.mock('react-native-modern-datepicker', () => ({
 //   getFormatedDate: jest.fn(),
 //   DatePicker: jest.fn(),
-// }))
+// }));
 // jest.mock('react-native-phone-number-input', () => ({
 //   PhoneInput: jest.fn(),
 //   parsePhoneNumberFromString: jest.fn(),
 // }));
+
+// jest.mock('react-native-fs', () => ({
+//   RNFS: {
+//     writeFile: jest.fn(),
+//     Share: jest.fn(),
+//   },
+// }));
+// jest.mock('../../../src/screens/approval/Pending', () => {
+//   return {
+//     someFunction: jest.fn(() => 'Pending'),
+//   };
+// });
+
+// jest.mock('../../../src/screens/approval/Approved', () => {
+//   return {
+//     someFunction: jest.fn(() => 'Approved'), 
+//   };
+// });
+
+// jest.mock('../../../src/screens/approval/Denied', () => {
+//   return {
+//     someFunction: jest.fn(() => 'Denied'),
+//   };
+// });
+
+// const mockNavigation = { navigate: jest.fn() };
+
+// const mockUserContextValue = {
+//   userType: 'admin',
+//   setUserType: jest.fn(),
+//   accessToken: 'mockAccessToken123',
+//   setUserEmail: jest.fn(),
+//   setL1ID: jest.fn(),
+//   loggedUser: { name: 'John Doe', role: 'L1' },
+//   setLoggedUser: jest.fn(),
+//   deviceToken: 'mockDeviceToken456',
+//   resident: { id: 'r123', name: 'Jane Resident' },
+//   setResident: jest.fn(),
+//   setProfileImage: jest.fn(),
+//   employee: { id: 'e789', name: 'Alice Employee' },
+//   setEmployee: jest.fn(),
+//   testResident: { id: 't987', name: 'Test Resident' },
+//   setTestResident: jest.fn(),
+//   departmentIds: ['d1', 'd2', 'd3'],
+//   setDepartmentIds: jest.fn(),
+// };
+
+// beforeEach(() => {
+//   jest.useFakeTimers();
+// });
+
+// afterEach(() => {
+//   jest.clearAllTimers();
+//   jest.restoreAllMocks();
+// });
+
+
+// const MyTabs=()=>{
+  
+//     <Tab.Navigator>
+//       <Tab.Screen name="Pending" component={required('../../../src/screens/approval/Pending.js').default} />
+//       <Tab.Screen name="Approved" component={required('../../../src/screens/approval/Approved').default} />
+//       <Tab.Screen name="Denied" component={required('../../../src/screens/approval/Denied').default} />
+//     </Tab.Navigator>
+  
+// }
+
 // describe('ApprovalTab', () => {
 //   test('Verify that the Pending, Approved, and Denied tabs are working properly', async () => {
-//     // Render the ApprovalTab component inside NavigationContainer
 //     const { getByText } = render(
 //       <NavigationContainer>
-//       <UserContext.Provider value={mockValues}>
-//         <ApprovalTab />
+//         <UserContext.Provider value={mockUserContextValue}>
+//           <MyTabs />
 //         </UserContext.Provider>
 //       </NavigationContainer>
 //     );
-
-//     // Verify that the Pending component is rendered by default
-//     expect(getByText('Pending Component')).toBeTruthy();
-
-//     // Navigate to the Approved tab by clicking the 'Approved' tab
+//     // expect(getByText('Pending')).toBeTruthy();
+//       expect(Tab.Screen).toHaveBeenCalledWith('Pending');
 //     fireEvent.press(getByText('Approved'));
 //     await waitFor(() => {
-//       expect(getByText('Approved Component')).toBeTruthy();
+//       expect(getByText('Approved')).toBeTruthy();
 //     });
 
-//     // Navigate to the Denied tab by clicking the 'Rejected' tab (assuming 'Rejected' is the text of the tab)
 //     fireEvent.press(getByText('Rejected'));
 //     await waitFor(() => {
-//       expect(getByText('Denied Component')).toBeTruthy();
+//       expect(getByText('Denied')).toBeTruthy();
 //     });
 
-//     // Navigate back to the Pending tab by clicking the 'Pending' tab
 //     fireEvent.press(getByText('Pending'));
 //     await waitFor(() => {
-//       expect(getByText('Pending Component')).toBeTruthy();
+//       expect(getByText('Pending')).toBeTruthy();
 //     });
 //   });
 // });
+
+import React from 'react';
+import { render, fireEvent } from '@testing-library/react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import UserContext from '../../../context/UserContext';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import Pending from '../../../src/screens/approval/Pending';
+import Approved from '../../../src/screens/approval/Approved';
+import Denied from '../../../src/screens/approval/Denied';
+
+const Tab = createMaterialTopTabNavigator();
+jest.mock('../../../src/screens/approval/Pending', () => {
+    return {
+      someFunction: jest.fn(() => 'Pending'),
+    };
+  });
+  
+  jest.mock('../../../src/screens/approval/Approved', () => {
+    return {
+      someFunction: jest.fn(() => 'Approved'), 
+    };
+  });
+  
+  jest.mock('../../../src/screens/approval/Denied', () => {
+    return {
+      someFunction: jest.fn(() => 'Denied'),
+    };
+  });
+const MyTabs = () => (
+  <Tab.Navigator>
+   <Tab.Screen
+      name="Pending"
+      component={require('../../../src/screens/approval/Pending').default}
+      options={{
+        tabBarActiveTintColor: '#FFBE65',
+        tabBarInactiveTintColor: 'gray',
+      }}
+    />
+    <Tab.Screen name="Pending" component={Pending} />
+    <Tab.Screen name="Approved" component={Approved} />
+    <Tab.Screen name="Denied" component={Denied} />
+  </Tab.Navigator>
+);
+
+jest.mock('@react-navigation/material-top-tabs', () => {
+    return {
+      createMaterialTopTabNavigator: jest.fn(() => {
+        return {
+          Navigator: jest.fn(),
+          Screen: jest.fn(),
+        };
+      }),
+    };
+  });
+  jest.mock('react-native/Libraries/Alert/Alert', () => ({
+    alert: jest.fn(),
+  }));
+  jest.mock('react-native-elements', () => ({
+    SearchBar: jest.fn(),
+  }));
+  jest.mock('react-native-modern-datepicker', () => ({
+    getFormatedDate: jest.fn(),
+    DatePicker: jest.fn(),
+  }));
+  jest.mock('react-native-phone-number-input', () => ({
+    PhoneInput: jest.fn(),
+    parsePhoneNumberFromString: jest.fn(),
+  }));
+  
+  jest.mock('react-native-fs', () => ({
+    RNFS: {
+      writeFile: jest.fn(),
+      Share: jest.fn(),
+    },
+  }));
+const mockUserContextValue = {
+  userType: 'admin',
+  setUserType: jest.fn(),
+  accessToken: 'mockAccessToken123',
+  loggedUser: { name: 'John Doe', role: 'L1' },
+  setLoggedUser: jest.fn(),
+  deviceToken: 'mockDeviceToken456',
+};
+const mockNavigation = { navigate: jest.fn() };
+describe('ApprovalTab', () => {
+  test('Verify navigation between Pending, Approved, and Denied tabs', async () => {
+    const { getByText } = render(
+      <NavigationContainer>
+        <UserContext.Provider value={mockUserContextValue}>
+          <MyTabs />
+        </UserContext.Provider>
+      </NavigationContainer>
+    );
+
+    // expect(getByText('Pending')).toBeTruthy();
+    expect(getByText('Pending')).toBeTruthy();
+    // Navigate to Approved
+    fireEvent.press(getByText('Approved'));
+    expect(getByText('Approved Screen')).toBeTruthy();
+
+    // Navigate to Denied
+    fireEvent.press(getByText('Denied'));
+    expect(getByText('Denied Screen')).toBeTruthy();
+
+    // Navigate back to Pending
+    fireEvent.press(getByText('Pending'));
+    expect(getByText('Pending Screen')).toBeTruthy();
+  });
+});

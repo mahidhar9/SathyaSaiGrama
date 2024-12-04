@@ -41,6 +41,7 @@ import Toast from 'react-native-toast-message';
 import {launchImageLibrary, launchCamera} from 'react-native-image-picker';
 import {PERMISSIONS, request} from 'react-native-permissions';
 import MyProfileSkeletonLoader from '../components/MyProfileSkeletonScreen'
+import {Platform} from 'react-native'
 const Profile = ({navigation}) => {
  const {
     getAccessToken,
@@ -95,7 +96,9 @@ const Profile = ({navigation}) => {
     formState: {errors},
   } = useForm();
 
+console.log('OutSide HandleDeleteAccount')
   const handleDeleteAccount = async (email, password) => {
+    console.log('THis is profile Screen')
     const credential = EmailAuthProvider.credential(userEmail, password);
 
     try {

@@ -10,6 +10,7 @@ import React, {useState} from 'react';
 import {Image} from 'react-native-elements';
 import FamilyMember from './FamilyMember';
 import {getDataWithInt} from '../components/ApiRequest';
+import {Platform} from 'react-native';
 
 const MyProfile = ({route, navigation}) => {
   const userdata = route.params?.userInfo[0];
@@ -98,6 +99,7 @@ const MyProfile = ({route, navigation}) => {
             }
             style={styles.edit}>
             <Image
+            testID="edit"
               source={require('../assets/edit.png')}
               style={{width: 17, height: 14.432, marginEnd: 5, flexShrink: 0}}
             />
@@ -109,8 +111,8 @@ const MyProfile = ({route, navigation}) => {
         {vehicledata ? (
           vehicledata.map((vehicle, index) => (
             <View key={index} style={styles.input}>
-              <Text style={styles.label}>{vehicle.Vehicle_Type}:</Text>
-              <Text style={styles.value}>{vehicle.Vehicle_Number}</Text>
+              <Text testID='Vehicle_Type' style={styles.label}>{vehicle.Vehicle_Type}:</Text>
+              <Text testID='Vehicle_Number' style={styles.value}>{vehicle.Vehicle_Number}</Text>
             </View>
           ))
         ) : (

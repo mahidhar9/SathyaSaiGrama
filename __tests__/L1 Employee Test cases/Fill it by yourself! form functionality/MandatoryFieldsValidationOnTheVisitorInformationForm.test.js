@@ -5,12 +5,10 @@ import UserContext from '../../../context/UserContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 jest.spyOn(global, 'fetch').mockImplementation((url, options) => {
-  ok: true;
-  passcodeData: jest.fn().mockResolvedValue({ ok: true });
   return Promise.resolve({
+    ok: true,
     json: () => Promise.resolve({ ok: true }),
   });
-  
 });
 
 jest.mock('react-native-calendars', () => ({
@@ -39,18 +37,8 @@ jest.mock('react-native-fs', () => ({
 jest.mock('react-native-gesture-handler', () => ({
   GestureHandlerRootView: ({ children }) => children,
   TouchableOpacity: ({ children }) => children,
-  Swipeable: ({ children }) => children,
-  DrawerLayout: ({ children }) => children,
-  State: {},
-  ScrollView: ({ children }) => children,
-  PanGestureHandler: ({ children }) => children,
-  BaseButton: ({ children }) => children,
-  RectButton: ({ children }) => children,
-  BorderlessButton: ({ children }) => children,
-  FlatList: ({ children }) => children,
-  gestureHandlerRootHOC: jest.fn(),
-  Directions: {},
 }));
+
 const mockNavigation = { navigate: jest.fn() };
 
 const mockUserContextValue = {
@@ -73,6 +61,7 @@ const mockUserContextValue = {
   setDepartmentIds: jest.fn(),
 };
 
+describe('Visitor Information Form', () => {
   test('Verify that validation messages appear below all mandatory fields when left empty', async () => {
     const { getByText } = render(
       <GestureHandlerRootView>
@@ -82,11 +71,14 @@ const mockUserContextValue = {
       </GestureHandlerRootView>
     );
 
+    // Step 1: Click on the Submit button without filling any fields
     fireEvent.press(getByText('Submit'));
 
+    // Step 2: Observe if validation messages are shown
     await waitFor(() => {
       expect(getByText('Prefix, First Name and Last Name are required')).toBeTruthy();
       expect(getByText('Phone number is required')).toBeTruthy();
       expect(getByText('Date of visit is required')).toBeTruthy();
     });
   });
+});
