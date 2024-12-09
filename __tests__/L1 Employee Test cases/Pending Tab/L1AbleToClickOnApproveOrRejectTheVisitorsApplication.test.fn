@@ -1,0 +1,92 @@
+import React from 'react';
+import { render, fireEvent, waitFor, cleanup } from '@testing-library/react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import UserContext from '../../../context/UserContext';
+import VerifyDetails from '../../../src/screens/approval/VerifyDetails';
+
+jest.mock('react-native-share', () => {
+  return {
+    Share: jest.fn(),
+  };
+});
+jest.mock('react-native-dialog', () => {
+  return {
+    Dialog: jest.fn(),
+  };
+});
+jest.mock('react-native-fs', () => {
+  return {
+    writeFile: jest.fn(),
+    RNFS: jest.fn(),
+    ExternalDirectoryPath: jest.fn(),
+  };
+});
+jest.mock('react-native-phone-number-input', () => {
+  return {
+    PhoneInput: jest.fn(),
+  };
+});
+
+const mockUserContextValue = {
+  userType: 'admin',
+  setUserType: jest.fn(),
+  accessToken: 'mockAccessToken123',
+  setUserEmail: jest.fn(),
+  setL1ID: jest.fn(),
+  loggedUser: { name: 'John Doe' },
+  setLoggedUser: jest.fn(),
+  deviceToken: 'mockDeviceToken456',
+  resident: { id: 'r123', name: 'Jane Resident' },
+  setResident: jest.fn(),
+  setProfileImage: jest.fn(),
+  getAccessToken: jest.fn(),
+  setPendingDataFetched: true,
+};
+
+const mockNavigation = { navigate: jest.fn() };
+
+describe('L1 Able to Approve or Reject Visitor Application', () => {
+  afterEach(cleanup);
+
+  test('Verify that L1 can approve or reject visitor application', async () => {
+    const user = {
+      L2_Approval_Status: 'PENDING',
+      Guest_Category: 'Corporate',
+      Priority: 'P2',
+      Remarks: 'Initial remarks',
+    };
+
+    const { getByText, getByPlaceholderText, getByTestId, queryByText, debug } = render(
+      <UserContext.Provider value={mockUserContextValue}>
+        <NavigationContainer>
+          <VerifyDetails navigation={mockNavigation} route={{ params: { user } }} />
+        </NavigationContainer>
+      </UserContext.Provider>
+    );
+
+    debug();
+
+    // Verify that the Verify Details screen is displayed
+    await waitFor(() => {
+      expect(queryByText('Visitor details')).toBeTruthy();
+    });
+
+    // Simulate clicking the Approve button
+    fireEvent.press(getByText('Approve'));
+
+    // Verify that the visitor application is approved and moves to the approved tab
+    await waitFor(() => {
+      expect(mockNavigation.navigate).toHaveBeenCalledWith('Approved');
+      expect(queryByText('Visitor application is approved by the L1 and application goes to approved tab')).toBeTruthy();
+    });
+
+    // Simulate clicking the Reject button
+    fireEvent.press(getByText('Reject'));
+
+    // Verify that the visitor application is rejected
+    await waitFor(() => {
+      expect(mockNavigation.navigate).toHaveBeenCalledWith('Denied');
+      expect(queryByText('Visitor application is rejected by the L1')).toBeTruthy();
+    });
+  });
+});

@@ -4,15 +4,19 @@ import FillByYourSelf from '../../../src/screens/FillByYourSelf';
 import UserContext from '../../../context/UserContext';
 import { TextInput,TouchableOpacity as MockTouchableOpacity} from 'react-native';
 import {  GestureHandlerRootView,   } from 'react-native-gesture-handler';
-
+import {Dropdown} from 'react-native-element-dropdown';
 import RNFS from 'react-native-fs';
 import { Picker } from '@react-native-picker/picker';
-import DatePicker from 'react-native-modern-datepicker';
+import { View } from 'react-native';
 
-
+jest.spyOn(View.prototype, 'measureInWindow').mockImplementation(callback => {
+  callback(100, 200, 300, 400);
+});
 jest.mock('react-native-modern-datepicker', () => {
   return {
-    DatePicker: jest.fn(),
+    DatePicker: jest.fn((props)=>{
+      return props.children
+  }),
   };
 });
 jest.mock('@react-native-picker/picker', () => {
@@ -45,14 +49,11 @@ jest.mock('react-native-gesture-handler',()=>{
     }),
   }
 })
-// jest.spyOn(global, 'fetch').mockImplementation(() => {
-//   return Promise.resolve({
-//     ok: true,
-//   });
-// });
-
 jest.mock('react-native-calendars', () => ({
-  CalendarList: jest.fn(),
+  
+  CalendarList: jest.fn((props)=>{
+    return props.children
+  }),
 }));
 jest.mock('react-native-share', () => ({
   Share: jest.fn(),
@@ -89,33 +90,29 @@ const mockUserContextValue = {
 };
 
 const mockNavigation = { navigate: jest.fn() };
-  
-describe('Visitor Information Form', () => {
-  afterEach(cleanup);
-
-  test('Verify that validation messages appear below all mandatory fields when left empty', async () => {
-    const { getByText, getByTestId, getByPlaceholderText,screen ,debug} = render(
-      
-        <UserContext.Provider value={mockUserContextValue}>
-          <FillByYourSelf navigation={mockNavigation} />
-        </UserContext.Provider>
-  
+const renderComponent = (loggedUser) => {
+    return render(
+      <UserContext.Provider value={{ loggedUser }}>
+        <FillByYourSelf navigation={mockNavigation} />
+      </UserContext.Provider>
     );
-debug();
+  };
+  
 
-    await waitFor(() => {
-      expect(getByTestId('submitButton')).toBeTruthy();
-    });
-    // Simulate pressing the Submit button
-    fireEvent.press(getByTestId('submitButton'));
+describe('Visitor Information Form', () => {
+    test('Verify that the user can Validate guest category dropdown', async () => {
+        const loggedUser = { resident: true, employee: true };
+        const { getByText,getByTestId, queryAllByText,debug ,queryByText,getAllByText} = renderComponent(loggedUser);
+        
+        expect(getByTestId('GuestCategory')).toBeTruthy();
+        fireEvent.press(getByTestId('GuestCategory'));
+        fireEvent.press(getAllByText('...')[0]);
+        fireEvent.press(getByText('Govt Officials'));
+        await waitFor(() => {
+            expect(getByText('Govt Officials')).toBeTruthy(); 
+        })
+        
+        
 
-    // Verify that validation messages appear
-    await waitFor(() => {
-      expect(getByText('Prefix, First Name and Last Name are required')).toBeTruthy();
-      expect(getByText('Phone number is required')).toBeTruthy();
-      expect(getByText('Date of visit is required')).toBeTruthy();
-      expect(getByText('Single or Group is required')).toBeTruthy();
-      expect(getByText('Gender is required')).toBeTruthy();
-    });
-  });
-});
+    })
+})

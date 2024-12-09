@@ -45,14 +45,11 @@ jest.mock('react-native-gesture-handler',()=>{
     }),
   }
 })
-// jest.spyOn(global, 'fetch').mockImplementation(() => {
-//   return Promise.resolve({
-//     ok: true,
-//   });
-// });
-
 jest.mock('react-native-calendars', () => ({
-  CalendarList: jest.fn(),
+  
+  CalendarList: jest.fn((props)=>{
+    return props.children
+  }),
 }));
 jest.mock('react-native-share', () => ({
   Share: jest.fn(),
@@ -92,30 +89,29 @@ const mockNavigation = { navigate: jest.fn() };
   
 describe('Visitor Information Form', () => {
   afterEach(cleanup);
-
-  test('Verify that validation messages appear below all mandatory fields when left empty', async () => {
-    const { getByText, getByTestId, getByPlaceholderText,screen ,debug} = render(
-      
-        <UserContext.Provider value={mockUserContextValue}>
-          <FillByYourSelf navigation={mockNavigation} />
-        </UserContext.Provider>
-  
+  const renderComponent = (loggedUser) => {
+    return render(
+      <UserContext.Provider value={{ loggedUser }}>
+        <FillByYourSelf navigation={mockNavigation} />
+      </UserContext.Provider>
     );
+  };
+  test('Verify that  user can able to select gender selection', async () => {
+    const loggedUser = { resident: true, employee: true };
+    const { getByText,getByPlaceholderText, getByTestId, queryByText, debug } = renderComponent(loggedUser);
+
+  
 debug();
 
-    await waitFor(() => {
-      expect(getByTestId('submitButton')).toBeTruthy();
-    });
-    // Simulate pressing the Submit button
-    fireEvent.press(getByTestId('submitButton'));
+fireEvent.press(getByText('Male'));
+expect(getByText('Male')).toBeTruthy();
+expect(getByText('Female')).not.toBeTruthy();
 
-    // Verify that validation messages appear
-    await waitFor(() => {
-      expect(getByText('Prefix, First Name and Last Name are required')).toBeTruthy();
-      expect(getByText('Phone number is required')).toBeTruthy();
-      expect(getByText('Date of visit is required')).toBeTruthy();
-      expect(getByText('Single or Group is required')).toBeTruthy();
-      expect(getByText('Gender is required')).toBeTruthy();
-    });
-  });
+// fireEvent.press(getByText('Submit'));
+
+fireEvent.press(getByText('Female'));
+expect(getByText('Male')).not.toBeTruthy();
+expect(getByText('Female')).toBeTruthy();
+
+});
 });

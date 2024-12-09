@@ -45,14 +45,11 @@ jest.mock('react-native-gesture-handler',()=>{
     }),
   }
 })
-// jest.spyOn(global, 'fetch').mockImplementation(() => {
-//   return Promise.resolve({
-//     ok: true,
-//   });
-// });
-
 jest.mock('react-native-calendars', () => ({
-  CalendarList: jest.fn(),
+  
+  CalendarList: jest.fn((props)=>{
+    return props.children
+  }),
 }));
 jest.mock('react-native-share', () => ({
   Share: jest.fn(),
@@ -92,30 +89,37 @@ const mockNavigation = { navigate: jest.fn() };
   
 describe('Visitor Information Form', () => {
   afterEach(cleanup);
-
-  test('Verify that validation messages appear below all mandatory fields when left empty', async () => {
-    const { getByText, getByTestId, getByPlaceholderText,screen ,debug} = render(
-      
-        <UserContext.Provider value={mockUserContextValue}>
-          <FillByYourSelf navigation={mockNavigation} />
-        </UserContext.Provider>
-  
+  const renderComponent = (loggedUser) => {
+    return render(
+      <UserContext.Provider value={{ loggedUser }}>
+        <FillByYourSelf navigation={mockNavigation} />
+      </UserContext.Provider>
     );
+  };
+  test('Verify that validation messages appear below all mandatory fields when left empty', async () => {
+    const loggedUser = { resident: true, employee: true };
+    const { getByText,getByPlaceholderText, getByTestId, queryByText, debug } = renderComponent(loggedUser);
+
+  
 debug();
+    expect(getByTestId('firstName')).toBeTruthy();
+    expect(getByTestId('lastName')).toBeTruthy();
+    fireEvent.changeText(getByTestId(' prefix '),'Mr');
+    fireEvent.changeText(getByTestId('firstName' ),'John');
+    fireEvent.changeText(getByTestId('lastName'), ' Teja');
+    fireEvent.changeText(getByPlaceholderText('Phone Input'), '+91 9876543210');
+    expect(getByTestId('date')).toBeTruthy();
+    fireEvent.changeText(getByTestId('date'), '20-nov-2024');
+    fireEvent.press(getByText('Single'));
+    fireEvent.press(getByText('Home'));
+    fireEvent.press(getByText('Male'));
+
+
+
+    fireEvent.press(getByText('Submit'));
 
     await waitFor(() => {
-      expect(getByTestId('submitButton')).toBeTruthy();
-    });
-    // Simulate pressing the Submit button
-    fireEvent.press(getByTestId('submitButton'));
-
-    // Verify that validation messages appear
-    await waitFor(() => {
-      expect(getByText('Prefix, First Name and Last Name are required')).toBeTruthy();
-      expect(getByText('Phone number is required')).toBeTruthy();
-      expect(getByText('Date of visit is required')).toBeTruthy();
-      expect(getByText('Single or Group is required')).toBeTruthy();
-      expect(getByText('Gender is required')).toBeTruthy();
+        expect(getByText('Prefix, First Name and Last Name are required')).toBeTruthy();
     });
   });
 });

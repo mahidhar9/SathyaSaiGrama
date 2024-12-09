@@ -1,39 +1,63 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
-import { MyApprovals } from '../screens/MyApprovals'; // Replace with your actual component
-import { RejectedApplicationsContext } from '../context/RejectedApplicationsContext'; // Replace with your context
+import { render, fireEvent ,waitFor } from '@testing-library/react-native';
 import { NavigationContainer } from '@react-navigation/native';
+import L2Denied from '../../../src/screens/L2-approval/L2Denied';
+import UserContext from '../../../context/UserContext';
+import PhoneInput from 'react-native-phone-number-input';
+import DatePicker, { getFormatedDate } from 'react-native-modern-datepicker'
 
-describe('Rejected Applications Tab', () => {
-  it('should display all L1 and L2 rejected applications in the Rejected tab', () => {
-    // Mock rejected applications data
+
+jest.mock('react-native-modern-datepicker', () => {
+  return {
+    DatePicker: jest.fn(),
+    getFormatedDate: jest.fn(),
+  }});
+jest.mock('react-native-phone-number-input', () => {
+          return {
+            phoneInput: jest.fn(),
+          }
+        })
+describe('Rejected Applications Tab',() => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+  afterEach(() => {
+    jest.clearAllTimers();
+    jest.restoreAllMocks();
+  });
+  it('should display all L1 and L2 rejected applications in the Rejected tab', async () => {
+
     const mockRejectedApplications = [
       { id: 1, level: 'L1', applicant: 'John Doe', status: 'Rejected' },
       { id: 2, level: 'L2', applicant: 'Jane Smith', status: 'Rejected' },
     ];
 
-    // Mock RejectedApplicationsContext value
-    const mockContextValue = {
-      rejectedApplications: mockRejectedApplications,
-      fetchRejectedApplications: jest.fn(),
+    const mockUserContextValue = {
+      userType: 'admin',
+      setUserType: jest.fn(),
+      accessToken: 'mockAccessToken123',
+      setUserEmail: jest.fn(),
+      setL1ID: jest.fn(),
+      loggedUser: { name: 'John Doe', role: 'L2' }, 
+      setLoggedUser: jest.fn(),
+      deviceToken: 'mockDeviceToken456',
+      resident: { id: 'r123', name: 'Jane Resident' },
+      setResident: jest.fn(),
+      setProfileImage: jest.fn(),
+      setL2DeniedDataFetched: jest.fn(), 
+        L2DeniedDataFetched: false,
     };
-
-    // Render component with context and navigation
-    const { getByText, getAllByText } = render(
-      <RejectedApplicationsContext.Provider value={mockContextValue}>
+    const { getByText, getAllByText ,debug} = render(
+      <UserContext.Provider value={mockUserContextValue}>
         <NavigationContainer>
-          <MyApprovals />
+          <L2Denied navigation={{ navigate: jest.fn() }}/>
         </NavigationContainer>
-      </RejectedApplicationsContext.Provider>
+      </UserContext.Provider>
     );
-
-    // Navigate to the "Rejected" tab
-    const rejectedTabButton = getByText('Rejected'); // Adjust button text to match your UI
-    fireEvent.press(rejectedTabButton);
-
-    // Verify L1 and L2 rejected applications are displayed
-    expect(getByText('John Doe')).toBeTruthy(); // L1 Rejected application
-    expect(getByText('Jane Smith')).toBeTruthy(); // L2 Rejected application
-    expect(getAllByText('Rejected')).toHaveLength(2); // Verify both applications are rejected
+    debug();
+    await waitFor(() => {
+      expect(getByText('John Doe')).toBeTruthy();
+      expect(getByText('Jane Smith')).toBeTruthy();
+    });
   });
 });

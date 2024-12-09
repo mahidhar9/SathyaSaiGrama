@@ -959,7 +959,12 @@ const FillByYourSelf = ({navigation}) => {
                       flexDirection: 'row',
                       justifyContent: 'space-between',
                     }}>
+
+
+
+
                     <Dropdown
+                    testID='prefix'
                       style={[styles.dropdown, { width: '25%' }]}
                       placeholderStyle={styles.placeholderStyle}
                       selectedTextStyle={styles.selectedTextStyle}
@@ -984,6 +989,7 @@ const FillByYourSelf = ({navigation}) => {
                     />
 
                     <TextInput
+                    testID='firstName'
                       style={[
                         styles.dropdown,
                         { width: '32%', color: '#71727A' },
@@ -1000,6 +1006,7 @@ const FillByYourSelf = ({navigation}) => {
                     />
 
                     <TextInput
+                    testID='lastName'
                       style={[
                         styles.dropdown,
                         { width: '30%', color: '#71727A' },
@@ -1083,6 +1090,7 @@ const FillByYourSelf = ({navigation}) => {
                         setShowModal(true);
                       }}>
                       <TextInput
+                       testID='date'
                         style={[
                           styles.phoneInputContainer,
                           { paddingLeft: 12, color: '#71727A' },
@@ -1125,6 +1133,7 @@ const FillByYourSelf = ({navigation}) => {
                     <Text style={styles.errorText}>{dateOfVisitErr}</Text>
                   )}
                   <Modal
+                 
                     animationType="none"
                     transparent={true}
                     visible={showModal}
@@ -1144,6 +1153,7 @@ const FillByYourSelf = ({navigation}) => {
                               />
                             </Pressable>
                             <CalendarList
+                              testID='date'
                               current={date === 'Select Date' ? minDate : date}
                               minDate={minDate}
                               maxDate={maxDate}
@@ -1196,6 +1206,7 @@ const FillByYourSelf = ({navigation}) => {
                     {singleorgroup.map(optionss => {
                       return (
                         <TouchableOpacity
+                          testID='Group'
                           key={optionss}
                           style={styles.singleOptionContainer}
                           onPress={() => {
@@ -1304,10 +1315,13 @@ const FillByYourSelf = ({navigation}) => {
                     <View style={styles.radioButtonContainer}>
                       {homeoroffice.map(option => {
                         return (
+                          
                           <TouchableOpacity
                             key={option}
                             style={styles.singleOptionContainer}
+                            
                             onPress={() => {
+                              testID='selectedHO'
                               setSelectedHO(option);
                               setHomeOrOfficeErr(null);
                             }}>
@@ -1402,6 +1416,7 @@ const FillByYourSelf = ({navigation}) => {
                   <View style={styles.namecontainer}>
                     <Text style={styles.label}>Guest Category</Text>
                     <Dropdown
+                    testID='GuestCategory'
                       style={[
                         styles.dropdown,
                         { width: '95%', paddingLeft: 12, color: '#71727a' },
@@ -1427,6 +1442,7 @@ const FillByYourSelf = ({navigation}) => {
                   <View style={styles.namecontainer}>
                     <Text style={styles.label}>Priority</Text>
                     <Dropdown
+                    testID='Priority'
                       style={[
                         styles.dropdown,
                         { width: '95%', paddingLeft: 12, color: '#71727a' },

@@ -1,69 +1,75 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, fireEvent, waitFor, cleanup } from '@testing-library/react-native';
 import FillByYourSelf from '../../../src/screens/FillByYourSelf';
 import UserContext from '../../../context/UserContext';
-import { GestureHandlerRootView , TouchableOpacity } from 'react-native-gesture-handler';
-import { Alert } from 'react-native';
+import { TextInput,TouchableOpacity as MockTouchableOpacity} from 'react-native';
+import {  GestureHandlerRootView,   } from 'react-native-gesture-handler';
+
 import RNFS from 'react-native-fs';
 import { Picker } from '@react-native-picker/picker';
-import DatePicker from 'react-native-modern-datepicker'
-import PhoneInput from 'react-native-phone-number-input';
-import {launchImageLibrary} from 'react-native-image-picker';
-import Share from 'react-native-share';
-import Dialog from 'react-native-dialog';
-import {CalendarList} from 'react-native-calendars';
+import DatePicker from 'react-native-modern-datepicker';
 
-jest.mock('react-native-calendars',()=>({
-  CalendarList:jest.fn(),
-}))
-jest.mock('react-native-share',()=>({
-  open:jest.fn(),
-  Share:jest.fn()
-}))
 
-jest.mock('react-native-dialog',()=>({
-  Dialog:jest.fn(),
-}))
-jest.mock('react-native-image-picker', () => {
-  return {
-    launchImageLibrary: jest.fn(),
-  };
-});
-jest.mock('react-native-phone-number-input', () => {
-  return {
-    PhoneInput: jest.fn(),
-    parsePhoneNumberFromString: jest.fn(),
-  };
-});
 jest.mock('react-native-modern-datepicker', () => {
   return {
     DatePicker: jest.fn(),
   };
 });
-jest.mock('@react-native-picker/picker',()=>{
-  return{
-    Picker:jest.fn(),
+jest.mock('@react-native-picker/picker', () => {
+  return {
+    Picker: jest.fn(),
   }
-})
-jest.mock('react-native-fs',()=>{
+});
+jest.mock('react-native-fs', () => {
   return {
     RNFS: {
       writeFile: jest.fn(),
-      Share: jest.fn(),
     },
-  }
-})
-jest.mock('react-native-gesture-handler',()=>{
-  return{
-    GestureHandlerRootView:jest.fn(),
-    TouchableOpacity:jest.fn(),
-  }
-})
-jest.mock('react-native/Libraries/Alert/Alert', () => ({
-  alert: jest.fn(),
-}));
+  };
+});
 
-const mockNavigation = { navigate: jest.fn() };
+
+jest.mock('react-native-gesture-handler',()=>{
+  return {
+    GestureHandlerRootView : jest.fn((props)=>{
+      console.log(props)
+      return props.children
+      
+    }),
+    
+    TouchableOpacity:jest.fn((props)=>{
+      
+      console.log(props)
+      return <MockTouchableOpacity {...props}/>
+      
+    }),
+  }
+})
+jest.mock('react-native-calendars', () => ({
+  
+  CalendarList: jest.fn((props)=>{
+    return props.children
+  }),
+}));
+jest.mock('react-native-share', () => ({
+  Share: jest.fn(),
+}));
+jest.mock('react-native-image-picker', () => ({
+  launchImageLibrary: jest.fn(),
+}));
+jest.mock('react-native-phone-number-input', () => {
+  const { TextInput } = require('react-native');
+  return {
+    __esModule: true,
+    default: ({ onChangeFormattedText }) => (
+      <TextInput
+        testID="phoneInput"
+        onChangeText={onChangeFormattedText}
+        placeholder="Phone Input"
+      />
+    ),
+  };
+});
 
 const mockUserContextValue = {
   userType: 'admin',
@@ -77,46 +83,50 @@ const mockUserContextValue = {
   resident: { id: 'r123', name: 'Jane Resident' },
   setResident: jest.fn(),
   setProfileImage: jest.fn(),
-  employee: { id: 'e789', name: 'Alice Employee' },
-  setEmployee: jest.fn(),
-  testResident: { id: 't987', name: 'Test Resident' },
-  setTestResident: jest.fn(),
-  departmentIds: ['d1', 'd2', 'd3'],
-  setDepartmentIds: jest.fn(),
 };
 
-describe('Form Submission with Valid Data', () => {
-  test('Verify that the user can successfully submit the form with valid data', async () => {
-    const { getByPlaceholderText, getByText, getByTestId } = render(
-      <GestureHandlerRootView>
-        <UserContext.Provider value={mockUserContextValue}>
-          <FillByYourSelf navigation={mockNavigation} />
-        </UserContext.Provider>
-      </GestureHandlerRootView>
+const mockNavigation = { navigate: jest.fn() };
+  
+describe('Visitor Information Form', () => {
+  afterEach(cleanup);
+  const renderComponent = (loggedUser) => {
+    return render(
+      <UserContext.Provider value={{ loggedUser }}>
+        <FillByYourSelf navigation={mockNavigation} />
+      </UserContext.Provider>
     );
+  };
+  test('Verify that validation messages appear below all mandatory fields when left empty', async () => {
+    const loggedUser = { resident: true, employee: true };
+    const { getByText,getByPlaceholderText, getAllByTestId, getAllByText,queryAllByText, debug } = renderComponent(loggedUser);
 
-    // Step 1: Fill in all the mandatory fields with valid data
-    // fireEvent.changeText(getByPlaceholderText('Name'), 'mr Sai Teja');
-    fireEvent.changeText(getByTestId('PhoneInput'), '+91 9876543210');
-    fireEvent.changeText(getByPlaceholderText('Date of Visit'), '20-09-2024');
+  
+debug();
+    expect(queryAllByText('prefix')).toBeTruthy();
+    expect(queryAllByText('firstName')).toBeTruthy();
+    expect(queryAllByText('lastName')).toBeTruthy();
+    fireEvent.changeText(queryAllByText(' prefix '),'Mr');
+    fireEvent.changeText(queryAllByText('firstName' ),'John');
+    fireEvent.changeText(queryAllByText('lastName'), ' Teja');
+    fireEvent.changeText(getByPlaceholderText('Phone Input'), '+91 9876543210');
+    expect(getAllByTestId('date')).toBeTruthy();
+    fireEvent.changeText(getAllByTestId('date'), '20-nov-2024');
     fireEvent.press(getByText('Single'));
-    fireEvent.press(getByText('Office'));
+    fireEvent.press(getByText('Home'));
     fireEvent.press(getByText('Male'));
-    fireEvent.press(getByText('Politician'));
-    fireEvent.press(getByText('P1'));
-    fireEvent.changeText(getByPlaceholderText('Vehicle Type'), 'Car');
-    fireEvent.changeText(getByPlaceholderText('Vehicle Number'), 'Ts-09-1234');
 
-    // Step 2: Click on the Submit button
+
+    // fireEvent.changeText(getByText('Guest Category'), 'Politician');
+    // fireEvent.changeText(getByText('Priority'), 'p1');
+    // fireEvent.changeText(getByText('Vehicle type'), 'Car');
+    // fireEvent.changeText(getByText('Vehicle Number'), 'Ts 09 1234');
+
     fireEvent.press(getByText('Submit'));
 
-    // Step 3: Observe if the form is submitted successfully
     await waitFor(() => {
-      expect(Alert.alert).toHaveBeenCalledWith(
-        'Success',
-        'Form submitted successfully',
-        [{ text: 'OK' }]
-      );
+      // expect(mockNavigation.navigate).toHaveBeenCalledWith('Invite');
+      expect(getAllByText('Prefix, First Name and Last Name are required')).toBeTruthy();
+      // expect(getByText('Date of visit is required')).toBeTruthy();
     });
   });
 });

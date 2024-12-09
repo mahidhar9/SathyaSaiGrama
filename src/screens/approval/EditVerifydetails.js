@@ -424,9 +424,9 @@ const EditVerifyDetails = ({navigation, route}) => {
       {/* <View style={styles.header}>
         <Text style={styles.headertxt}>Edit visitor details</Text>
       </View> */}
-      <ScrollView
+      <ScrollView  
         style={{height: '92%s', backgroundColor: '#FFF', fontFamily: 'Inter'}}>
-        <View style={styles.v}>
+        <View testID='EditPage' style={styles.v}>
           <Text style={[styles.txt, {marginTop: 20}]}>Visitor Name</Text>
           <TextInput
             style={styles.inputtxt}

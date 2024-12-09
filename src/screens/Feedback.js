@@ -71,6 +71,7 @@ const Feedback = ({navigation}) => {
             Pick a subject and provide your feedback
           </Text>
           <Controller
+          testID='subjectDropdown'
             name="subject"
             control={control}
             rules={{required: 'Subject is required'}}
@@ -83,6 +84,7 @@ const Feedback = ({navigation}) => {
                   {label: 'Suggestion', value: 'Suggestion'},
                   {label: 'Compliment', value: 'Compliment'},
                 ]}
+                
                 maxHeight={300}
                 placeholder="Select an option"
                 labelField="label"

@@ -1,28 +1,43 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import Profile from '../../../src/screens/Profile';
-import MyProfile from '../../../src/screens/MyProfile';
+import Profile from '../../../src/screens/Profile'; 
 import UserContext from '../../../context/UserContext';
-import { AuthContext } from '../../../src/auth/AuthProvider';
 import { NavigationContainer } from '@react-navigation/native';
+import LinearGradient from 'react-native-linear-gradient';
+import {createShimmerPlaceholder} from 'react-native-shimmer-placeholder';
+import { AuthContext } from '../../../src/auth/AuthProvider';
+// import Toast from 'react-native-toast-message';
+import { signOut } from 'firebase/auth';
 
-jest.mock('@react-navigation/native', () => ({
-  useNavigation: jest.fn(),
+jest.mock('firebase/auth', () => ({
+  getReactNativePersistence: jest.fn().mockResolvedValue('local'),
+  initializeAuth: jest.fn(),
+  signOut: jest.fn(),
+  deleteUser: jest.fn(),
+  reauthenticateWithCredential: jest.fn(),
+  EmailAuthProvider: {
+    credential: jest.fn(),
+  },
 }));
+// jest.mock('react-native-toast-message', () => ({
+//   show: jest.fn(),
+//    hide: jest.fn(),
+//    Toast: jest.fn(() => <div />),
+//   })),
 
+jest.mock('react-native-shimmer-placeholder', () => ({
+  createShimmerPlaceholder: jest.fn(() => 'ShimmerPlaceholder'),
+
+}));
+jest.mock('react-native-linear-gradient', () => 'LinearGradient');
 jest.mock('react-native-toast-message', () => ({
   show: jest.fn(),
 }));
-
-jest.mock('react-native-elements', () => ({
-  SearchBar: jest.fn(),
-  Image : 'Image',
+jest.mock('react-native-safe-area-context', () => ({
+  SafeAreaView: jest.fn((props) => {
+    return props.children;
+  }),
 }));
-jest.mock('react-native-shimmer-placeholder', () => ({
-  createShimmerPlaceholder: jest.fn(() => (props) => jest.fn()),
-}));
-
-jest.mock('react-native-linear-gradient', () => 'LinearGradient');
 
 jest.mock('react-native-image-picker', () => ({
   launchImageLibrary: jest.fn(),
@@ -30,27 +45,39 @@ jest.mock('react-native-image-picker', () => ({
 }));
 
 jest.mock('react-native-permissions', () => ({
-  check: jest.fn().mockResolvedValue('granted'),
-  request: jest.fn().mockResolvedValue('granted'),
+  request: jest.fn(),
   PERMISSIONS: {
-    IOS: {
-      CAMERA: 'camera',
-      PHOTO_LIBRARY: 'photo',
-    },
     ANDROID: {
-      CAMERA: 'camera',
-      READ_EXTERNAL_STORAGE: 'read_external_storage',
+      CAMERA: 'android.permission.CAMERA',
+      READ_EXTERNAL_STORAGE: 'android.permission.READ_EXTERNAL_STORAGE',
     },
   },
 }));
 
-jest.mock('react-native/Libraries/Alert/Alert', () => ({
-  alert: jest.fn(),
+
+
+
+jest.mock('../../../src/components/ApiRequest', () => ({
+  getDataWithInt: jest.fn(() => Promise.resolve({
+    data: [{ ID: 'flat123', Building: 'Building A', Flat: 'Flat 101' }],
+  })),
+  getDataWithoutStringAndWithInt: jest.fn(() => Promise.resolve({
+    data: [{ ID: 'family123', Flats_lookup: { Building: 'Building A', Flat: 'Flat 101' } }],
+  })),
+  getDataWithString: jest.fn(() => Promise.resolve({
+    data: [{ ID: 'family123', Flats_lookup: { Building: 'Building A', Flat: 'Flat 101', Department: { ID: 'd1' } } }],
+  })),
+  getDataWithEmployee: jest.fn(() => Promise.resolve({
+    data: [{ Office_lookup: { Department: 'd1', Employee: 'e123' } }],
+  })),
 }));
 
-const mockNavigation = { navigate: jest.fn() };
 
+describe('Profile Component', () => {
+  const mockNavigation = { navigate: jest.fn() };
+  
 const mockUserContextValue = {
+  getAccessToken: jest.fn().mockReturnValue('mockAccessToken'),
   userType: 'admin',
   setUserType: jest.fn(),
   accessToken: 'mockAccessToken123',
@@ -68,33 +95,30 @@ const mockUserContextValue = {
   setTestResident: jest.fn(),
   departmentIds: ['d1', 'd2', 'd3'],
   setDepartmentIds: jest.fn(),
-  userEmail: 'mockuser@example.com', // Mock user email
 };
 
-const mockAuthContextValue = {
-  user: { uid: '123', email: 'mockuser@example.com' },
-  setUser: jest.fn(),
-};
-
-
-describe('Profile Screen', () => {
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should navigate to the My Profile section when the "My Profile" button is pressed', async () => {
-    const { getByText } = render(
+const toMyprofile = jest.fn(() => {
+  mockNavigation.navigate('MyProfile');
+});
+afterEach(() => {
+  jest.clearAllMocks();
+});
+  const mockAuthContextValue = {
+    user: {email: 'mockuser@example.com' },
+    setUser: jest.fn(),
+  };
+  it('test_navigation_to_my_profile', async () => {
+    const { getByText , getAllByText} = render(
       <AuthContext.Provider value={mockAuthContextValue}>
         <UserContext.Provider value={mockUserContextValue}>
           <Profile navigation={mockNavigation} />
         </UserContext.Provider>
       </AuthContext.Provider>
-    );
+    )
 
-    fireEvent.press(getByText('My Profile'));
-
+    fireEvent.press(getAllByText('My Profile'));
     await waitFor(() => {
-      expect(getByText('Personal Info')).toBeTruthy();
-    });
-  });
+      expect(mockNavigation.navigate).toHaveBeenCalledWith('MyProfile');      
+  })
+})
 });

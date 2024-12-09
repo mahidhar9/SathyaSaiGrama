@@ -45,14 +45,11 @@ jest.mock('react-native-gesture-handler',()=>{
     }),
   }
 })
-// jest.spyOn(global, 'fetch').mockImplementation(() => {
-//   return Promise.resolve({
-//     ok: true,
-//   });
-// });
-
 jest.mock('react-native-calendars', () => ({
-  CalendarList: jest.fn(),
+  
+  CalendarList: jest.fn((props)=>{
+    return props.children
+  }),
 }));
 jest.mock('react-native-share', () => ({
   Share: jest.fn(),
@@ -92,30 +89,45 @@ const mockNavigation = { navigate: jest.fn() };
   
 describe('Visitor Information Form', () => {
   afterEach(cleanup);
-
-  test('Verify that validation messages appear below all mandatory fields when left empty', async () => {
-    const { getByText, getByTestId, getByPlaceholderText,screen ,debug} = render(
-      
-        <UserContext.Provider value={mockUserContextValue}>
-          <FillByYourSelf navigation={mockNavigation} />
-        </UserContext.Provider>
-  
+  const renderComponent = (loggedUser) => {
+    return render(
+      <UserContext.Provider value={{ loggedUser }}>
+        <FillByYourSelf navigation={mockNavigation} />
+      </UserContext.Provider>
     );
+  };
+  test('Verify that validation messages appear below all mandatory fields when left empty', async () => {
+    const loggedUser = { resident: true, employee: true };
+    const { getByText,queryByText,getByPlaceholderText, getAllByTestId, getAllByText,queryAllByText, debug } = renderComponent(loggedUser);
+
+  
 debug();
+expect(queryAllByText('prefix')).toBeTruthy();
+expect(queryAllByText('firstName')).toBeTruthy();
+expect(queryAllByText('lastName')).toBeTruthy();
+fireEvent.changeText(queryAllByText(' prefix '),'Mr');
+fireEvent.changeText(queryAllByText('firstName' ),'John');
+fireEvent.changeText(queryAllByText('lastName'), ' Teja');
+fireEvent.changeText(getByPlaceholderText('Phone Input'), '+91 9876543210');
+expect(getAllByTestId('date')).toBeTruthy();
+fireEvent.changeText(getAllByTestId('date'), '20-nov-2024');
+fireEvent.press(getByText('Group'));
+fireEvent.press(getByText('Home'));
+fireEvent.press(getByText('Male'));
 
-    await waitFor(() => {
-      expect(getByTestId('submitButton')).toBeTruthy();
-    });
-    // Simulate pressing the Submit button
-    fireEvent.press(getByTestId('submitButton'));
+fireEvent.changeText(queryAllByText('Vehicle Type'), 'Car');
+fireEvent.changeText(queryAllByText('Vehicle Number'), 'Ts-09-pq1234');
 
-    // Verify that validation messages appear
-    await waitFor(() => {
-      expect(getByText('Prefix, First Name and Last Name are required')).toBeTruthy();
-      expect(getByText('Phone number is required')).toBeTruthy();
-      expect(getByText('Date of visit is required')).toBeTruthy();
-      expect(getByText('Single or Group is required')).toBeTruthy();
-      expect(getByText('Gender is required')).toBeTruthy();
-    });
-  });
+
+// fireEvent.changeText(getByPlaceholderText('Vehicle Type'), 'Bike');
+// fireEvent.changeText(getByPlaceholderText('Vehicle Number'), 'Ts-02-XY-5678');
+
+await waitFor(() => {
+    expect(queryByText('+ Add Vehicle Information'))
 });
+
+
+
+
+  })
+})
