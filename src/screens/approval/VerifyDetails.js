@@ -660,6 +660,7 @@ const VerifyDetails = ({ navigation, route }) => {
               ) : (
                 <View style={{ width: '100%', padding: 10, marginLeft: '15%' }}>
                   <TouchableOpacity
+                    testID="approveButton"
                     style={styles.btnAccept}
                     onPress={onApprove}>
                     <Text style={styles.btntxt}>Approve</Text>
@@ -700,6 +701,7 @@ const VerifyDetails = ({ navigation, route }) => {
                 )}
                 {loading ? null : (
                   <TouchableOpacity
+                  testID='shareButton'
                     style={[styles.HomeButton, { backgroundColor: 'green' }]}
                     onPress={() => {
                       onShare();
@@ -889,8 +891,8 @@ const VerifyDetails = ({ navigation, route }) => {
           </View>
         </Modal>
       </SafeAreaView>
-
       <Dialog.Container
+      testID='dialog'
         visible={DialogVisible}
         contentStyle={styles.detailsNotEditableDialogue}>
         <Image

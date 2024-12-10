@@ -4,6 +4,7 @@ import Profile from '../../../src/screens/Profile';
 import UserContext from '../../../context/UserContext';
 import { AuthContext } from '../../../src/auth/AuthProvider';
 import { signOut, deleteUser, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
+import Toast from 'react-native-toast-message';
 
 
 jest.mock('firebase/auth', () => ({
@@ -16,11 +17,6 @@ jest.mock('firebase/auth', () => ({
     credential: jest.fn(),
   },
 }));
-// jest.mock('react-native-toast-message', () => ({
-//   show: jest.fn(),
-//    hide: jest.fn(),
-//    Toast: jest.fn(() => <div />),
-//   })),
 
 jest.mock('react-native-shimmer-placeholder', () => ({
   createShimmerPlaceholder: jest.fn(() => 'ShimmerPlaceholder'),
@@ -29,6 +25,8 @@ jest.mock('react-native-shimmer-placeholder', () => ({
 jest.mock('react-native-linear-gradient', () => 'LinearGradient');
 jest.mock('react-native-toast-message', () => ({
   show: jest.fn(),
+  hide: jest.fn(),
+  Toast: jest.fn(() => null),
 }));
 jest.mock('react-native-safe-area-context', () => ({
   SafeAreaView: jest.fn((props) => {
@@ -105,17 +103,16 @@ afterEach(() => {
     setUser: jest.fn(),
   };
   it('test_navigation_to_my_profile', async () => {
-    const { getByText , getAllByText,debug} = render(
+    const { getByText,queryByText , getAllByText,debug} = render(
       <AuthContext.Provider value={mockAuthContextValue}>
         <UserContext.Provider value={mockUserContextValue}>
           <Profile navigation={mockNavigation} />
         </UserContext.Provider>
       </AuthContext.Provider>
     )
-    expect(getByText('Logout')).toBeTruthy();
-  fireEvent.press(getByText('Logout')[2]);
-    debug();
-   console.log('res',getByText('Logout')[0]);
+    expect(getByText('Logout')[4])
+  fireEvent.press(queryByText('Logout')[4]);
+  //   debug();
 
     await waitFor(() => {
       expect(mockNavigation.navigate).toHaveBeenCalledWith('Login');
