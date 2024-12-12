@@ -24,9 +24,10 @@ jest.mock('react-native-shimmer-placeholder', () => ({
 }));
 jest.mock('react-native-linear-gradient', () => 'LinearGradient');
 jest.mock('react-native-toast-message', () => ({
-  show: jest.fn(),
+  show: jest.fn(() => {
+    type: 'success'
+  }),
   hide: jest.fn(),
-  Toast: jest.fn(() => null),
 }));
 jest.mock('react-native-safe-area-context', () => ({
   SafeAreaView: jest.fn((props) => {

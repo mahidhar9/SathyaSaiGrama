@@ -66,7 +66,7 @@ const ViewDetails = ({ navigation, route }) => {
     try {
       // Parse the formatted string
       user.Vehicle_Information = JSON.parse(formattedString);
-      console.log(parsedArray);
+      // console.log(parsedArray);
     } catch (error) {
       console.error('Parsing error:', error.message);
     }

@@ -102,7 +102,6 @@ const renderComponent = (loggedUser) => {
   
       debug();
       fireEvent.press(getByText('Office'));
-      console.log('Office',queryAllByText('Office'))
       await waitFor(()=>{
 
         expect(getByText('Office')).toBeTruthy();
