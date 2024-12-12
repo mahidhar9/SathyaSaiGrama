@@ -14,6 +14,7 @@ import {
   Button,
   Image,
   Dimensions,
+  Linking,
 } from 'react-native';
 
 import {
@@ -865,7 +866,8 @@ const FillByYourSelf = ({navigation}) => {
           await passcodeGenerator();
         }
         setIsSubmitted(false);
-        navigation.navigate('Invite');
+        // navigation.navigate('Invite');
+        Linking.openURL('myapp://Approved');
       } catch (err) {
         Alert.alert(err);
       }

@@ -13,6 +13,7 @@ import UserContext from '../../context/UserContext';
 import VerificationNotice from '../../src/auth/VerificationNotice';
 import messaging from '@react-native-firebase/messaging';
 import * as RootNavigation from './RootNavigation';
+import PushNotification from 'react-native-push-notification';
 import {
   DATABASE_ID,
   COLLECTION_ID,
@@ -200,6 +201,18 @@ const BaseRoute = () => {
   useEffect(() => {
     const intervalId = setInterval(getAppWriteToken, 1800000);
     return () => clearInterval(intervalId);
+  }, []);
+
+  // Handle foreground notifications
+  useEffect(() => {
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      console.log('Foreground notification received:', remoteMessage);
+      PushNotification.localNotification({
+        title: remoteMessage.notification?.title || 'Notification',
+        message: remoteMessage.notification?.body || 'You have a new message',
+      });
+    });
+    return unsubscribe;
   }, []);
 
   // useEffect(() => {

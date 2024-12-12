@@ -55,12 +55,15 @@ const VerifyDetails = ({navigation, route}) => {
   //console.log('stringified', stringified);
   let {user} = route.params;
   // console.log('user outside stringified', user);
+  let userID = user.ID;
+  console.log('user id before stringified', userID);
 
   if (stringified) {
     console.log('inside if stringified');
     // const {user} = route.params;
     user = JSON.parse(user);
-
+    console.log('user.ID', user.ID);
+    userID = user.ID;
     user.Name_field = JSON.parse(user.Name_field);
     user.Referrer_App_User_lookup = JSON.parse(user.Referrer_App_User_lookup);
     user.Department = JSON.parse(user.Department);
@@ -118,14 +121,19 @@ const VerifyDetails = ({navigation, route}) => {
     setEditData(user);
   }, []);
   const [loading, setLoading] = useState(true);
-  const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Photo/download`;
-  const qrCodeurl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Generated_QR_Code/download`;
 
+  // const [url, setUrl] = useState(
+  //   `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Photo/download`,
+  // );
+  // const [qrCodeurl, setQrCodeurl] = useState(
+  //   `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Generated_QR_Code/download`,
+  // );
   const [approvingLoading, setapprovingLoading] = useState(false);
   const [deniedLoading, setdeniedLoading] = useState(false);
 
-  const getImage = async () => {
+  const getImage = async url => {
     try {
+      console.log('get image url', url);
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -147,8 +155,9 @@ const VerifyDetails = ({navigation, route}) => {
       console.error('Error fetching image:', error);
     }
   };
-  const getQrCodeImage = async () => {
+  const getQrCodeImage = async qrCodeurl => {
     try {
+      console.log('get QRCodeImage url', qrCodeurl);
       const response = await fetch(qrCodeurl, {
         method: 'GET',
         headers: {
@@ -192,15 +201,27 @@ const VerifyDetails = ({navigation, route}) => {
     React.useCallback(() => {
       const fetchImage = async () => {
         try {
-          const dataUrl = await getImage();
-          let qrCodeDataUrl = await getQrCodeImage();
-
+          // setUrl(
+          //   `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Photo/download`,
+          // );
+          // setQrCodeurl(
+          //   `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Generated_QR_Code/download`,
+          // );
+          const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${userID}/Photo/download`;
+          const qrCodeurl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${userID}/Generated_QR_Code/download`;
+          const dataUrl = await getImage(url);
+          let qrCodeDataUrl = await getQrCodeImage(qrCodeurl);
+          let count = 0;
           // Retry if QR Code Data URL is of unexpected length
-          if (qrCodeDataUrl.length === 135) {
-            qrCodeDataUrl = await getQrCodeImage();
+          while (qrCodeDataUrl.length === 135) {
+            qrCodeDataUrl = await getQrCodeImage(qrCodeurl);
+            count++;
+            if (count > 5) {
+              break;
+            }
           }
 
-          console.log('qrCodeDataUrl', qrCodeDataUrl);
+          // console.log('qrCodeDataUrl', qrCodeDataUrl);
           setPhoto(dataUrl);
           setQrCodephoto(qrCodeDataUrl);
         } catch (error) {
@@ -215,11 +236,11 @@ const VerifyDetails = ({navigation, route}) => {
       // Cleanup function (if necessary)
       return () => {
         console.log('Screen unfocused, cleaning up if needed');
-        // setPhoto(null);
-        // setQrCodephoto(null);
-        // setLoading(true);
+        setPhoto(null);
+        setQrCodephoto(null);
+        setLoading(true);
       };
-    }, []),
+    }, [userID]),
   );
 
   const generateQR = async passcodeData => {
