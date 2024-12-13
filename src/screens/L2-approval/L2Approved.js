@@ -7,10 +7,40 @@ import parseDate from '../../components/ParseDate';
 import { useFocusEffect, } from '@react-navigation/native';
 import Filter from '../../components/Filter';
 import DotsBlinkingLoaderEllipsis from '../../components/DotsBlinkingLoaderEllipsis'
+import Sort from '../../components/Sort';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import moment from 'moment';
+
+const defaultSort = (data) => {
+  let sortedData = [...data];
+  sortedData.sort((a, b) =>
+    (new Date(moment(a.Modified_Time, 'DD-MMM-YYYY HH:mm:ss')) -
+      new Date(moment(b.Modified_Time, 'DD-MMM-YYYY HH:mm:ss'))) * -1
+  );
+  return sortedData
+}
 
 const L2Approved = ({ navigation }) => {
 
-  const { loggedUser, accessToken, L2ApproveDataFetched, setL2ApproveDataFetched } = useContext(UserContext)
+  const { loggedUser, setLoggedUser, accessToken, L2ApproveDataFetched, setL2ApproveDataFetched } = useContext(UserContext)
+
+  
+  useEffect(()=>{
+    const settingLoggedUser = async() => {
+      let existedUser = await AsyncStorage.getItem('existedUser');
+      existedUser = JSON.parse(existedUser);
+      if(existedUser){
+        setLoggedUser(existedUser);
+      }
+    }
+
+    if(!loggedUser || loggedUser===null){
+      settingLoggedUser();
+    }
+  }, [])
+
+  console.log("Logged user name in L2 approveds: ", loggedUser.name)
+
   const [L2Approveds, setL2Approveds] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -24,30 +54,26 @@ const L2Approved = ({ navigation }) => {
     if (result.data === undefined) {
       setL2Approveds(null);
       setL2ApprovedsData(null);
-      setL2ApproveDataFetched(false);
+      //setL2ApproveDataFetched(false);
       setLoading(false);
 
     } else {
-      all_L2approveds.sort((a, b) => {
-        // Parse the date strings into Date objects
-        const dateA = new parseDate(a.Date_of_Visit);
-        const dateB = new parseDate(b.Date_of_Visit);
-        // Compare the Date objects
-        return dateB - dateA;
-      });
-      setL2Approveds(all_L2approveds)
-      setL2ApprovedsData(all_L2approveds)
+ 
+      const sortedData = defaultSort(all_L2approveds)
+      setL2Approveds(sortedData)
+      setL2ApprovedsData(sortedData)
       setLoading(false)
-      setL2ApproveDataFetched(true)
+      //setL2ApproveDataFetched(true)
     }
 
   };
 
   useEffect(() => {
 
-    if (!L2ApproveDataFetched) {
-      fetchData();
+    const fetchLatest = async () => {
+      await fetchData(); 
     }
+    fetchLatest();
 
   }, [L2ApproveDataFetched]);
 
@@ -63,15 +89,9 @@ const L2Approved = ({ navigation }) => {
 
 
     } else {
-      all_L2approveds.sort((a, b) => {
-        // Parse the date strings into Date objects
-        const dateA = new parseDate(a.Date_of_Visit);
-        const dateB = new parseDate(b.Date_of_Visit);
-        // Compare the Date objects
-        return dateB - dateA;
-      });
-      setL2Approveds(all_L2approveds)
-      setL2ApprovedsData(all_L2approveds)
+      const sortedData = defaultSort(all_L2approveds)
+      setL2Approveds(sortedData)
+      setL2ApprovedsData(sortedData)
       setRefreshing(false);
     }
   };
@@ -87,15 +107,18 @@ const L2Approved = ({ navigation }) => {
         <View style={styles.loadingContainer}>
           {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
           {/* <RequestSkeletonScreen/> */}
-          <DotsBlinkingLoaderEllipsis/>
+          <DotsBlinkingLoaderEllipsis />
         </View>
       ) : ((refreshing ? (<View style={styles.loadingContainer}>
         {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
         {/* <RequestSkeletonScreen/> */}
-        <DotsBlinkingLoaderEllipsis/>
+        <DotsBlinkingLoaderEllipsis />
       </View>) : (
         <>
-          <Filter setFilteredData={setL2ApprovedsData} ToFilterData={L2Approveds}  comingFrom={"L2Approved"}/>
+          <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+            <Sort setSortedData={setL2ApprovedsData} ToSortData={L2Approveds} />
+            <Filter setFilteredData={setL2ApprovedsData} ToFilterData={L2Approveds} comingFrom={"L2Approved"} />
+          </View>
           <FlatList
             data={L2ApprovedsData}
             renderItem={({ item }) => (

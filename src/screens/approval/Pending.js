@@ -7,17 +7,29 @@ import {
   Text,
   TouchableOpacity,
 } from 'react-native';
-import React, {useContext, useEffect, useState, useCallback} from 'react';
+import React, { useContext, useEffect, useState, useCallback } from 'react';
 import ApprovalComponent from './ApprovalComponent';
 import UserContext from '../../../context/UserContext';
-import {getDataWithIntAndString} from '../../components/ApiRequest';
+import { getDataWithIntAndString } from '../../components/ApiRequest';
 import parseDate from '../../components/ParseDate';
-import {useFocusEffect} from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import Filter from '../../components/Filter';
+import Sort from '../../components/Sort'
 import DotsBlinkingLoaderEllipsis from '../../components/DotsBlinkingLoaderEllipsis'
+import moment from 'moment';
 
-const Pending = ({navigation}) => {
-  const {L1ID, getAccessToken, pendingDataFetched, setPendingDataFetched} =
+const defaultSort = (data) => {
+
+  let sortedData = [...data];
+  sortedData.sort((a, b) =>
+    (new Date(moment(a.Modified_Time, 'DD-MMM-YYYY HH:mm:ss')) -
+      new Date(moment(b.Modified_Time, 'DD-MMM-YYYY HH:mm:ss'))) * -1
+  );
+  return sortedData
+}
+
+const Pending = ({ navigation }) => {
+  const { L1ID, getAccessToken, pendingDataFetched, setPendingDataFetched } =
     useContext(UserContext);
   const [pendings, setPendings] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -38,29 +50,28 @@ const Pending = ({navigation}) => {
     if (result.data === undefined) {
       setPendings(null);
       setPendingsData(null);
-      setPendingDataFetched(false);
+      //setPendingDataFetched(false);
       setLoading(false);
     }
     // sorting the pendings data by date
     else {
-      // all_pendings.sort((a, b) => {
-      //   // Parse the date strings into Date objects
-      //   const dateA = new parseDate(a.Date_of_Visit);
-      //   const dateB = new parseDate(b.Date_of_Visit);
-      //   // Compare the Date objects
-      //   return dateB - dateA;
-      // });
-      setPendings(all_pendings);
-      setPendingsData(all_pendings);
+      const sortedData = defaultSort(all_pendings)
+      setPendings(sortedData);
+      setPendingsData(sortedData);
       setPendingDataFetched(true);
       setLoading(false);
     }
   };
 
+
   useEffect(() => {
-    if (!pendingDataFetched) {
-      fetchData();
+
+    const fetchLatest = async () => {
+      await onRefresh();
     }
+
+    fetchLatest();
+    
   }, [pendingDataFetched]);
 
   const onRefresh = async () => {
@@ -88,8 +99,10 @@ const Pending = ({navigation}) => {
       //   // Compare the Date objects
       //   return dateB - dateA;
       // });
-      setPendings(all_pendings);
-      setPendingsData(all_pendings);
+
+      const sortedData = defaultSort(all_pendings)
+      setPendings(sortedData);
+      setPendingsData(sortedData);
       setRefreshing(false);
     }
   };
@@ -101,29 +114,28 @@ const Pending = ({navigation}) => {
   );
 
   return (
-    <View style={{flex: 1}}>
-      <View style={{flex: 1, paddingTop: 10, backgroundColor: '#FFFF'}}>
+    <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, paddingTop: 10, backgroundColor: '#FFFF' }}>
         {loading ? (
           <View style={styles.loadingContainer}>
             {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
             {/* <RequestSkeletonScreen /> */}
-            <DotsBlinkingLoaderEllipsis/>
+            <DotsBlinkingLoaderEllipsis />
           </View>
         ) : refreshing ? (
           <View style={styles.loadingContainer}>
             {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
-            <DotsBlinkingLoaderEllipsis/>
+            <DotsBlinkingLoaderEllipsis />
           </View>
         ) : (
           <>
-            <Filter
-              setFilteredData={setPendingsData}
-              ToFilterData={pendings}
-              comingFrom={'Pending'}
-            />
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+              <Sort setSortedData={setPendingsData} ToSortData={pendings} />
+              <Filter setFilteredData={setPendingsData} ToFilterData={pendings} comingFrom={"Pending"} />
+            </View>
             <FlatList
               data={pendingsData}
-              renderItem={({item}) => (
+              renderItem={({ item }) => (
                 <ApprovalComponent
                   navigation={navigation}
                   key={item.ID}
@@ -140,12 +152,12 @@ const Pending = ({navigation}) => {
       </View>
       {pendingsData?.length < 1 && pendings?.length > 0 && (
         <View style={styles.noPendingTextView}>
-          <Text style={{flex: 10}}>No Visitors found</Text>
+          <Text style={{ flex: 10 }}>No Visitors found</Text>
         </View>
       )}
       {!refreshing && pendings === null && !loading && (
         <View style={styles.noPendingTextView}>
-          <Text style={{flex: 10}}>No Pending visitors</Text>
+          <Text style={{ flex: 10 }}>No Pending visitors</Text>
         </View>
       )}
     </View>

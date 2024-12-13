@@ -40,7 +40,7 @@ import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME} from '@env';
 import Toast from 'react-native-toast-message';
 import {launchImageLibrary, launchCamera} from 'react-native-image-picker';
 import {PERMISSIONS, request} from 'react-native-permissions';
-import MyProfileSkeletonLoader from '../components/MyProfileSkeletonScreen'
+import MyProfileSkeletonLoader from '../components/MyProfileSkeletonScreen';
 const Profile = ({navigation}) => {
   const {
     getAccessToken,
@@ -108,10 +108,7 @@ const Profile = ({navigation}) => {
       setToastVisible(true);
     } catch (error) {
       console.error('Error reauthenticating or deleting user:', error);
-      Alert.alert(
-        'Error',
-        `Invalid Password`,
-      );
+      Alert.alert('Error', `Invalid Password`);
     }
     setDeleteLoading(false);
   };
@@ -283,10 +280,10 @@ const Profile = ({navigation}) => {
             flatid: resFromFlat.data[0].ID,
             dapartmentExists: false,
           });
-          setLoading(false);
+        setLoading(false);
       } else {
         // setLoading(false);
-      //  setSkeletonLoader(false);
+        //  setSkeletonLoader(false);
 
         if (resFromEmployee.data)
           navigation.navigate('MyProfile', {
@@ -311,7 +308,7 @@ const Profile = ({navigation}) => {
             flatExists: true,
             dapartmentExists: false,
           });
-          setLoading(false);
+        setLoading(false);
       }
     } else {
       const resFromFamilyMemberRoom = await getDataWithInt(
@@ -561,27 +558,26 @@ const Profile = ({navigation}) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {loading ?  (
+      {loading ? (
         <View style={styles.loadingContainer}>
           {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
           <MyProfileSkeletonLoader />
         </View>
       ) : isLogOutIndicator ? (
-        
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-        <TouchableOpacity>
-                {profileImage != null ? (
-                  <Image source={{uri: profileImage}} style={styles.propic} />
-                ) : (
-                  <Image
-                    source={require('../assets/profileImg.png')}
-                    style={styles.propic}
-                  />
-                )}
-              </TouchableOpacity>
-              
-              <Text style={[styles.name,]} >{loggedUser.name}</Text>
-              <Text style={[styles.emailVisible,{marginTop:5}]}>{userEmail}</Text>
+          <TouchableOpacity>
+            {profileImage != null ? (
+              <Image source={{uri: profileImage}} style={styles.propic} />
+            ) : (
+              <Image
+                source={require('../assets/profileImg.png')}
+                style={styles.propic}
+              />
+            )}
+          </TouchableOpacity>
+
+          <Text style={[styles.name]}>{loggedUser.name}</Text>
+          <Text style={[styles.emailVisible, {marginTop: 5}]}>{userEmail}</Text>
           <View style={styles.indicatorBox}>
             <ActivityIndicator
               style={styles.activityIndicator}
@@ -740,6 +736,15 @@ const Profile = ({navigation}) => {
                 />
               </View>
             </TouchableOpacity>
+            <Text
+              style={{
+                padding: 15,
+                paddingTop: 30,
+                marginStart: 10,
+                fontSize: 10,
+              }}>
+              Version 1.0 v17
+            </Text>
           </View>
 
           {/* <Modal
@@ -795,28 +800,33 @@ const Profile = ({navigation}) => {
             onRequestClose={() => setModalVisible(!modalVisible)}>
             <TouchableWithoutFeedback onPress={handleModal}>
               <View style={styles.centeredView}>
-              <TouchableWithoutFeedback>
-                <View style={OndeleteStyles.modalView}>
-                  {deleteLoading ? (
-                    <View
-                      style={{
-                        flex: 1,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                      }}>
-                      <ActivityIndicator size="large" color="#B21E2B" />
-                      <Text>Deleting profile...</Text>
-                    </View>
-                  ) : (
-                    <>
-                      
-                      <Text style={styles.shareLinkAttention}>Attention! </Text>
-                    <Text style={[styles.shareLink,{fontSize:15,fontWeight:'400'}]}>
-                      You are about to delete your account permanently. Enter your password to confirm deletion.
-                    </Text>
+                <TouchableWithoutFeedback>
+                  <View style={OndeleteStyles.modalView}>
+                    {deleteLoading ? (
+                      <View
+                        style={{
+                          flex: 1,
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                        }}>
+                        <ActivityIndicator size="large" color="#B21E2B" />
+                        <Text>Deleting profile...</Text>
+                      </View>
+                    ) : (
+                      <>
+                        <Text style={styles.shareLinkAttention}>
+                          Attention!{' '}
+                        </Text>
+                        <Text
+                          style={[
+                            styles.shareLink,
+                            {fontSize: 15, fontWeight: '400'},
+                          ]}>
+                          You are about to delete your account permanently.
+                          Enter your password to confirm deletion.
+                        </Text>
 
-
-                      {/* <Controller
+                        {/* <Controller
                         name="email"
                         control={control}
                         render={({field: {onChange, value}}) => (
@@ -842,100 +852,107 @@ const Profile = ({navigation}) => {
                         <Text style={styles.textError}>Enter valid email</Text>
                       )} */}
 
-                      <View
-                        style={[
-                          styles.passBorder,
-                          focusedInput === 'password' && styles.inputFocused,
-                        ]}>
-                        <Controller
-                          name="password"
-                          control={control}
-                          render={({field: {onChange,
-                          // value
-                           }}) => (
-                            <TextInput
-                              placeholder="Password"
-                              style={styles.inputBox}
-                             // value={value}
-                              selectionColor="#B21E2B"
-                              onFocus={() => setFocusedInput('password')}
-                              secureTextEntry={!showPassword}
-                              onChangeText={onChange}
-                            />
+                        <View
+                          style={[
+                            styles.passBorder,
+                            focusedInput === 'password' && styles.inputFocused,
+                          ]}>
+                          <Controller
+                            name="password"
+                            control={control}
+                            render={({
+                              field: {
+                                onChange,
+                                // value
+                              },
+                            }) => (
+                              <TextInput
+                                placeholder="Password"
+                                style={styles.inputBox}
+                                // value={value}
+                                selectionColor="#B21E2B"
+                                onFocus={() => setFocusedInput('password')}
+                                secureTextEntry={!showPassword}
+                                onChangeText={onChange}
+                              />
+                            )}
+                            rules={{
+                              required: true,
+                              // minLength: 8,
+                              // pattern:
+                              //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/,
+                            }}
+                          />
+                          {showPassword === false ? (
+                            <TouchableOpacity
+                              onPress={() => {
+                                setShowPassword(!showPassword);
+                              }}>
+                              <Image
+                                source={require('../assets/eyestrike.png')}
+                                style={{width: 16, height: 16}}
+                              />
+                            </TouchableOpacity>
+                          ) : (
+                            <TouchableOpacity
+                              onPress={() => setShowPassword(!showPassword)}>
+                              <Image
+                                source={require('../assets/eye.png')}
+                                style={{width: 16, height: 16}}
+                              />
+                            </TouchableOpacity>
                           )}
-                          rules={{
-                            required: true,
-                            // minLength: 8,
-                            // pattern:
-                            //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/,
-                          }}
-                        />
-                        {showPassword === false ? (
-                          <TouchableOpacity
-                            onPress={() => {
-                              setShowPassword(!showPassword);
-                            }}>
-                            <Image
-                              source={require('../assets/eyestrike.png')}
-                              style={{width: 16, height: 16}}
-                            />
-                          </TouchableOpacity>
-                        ) : (
-                          <TouchableOpacity
-                            onPress={() => setShowPassword(!showPassword)}>
-                            <Image
-                              source={require('../assets/eye.png')}
-                              style={{width: 16, height: 16}}
-                            />
-                          </TouchableOpacity>
-                        )}
-                      </View>
+                        </View>
 
-                      {errors.password?.type === 'required' && (
-                        <Text style={styles.textError}>
-                          Password is required
-                        </Text>
-                      )}
-                      {/* {errors.password?.type === 'minLength' && (
+                        {errors.password?.type === 'required' && (
+                          <Text style={styles.textError}>
+                            Password is required
+                          </Text>
+                        )}
+                        {/* {errors.password?.type === 'minLength' && (
                         <Text style={styles.textError}>
                           Password must be 8 characters long
                         </Text>
                       )} */}
-                      {errors.password?.type === 'pattern' && (
-                        <Text style={styles.textError}>
-                          Password must contain at least a uppercase,lowercase,
-                          number and a special character
-                        </Text>
-                      )}
+                        {errors.password?.type === 'pattern' && (
+                          <Text style={styles.textError}>
+                            Password must contain at least a
+                            uppercase,lowercase, number and a special character
+                          </Text>
+                        )}
 
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                        }}>
-                        <TouchableOpacity
-                          style={[
-                            styles.HomeButton,
-                            {backgroundColor: '#B21E2B'},
-                          ]}
-                          onPress={handleSubmit(onDelete)}>
-                          <Text style={[styles.wewe, styles.wewe1]}>
-                            Delete
-                          </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          style={[
-                            styles.HomeButton,
-                            {backgroundColor: '#fff',borderWidth:2,borderColor:'#B21E2B'},
-                          ]}
-                          onPress={() => setModalVisible(!modalVisible)}>
-                          <Text style={[styles.wewe, styles.wewe2]}>
-                            Cancel
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-                    </>
-                  )}
-                </View>
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                          }}>
+                          <TouchableOpacity
+                            style={[
+                              styles.HomeButton,
+                              {backgroundColor: '#B21E2B'},
+                            ]}
+                            onPress={handleSubmit(onDelete)}>
+                            <Text style={[styles.wewe, styles.wewe1]}>
+                              Delete
+                            </Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={[
+                              styles.HomeButton,
+                              {
+                                backgroundColor: '#fff',
+                                borderWidth: 2,
+                                borderColor: '#B21E2B',
+                              },
+                            ]}
+                            onPress={() => setModalVisible(!modalVisible)}>
+                            <Text style={[styles.wewe, styles.wewe2]}>
+                              Cancel
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+                      </>
+                    )}
+                  </View>
                 </TouchableWithoutFeedback>
               </View>
             </TouchableWithoutFeedback>
@@ -981,27 +998,46 @@ const Profile = ({navigation}) => {
             animationType="fade"
             transparent={true}
             visible={logoutModalVisible}
-            onRequestClose={() => setLogoutModalVisible(!logoutModalVisible)}
-          >
+            onRequestClose={() => setLogoutModalVisible(!logoutModalVisible)}>
             <TouchableWithoutFeedback onPress={handleLogoutModal}>
               <View style={styles.centeredView}>
                 <TouchableWithoutFeedback>
                   <View style={OndeleteStyles.modalView}>
                     <Text style={styles.modalTitle}>Logout</Text>
-                    <Text style={[styles.shareLink,{fontWeight:'400',fontSize:15,marginBottom:-30}]}>
-                      Are you sure you want to logout? You'll need to login again to the app.
+                    <Text
+                      style={[
+                        styles.shareLink,
+                        {fontWeight: '400', fontSize: 15, marginBottom: -30},
+                      ]}>
+                      Are you sure you want to logout? You'll need to login
+                      again to the app.
                     </Text>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginTop: 20 }}>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-around',
+                        marginTop: 20,
+                      }}>
                       <TouchableOpacity
-                        style={[styles.HomeButton, { backgroundColor: '#B21E2B' }]}
-                        onPress={onLogout}
-                      >
+                        style={[
+                          styles.HomeButton,
+                          {backgroundColor: '#B21E2B'},
+                        ]}
+                        onPress={onLogout}>
                         <Text style={[styles.wewe, styles.wewe1]}>Logout</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
-                        style={[styles.HomeButton, { backgroundColor: '#fff', borderColor: '#B21E2B', borderWidth: 2 }]}
-                        onPress={() => setLogoutModalVisible(!logoutModalVisible)}
-                      >
+                        style={[
+                          styles.HomeButton,
+                          {
+                            backgroundColor: '#fff',
+                            borderColor: '#B21E2B',
+                            borderWidth: 2,
+                          },
+                        ]}
+                        onPress={() =>
+                          setLogoutModalVisible(!logoutModalVisible)
+                        }>
                         <Text style={[styles.wewe, styles.wewe2]}>Cancel</Text>
                       </TouchableOpacity>
                     </View>
@@ -1010,7 +1046,6 @@ const Profile = ({navigation}) => {
               </View>
             </TouchableWithoutFeedback>
           </Modal>
-
 
           <Modal
             animationType="fade"
@@ -1318,12 +1353,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.75)',
   },
   modalTitle: {
-    fontSize: 24, 
+    fontSize: 24,
     fontFamily: 'Inter',
-    fontWeight: 'bold', 
-    textAlign: 'center', 
+    fontWeight: 'bold',
+    textAlign: 'center',
     marginBottom: 15,
-    color: '#1F2024', 
+    color: '#1F2024',
   },
   shareLink: {
     color: '#1F2024',
@@ -1336,7 +1371,7 @@ const styles = StyleSheet.create({
     height: 41,
     alignSelf: 'stretch',
   },
-  shareLinkAttention:{
+  shareLinkAttention: {
     color: '#B21E2B',
     textAlign: 'center',
     fontFamily: 'Inter',

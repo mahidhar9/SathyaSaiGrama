@@ -82,6 +82,7 @@ const App = () => {
         }
       );
       res = await res.json();
+      console.log(res.documents[0].Token)
       await setAccessToken(res.documents[0].Token);
       setIsTokenFetched(true);
     } catch (error) {
@@ -111,13 +112,13 @@ const App = () => {
     const checkUserExist = async () => {
       let existedUser = await AsyncStorage.getItem('existedUser');
       existedUser = JSON.parse(existedUser);
+      // console.log("Existed user in App.js : ", existedUser)
       if (existedUser) {
         setLoggedUser(existedUser);
         setUserType(existedUser.role);
         setL1ID(existedUser.userId);
         setUserEmail(existedUser.email);
         setProfileImage(existedUser.profilePhoto);
-        console.log('Existed user in App.js:', existedUser);
       }
     };
 
@@ -145,7 +146,7 @@ const App = () => {
 
   const checkIsResident = async () => {
     const res = await getDataWithInt('All_Residents', 'App_User_lookup', loggedUser.userId, accessToken);
-    if(res && res.data && res.data[0].Department_Approval === 'APPROVED'){
+    if(res && res.data && res.data[0].Accommodation_Approval === 'APPROVED'){
       return true;
     }else{
       return false;
@@ -183,12 +184,14 @@ const App = () => {
       testResident: testResident,
     };
 
+
     setLoggedUser(data);
     console.log("Data to be set in AsyncStorage: ", data); // Log the data before setting
+
     await AsyncStorage.setItem('existedUser', JSON.stringify(data));
 
     const existedUser = await AsyncStorage.getItem('existedUser');
-    console.log("existed user inside of setModifyData: ", JSON.parse(existedUser));
+    
   };
 
   const runChecks = async () => {
@@ -200,6 +203,8 @@ const App = () => {
     ]);
 
     await setModifyData(role, resident, employee, testResident);
+
+   // console.log("loggedUser after setting: ", loggedUser)
 
   };
 
@@ -213,7 +218,8 @@ const App = () => {
 
   useEffect(() => {
     if (accessToken) {
-      console.log("Access token found, stopping loading");
+      console.log("Access token found, stopping loading", accessToken);
+
       setLoading(false);
     } else {
       console.log("Access token missing, still loading");

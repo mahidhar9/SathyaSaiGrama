@@ -7,6 +7,18 @@ import { getDataWithIntAndString } from '../../components/ApiRequest';
 import parseDate from "../../components/ParseDate"
 import Filter from '../../components/Filter';
 import DotsBlinkingLoaderEllipsis from '../../components/DotsBlinkingLoaderEllipsis'
+import Sort from '../../components/Sort';
+import moment from 'moment';
+
+const defaultSort = (data) => {
+
+  let sortedData = [...data];
+  sortedData.sort((a, b) =>
+    (new Date(moment(a.Modified_Time, 'DD-MMM-YYYY HH:mm:ss')) -
+      new Date(moment(b.Modified_Time, 'DD-MMM-YYYY HH:mm:ss'))) * -1
+  );
+  return sortedData
+}
 
 const Approved = ({ navigation }) => {
   const { L1ID, getAccessToken, approveDataFetched, setApproveDataFetched } = useContext(UserContext);
@@ -25,28 +37,17 @@ const Approved = ({ navigation }) => {
     if (result.data === undefined) {
       setApproveds(null);
       setApprovedsData(null);
-      setApproveDataFetched(false);
+      //setApproveDataFetched(false);
       setLoading(false);
     } else {
-      // all_approveds.sort((a, b) => {
-      //   // Parse the date strings into Date objects
-      //   const dateA = new parseDate(a.Date_of_Visit);
-      //   const dateB = new parseDate(b.Date_of_Visit);
-      //   // Compare the Date objects
-      //   return dateB - dateA;
-      // });
-      setApproveds(all_approveds);
-      setApprovedsData(all_approveds)
+      
+      const sortedData = defaultSort(all_approveds)
+      setApproveds(sortedData);
+      setApprovedsData(sortedData)
       setLoading(false);
-      setApproveDataFetched(true);
+      //setApproveDataFetched(true);
     }
   };
-
-  useEffect(() => {
-    if (!approveDataFetched) {
-      fetchData();
-    }
-  }, [approveDataFetched]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -59,15 +60,10 @@ const Approved = ({ navigation }) => {
       setLoading(false);
     }
     else {
-      // all_approveds.sort((a, b) => {
-      //   // Parse the date strings into Date objects
-      //   const dateA = new parseDate(a.Date_of_Visit);
-      //   const dateB = new parseDate(b.Date_of_Visit);
-      //   // Compare the Date objects
-      //   return dateB - dateA;
-      // });
-      setApproveds(all_approveds);
-      setApprovedsData(all_approveds)
+
+      const sortedData = defaultSort(all_approveds)
+      setApproveds(sortedData);
+      setApprovedsData(sortedData)
       setRefreshing(false);
     }
   };
@@ -76,6 +72,16 @@ const Approved = ({ navigation }) => {
     onRefresh();
   }, [Approved]));
 
+  useEffect(() => {
+
+    const fetchLatest = async () => {
+      await onRefresh();
+    }
+
+    fetchLatest();
+
+  }, [approveDataFetched]);
+
 
   return (
     <><View style={{ flex: 1, paddingTop: 10, backgroundColor: "#FFFF" }}>
@@ -83,15 +89,18 @@ const Approved = ({ navigation }) => {
         <View style={styles.loadingContainer}>
           {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
           {/* <RequestSkeletonScreen/> */}
-          <DotsBlinkingLoaderEllipsis/>
+          <DotsBlinkingLoaderEllipsis />
         </View>
       ) : ((refreshing ? (<View style={styles.loadingContainer}>
         {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
         {/* <RequestSkeletonScreen/> */}
-        <DotsBlinkingLoaderEllipsis/>
+        <DotsBlinkingLoaderEllipsis />
       </View>) : (
         <>
-          <Filter setFilteredData={setApprovedsData} ToFilterData={approveds}  comingFrom={"Approved"}/>
+          <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+            <Sort setSortedData={setApprovedsData} ToSortData={approveds} />
+            <Filter setFilteredData={setApprovedsData} ToFilterData={approveds} comingFrom={"Approved"} />
+          </View>
           <FlatList
             data={approvedsData}
             renderItem={({ item }) => (
@@ -105,8 +114,8 @@ const Approved = ({ navigation }) => {
         </>
       )))}
     </View>
-    {
-        approvedsData?.length<1 && approveds?.length>0  && !loading && <View style={styles.noApprovedTextView}><Text style={{ flex: 10 }}>No Visitors found</Text></View>
+      {
+        approvedsData?.length < 1 && approveds?.length > 0 && !loading && <View style={styles.noApprovedTextView}><Text style={{ flex: 10 }}>No Visitors found</Text></View>
       }
       {!refreshing && approveds === null && !loading && <View style={styles.noApprovedTextView}><Text style={{ flex: 10 }}>No Approved visitors</Text></View>}</>
   );

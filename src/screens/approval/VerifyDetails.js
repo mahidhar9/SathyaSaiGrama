@@ -10,22 +10,19 @@ import {
   ActivityIndicator,
   Alert,
   Dimensions,
-  Modal
+  Modal,
+  Linking,
 } from 'react-native';
-import React, {
-  useContext,
-  useEffect,
-  useState,
-  useCallback,
-} from 'react';
-import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME, SECRET_KEY } from '@env';
+import React, {useContext, useEffect, useState, useCallback} from 'react';
+import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME, SECRET_KEY} from '@env';
 
 import UserContext from '../../../context/UserContext';
-import { encode } from 'base64-arraybuffer';
+import {encode} from 'base64-arraybuffer';
 import RNFS from 'react-native-fs';
 import Share from 'react-native-share';
 import Dialog from 'react-native-dialog';
-import { useFocusEffect } from '@react-navigation/native';
+import {useFocusEffect} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const updateRecord = async (reportName, modified_data, token, id) => {
   try {
@@ -52,18 +49,21 @@ export const updateRecord = async (reportName, modified_data, token, id) => {
   }
 };
 
-const VerifyDetails = ({ navigation, route }) => {
-  const { height } = Dimensions.get('window');
-  const { stringified } = route.params;
-  console.log('stringified', stringified);
-  let { user } = route.params;
+const VerifyDetails = ({navigation, route}) => {
+  const {height} = Dimensions.get('window');
+  const {stringified} = route.params;
+  //console.log('stringified', stringified);
+  let {user} = route.params;
   // console.log('user outside stringified', user);
+  let userID = user.ID;
+  console.log('user id before stringified', userID);
 
   if (stringified) {
     console.log('inside if stringified');
     // const {user} = route.params;
     user = JSON.parse(user);
-
+    console.log('user.ID', user.ID);
+    userID = user.ID;
     user.Name_field = JSON.parse(user.Name_field);
     user.Referrer_App_User_lookup = JSON.parse(user.Referrer_App_User_lookup);
     user.Department = JSON.parse(user.Department);
@@ -74,7 +74,7 @@ const VerifyDetails = ({ navigation, route }) => {
     try {
       // Parse the formatted string
       user.Vehicle_Information = JSON.parse(formattedString);
-      console.log(parsedArray);
+      // console.log(parsedArray);
     } catch (error) {
       console.error('Parsing error:', error.message);
     }
@@ -88,12 +88,30 @@ const VerifyDetails = ({ navigation, route }) => {
   const [DialogVisible, setDialogVisible] = useState(false);
   const {
     setDeniedDataFetched,
+    deniedDataFetched,
     setApproveDataFetched,
+    pendingDataFetched,
+    approveDataFetched,
     setPendingDataFetched,
     setEditData,
     loggedUser,
+    setLoggedUser,
     accessToken,
   } = useContext(UserContext);
+
+  useEffect(() => {
+    const settingLoggedUser = async () => {
+      let existedUser = await AsyncStorage.getItem('existedUser');
+      existedUser = JSON.parse(existedUser);
+      if (existedUser) {
+        setLoggedUser(existedUser);
+      }
+    };
+
+    if (!loggedUser || loggedUser === null) {
+      settingLoggedUser();
+    }
+  }, []);
 
   const onPressOk = () => {
     setDialogVisible(false);
@@ -103,15 +121,19 @@ const VerifyDetails = ({ navigation, route }) => {
     setEditData(user);
   }, []);
   const [loading, setLoading] = useState(true);
-  const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Photo/download`;
-  const qrCodeurl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Generated_QR_Code/download`;
 
-
+  // const [url, setUrl] = useState(
+  //   `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Photo/download`,
+  // );
+  // const [qrCodeurl, setQrCodeurl] = useState(
+  //   `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Generated_QR_Code/download`,
+  // );
   const [approvingLoading, setapprovingLoading] = useState(false);
   const [deniedLoading, setdeniedLoading] = useState(false);
 
-  const getImage = async () => {
+  const getImage = async url => {
     try {
+      console.log('get image url', url);
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -133,8 +155,9 @@ const VerifyDetails = ({ navigation, route }) => {
       console.error('Error fetching image:', error);
     }
   };
-  const getQrCodeImage = async () => {
+  const getQrCodeImage = async qrCodeurl => {
     try {
+      console.log('get QRCodeImage url', qrCodeurl);
       const response = await fetch(qrCodeurl, {
         method: 'GET',
         headers: {
@@ -160,23 +183,72 @@ const VerifyDetails = ({ navigation, route }) => {
     }
   };
 
-  useEffect(() => {
-    const fetchImage = async () => {
-      const dataUrl = await getImage();
-      const qrCodeDataUrl = await getQrCodeImage();
-      setPhoto(dataUrl);
-      setQrCodephoto(qrCodeDataUrl);
-      setLoading(false);
-    };
-    fetchImage();
-  }, []);
+  // useEffect(() => {
+  //   const fetchImage = async () => {
+  //     const dataUrl = await getImage();
+  //     let qrCodeDataUrl = await getQrCodeImage();
+  //     if (qrCodeDataUrl.length === 135) {
+  //       qrCodeDataUrl = await getQrCodeImage();
+  //     }
+  //     console.log('qrCodeDataUrl', qrCodeDataUrl);
+  //     setPhoto(dataUrl);
+  //     setQrCodephoto(qrCodeDataUrl);
+  //     setLoading(false);
+  //   };
+  //   fetchImage();
+  // }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchImage = async () => {
+        try {
+          // setUrl(
+          //   `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Photo/download`,
+          // );
+          // setQrCodeurl(
+          //   `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Generated_QR_Code/download`,
+          // );
+          const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${userID}/Photo/download`;
+          const qrCodeurl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${userID}/Generated_QR_Code/download`;
+          const dataUrl = await getImage(url);
+          let qrCodeDataUrl = await getQrCodeImage(qrCodeurl);
+          let count = 0;
+          // Retry if QR Code Data URL is of unexpected length
+          while (qrCodeDataUrl.length === 135) {
+            qrCodeDataUrl = await getQrCodeImage(qrCodeurl);
+            count++;
+            if (count > 5) {
+              break;
+            }
+          }
 
-  const generateQR = async (passcodeData) => {
+          // console.log('qrCodeDataUrl', qrCodeDataUrl);
+          setPhoto(dataUrl);
+          setQrCodephoto(qrCodeDataUrl);
+        } catch (error) {
+          console.error('Error fetching images:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchImage();
+
+      // Cleanup function (if necessary)
+      return () => {
+        console.log('Screen unfocused, cleaning up if needed');
+        setPhoto(null);
+        setQrCodephoto(null);
+        setLoading(true);
+      };
+    }, [userID]),
+  );
+
+  const generateQR = async passcodeData => {
     try {
       const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${user.Referrer_App_User_lookup.Name_field}&&passcode=${passcodeData}&&date=${user.Date_of_Visit}&&key=${SECRET_KEY}`;
       const res = await fetch(qrUrl);
       console.log('URL - ', qrUrl);
-      console.log("res from fetch img : ", res)
+      console.log('res from fetch img : ', res);
 
       if (!res.ok) {
         console.error('Error fetching image:', res.statusText);
@@ -193,7 +265,7 @@ const VerifyDetails = ({ navigation, route }) => {
           const result = reader.result.split(',')[1]; // Extract the base64 part only
           resolve(result);
         };
-        reader.onerror = (error) => {
+        reader.onerror = error => {
           console.error('Error reading blob:', error);
           reject(error);
         };
@@ -229,47 +301,91 @@ const VerifyDetails = ({ navigation, route }) => {
           'Content-Type': 'application/json',
         },
       });
-      console.log('Posting to Zoho....');
+
+      const updateRes = await response1.json();
+
       if (response1.ok) {
-        console.log('Code posted successfully to Zoho.');
-        console.log('Response for the code is:', response1);
+        if (updateRes.data && updateRes.code === 3000) {
+          const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Generated_QR_Code/upload`;
+          const response = await fetch(url, {
+            method: 'POST',
+            body: postData,
+            headers: {
+              Authorization: `Zoho-oauthtoken ${accessToken}`,
+              'Cache-Control': 'no-cache', // Prevent caching
+              Pragma: 'no-cache', // Prevent caching in older HTTP/1.0 proxies
+              Expires: '0',
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+          if (response.ok) {
+            console.log('Image uploaded successfully to Zoho.', response);
+            return;
+          } else {
+            console.log(
+              'Failed to upload qr code image to Zoho: ',
+              response.status,
+            );
+            return;
+          }
+        } else if (
+          updateRes.error[0].alert_message[0] === 'L2 is already approved.' ||
+          updateRes.error[0].alert_message[0] ===
+            'Record cannot be edited after L2 Approved'
+        ) {
+          setL2approvedalreadydialogVisible(true);
+          setErrorMessage(updateRes.error[0].alert_message[0]);
+        } else if (
+          updateRes.error[0].alert_message[0] ===
+          'You cannot approve the L1 Denied requests'
+        ) {
+          setDialogVisible(true);
+        } else {
+          Alert.alert('Error in approving: ', updateRes.code);
+        }
       } else {
-        console.log('Failed to post code to Zoho:', response1.status, response1.statusText);
+        console.log(
+          'Failed to post code to Zoho:',
+          response1.status,
+          response1.statusText,
+        );
       }
 
       // POST request to upload image to Zoho
-      const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Generated_QR_Code/upload`;
-      console.log(url);
-      const response = await fetch(url, {
-        method: 'POST',
-        body: postData,
-        headers: {
-          Authorization: `Zoho-oauthtoken ${accessToken}`,
-          'Cache-Control': 'no-cache', // Prevent caching
-          Pragma: 'no-cache', // Prevent caching in older HTTP/1.0 proxies
-          Expires: '0',
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      console.log('Posting image to Zoho....');
+      // const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Generated_QR_Code/upload`;
+      // console.log(url);
+      // const response = await fetch(url, {
+      //   method: 'POST',
+      //   body: postData,
+      //   headers: {
+      //     Authorization: `Zoho-oauthtoken ${accessToken}`,
+      //     'Cache-Control': 'no-cache', // Prevent caching
+      //     Pragma: 'no-cache', // Prevent caching in older HTTP/1.0 proxies
+      //     Expires: '0',
+      //     'Content-Type': 'multipart/form-data',
+      //   },
+      // });
+      // console.log('Posting image to Zoho....');
 
-      if (response.ok) {
-        console.log('Image uploaded successfully to Zoho.', response);
-        return;
-      } else {
-        console.log('Failed to upload image to Zoho: ', response.status,);
-        return;
-      }
+      // if (response.ok) {
+      //   console.log('Image uploaded successfully to Zoho.', response);
+      //   return;
+      // } else {
+      //   console.log('Failed to upload image to Zoho: ', response.status,);
+      //   return;
+      // }
     } catch (error) {
       console.error('Error capturing and uploading QR code:', error);
     }
   };
 
-  const passcodeGenerator = async () => {
+  const passcodeGenerator = async status => {
     let generatedPasscode;
     while (true) {
-      const newCode = Math.floor(100000 + Math.random() * (999999 - 100001 + 1),).toString();
-      const codeurl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Passcode_Report?criteria=Passcode==${newCode}`
+      const newCode = Math.floor(
+        100000 + Math.random() * (999999 - 100001 + 1),
+      ).toString();
+      const codeurl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Passcode_Report?criteria=Passcode==${newCode}`;
       const response = await fetch(codeurl, {
         method: 'GET',
         headers: {
@@ -283,9 +399,11 @@ const VerifyDetails = ({ navigation, route }) => {
       if (response.ok) {
         continue;
       }
-      generatedPasscode = newCode
+      generatedPasscode = newCode;
       break;
     }
+
+    generateQR(generatedPasscode);
 
     const payload = {
       data: {
@@ -303,11 +421,10 @@ const VerifyDetails = ({ navigation, route }) => {
       },
     });
 
-    const responseData = await passcodeResponse.json();
-    console.log("response of posting passcode to zoho : ", responseData);
-
-    await generateQR(generatedPasscode);
-    return;
+    if (!passcodeResponse.ok) {
+      console.log('Error is posting passcode to zoho');
+      Alert.alert('Error is posting passcode to zoho');
+    }
   };
 
   const onApprove = async () => {
@@ -315,33 +432,25 @@ const VerifyDetails = ({ navigation, route }) => {
 
     let updateField;
 
-    if (loggedUser.role === 'L2') {
-      if (
-        (user.Home_or_Office === 'Home' &&
-          (loggedUser.deptIds.includes('3318254000027832015') ||
-            loggedUser.deptIds.includes('3318254000031368009'))) ||
-        user.Home_or_Office === 'Office'
-      ) {
-        updateField = {
-          Referrer_Approval: 'APPROVED',
-          L2_Approval_Status: 'APPROVED',
-        };
-        setapprovingLoading(true);
-        await passcodeGenerator();
-      } else {
-        updateField = {
-          Referrer_Approval: 'APPROVED',
-          L2_Approval_Status: 'PENDING APPROVAL',
-        };
-        setapprovingLoading(true);
-      }
+    if (
+      loggedUser.role === 'L2' &&
+      ((user.Home_or_Office === 'Home' &&
+        (loggedUser.deptIds.includes('3318254000027832015') ||
+          loggedUser.deptIds.includes('3318254000031368009'))) ||
+        user.Home_or_Office === 'Office')
+    ) {
+      updateField = {
+        Referrer_Approval: 'APPROVED',
+        L2_Approval_Status: 'APPROVED',
+      };
     } else {
       updateField = {
         Referrer_Approval: 'APPROVED',
         L2_Approval_Status: 'PENDING APPROVAL',
       };
-      setapprovingLoading(true);
     }
+
+    setapprovingLoading(true);
 
     const updateData = {
       data: updateField,
@@ -355,17 +464,32 @@ const VerifyDetails = ({ navigation, route }) => {
     );
 
     if (response.code === 3000) {
+      console.log('record is updated');
       if (status === 'PENDING APPROVAL') {
-        setPendingDataFetched(false);
-        setApproveDataFetched(false);
+        setPendingDataFetched(!pendingDataFetched);
+        setApproveDataFetched(!approveDataFetched);
       } else if (status === 'DENIED') {
-        setDeniedDataFetched(false);
-        setApproveDataFetched(false);
+        setDeniedDataFetched(!deniedDataFetched);
+        setApproveDataFetched(!approveDataFetched);
       }
-      setapprovingLoading(false)
-      navigation.navigate('Approved');
-      Alert.alert('Visitor Approved');
-      return
+
+      if (
+        loggedUser.role === 'L2' &&
+        ((user.Home_or_Office === 'Home' &&
+          (loggedUser.deptIds.includes('3318254000027832015') ||
+            loggedUser.deptIds.includes('3318254000031368009'))) ||
+          user.Home_or_Office === 'Office')
+      ) {
+        Alert.alert('Visitor Approved');
+        await passcodeGenerator(status);
+      } else {
+        Alert.alert('Visitor Approved');
+      }
+      setapprovingLoading(false);
+      // navigation.navigate('Approved');
+      Linking.openURL('myapp://Approved');
+
+      return;
     } else {
       Alert.alert('Error: ', response.code);
     }
@@ -411,16 +535,15 @@ const VerifyDetails = ({ navigation, route }) => {
       const deletePayload = {
         criteria: `Passcode==\"${user.Generated_Passcode}\"`,
         result: {
-          "message": true,
-          "tasks": true
-        }
+          message: true,
+          tasks: true,
+        },
       };
       try {
         const deletePasscodeResponse = await fetch(PasscodeDeleteUrl, {
           method: 'DELETE',
           headers: {
             Authorization: `Zoho-oauthtoken ${accessToken}`,
-
           },
           body: JSON.stringify(deletePayload),
         });
@@ -438,7 +561,6 @@ const VerifyDetails = ({ navigation, route }) => {
       }
     }
 
-
     if (response.code === 3000) {
       if (status === 'PENDING APPROVAL') {
         setPendingDataFetched(false);
@@ -447,9 +569,10 @@ const VerifyDetails = ({ navigation, route }) => {
         setDeniedDataFetched(false);
         setApproveDataFetched(false);
       }
-      console.log("Reject is called")
+      console.log('Reject is called');
       Alert.alert('Visitor Rejected');
-      navigation.navigate('Denied');
+      // navigation.navigate('Denied');
+      Linking.openURL('myapp://Denied');
       setdeniedLoading(false);
     } else {
       Alert.alert('Error in rejecting: ', response.code);
@@ -482,11 +605,9 @@ const VerifyDetails = ({ navigation, route }) => {
         url: `file://${path}`,
       });
     } catch (error) {
-      Alert.alert('', 'The file is not shared.');
+      console.log('', 'The file is not shared.');
     }
   };
-
-  console.log('Screen Height:', height);
 
   let heightStyles;
   if (height > 900) {
@@ -497,10 +618,9 @@ const VerifyDetails = ({ navigation, route }) => {
     heightStyles = smallScreen;
   }
 
-
   useFocusEffect(
     useCallback(() => {
-      const { triggerDialog } = route.params || {};
+      const {triggerDialog} = route.params || {};
       if (triggerDialog) {
         setDialogVisible(true);
       }
@@ -513,10 +633,9 @@ const VerifyDetails = ({ navigation, route }) => {
 
   const [modalVisible, setModalVisible] = useState(false);
 
-  console.log('User in verify details : ', user);
   return (
     <>
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF', zIndex: 1 }}>
+      <SafeAreaView style={{flex: 1, backgroundColor: '#FFF', zIndex: 1}}>
         {/* <View style={styles.header}>
       <View style={styles.headerContainer}>
         <Text style={styles.headertxt}>Visitor details</Text>
@@ -550,7 +669,7 @@ const VerifyDetails = ({ navigation, route }) => {
             </View>
           ) : null} */}
           {user?.Referrer_Approval === 'PENDING APPROVAL' ? (
-            <View style={[styles.container, { marginTop: 20 }]}>
+            <View style={[styles.container, {marginTop: 20}]}>
               {approvingLoading || deniedLoading ? (
                 <View>
                   {approvingLoading ? (
@@ -559,7 +678,7 @@ const VerifyDetails = ({ navigation, route }) => {
                       <Text
                         style={[
                           heightStyles.ActivityIndicatorText,
-                          { color: 'white' },
+                          {color: 'white'},
                         ]}>
                         Approving
                       </Text>
@@ -585,7 +704,7 @@ const VerifyDetails = ({ navigation, route }) => {
                 </View>
               ) : (
                 <>
-                  <View style={[styles.left, { width: '50%' }]}>
+                  <View style={[styles.left, {width: '50%'}]}>
                     <TouchableOpacity
                       style={[styles.btnAccept, heightStyles.apprejBtnPosition]}
                       onPress={onApprove}>
@@ -616,7 +735,7 @@ const VerifyDetails = ({ navigation, route }) => {
                   />
                 </View>
               ) : (
-                <View style={{ width: '100%', padding: 10, marginLeft: '30%' }}>
+                <View style={{width: '100%', padding: 10, marginLeft: '30%'}}>
                   <TouchableOpacity
                     style={[styles.btnReject]}
                     onPress={onReject}>
@@ -632,7 +751,7 @@ const VerifyDetails = ({ navigation, route }) => {
                   <Text
                     style={[
                       heightStyles.ActivityIndicatorText,
-                      { color: 'white' },
+                      {color: 'white'},
                     ]}>
                     Approving
                   </Text>
@@ -643,7 +762,7 @@ const VerifyDetails = ({ navigation, route }) => {
                   />
                 </View>
               ) : (
-                <View style={{ width: '100%', padding: 10, marginLeft: '15%' }}>
+                <View style={{width: '100%', padding: 10, marginLeft: '15%'}}>
                   <TouchableOpacity
                     style={styles.btnAccept}
                     onPress={onApprove}>
@@ -654,9 +773,9 @@ const VerifyDetails = ({ navigation, route }) => {
             </View>
           ) : null}
           {user.Referrer_Approval === 'APPROVED' &&
-            user.L2_Approval_Status == 'APPROVED' &&
-            user.Referrer_App_User_lookup.ID == loggedUser.userId ? (
-            <View style={[styles.container, { marginTop: 20, marginBottom: 20 }]}>
+          user.L2_Approval_Status == 'APPROVED' &&
+          user.Referrer_App_User_lookup.ID == loggedUser.userId ? (
+            <View style={[styles.container, {marginTop: 20, marginBottom: 20}]}>
               <View style={styles.left}>
                 <Text style={styles.label}>Generated QR Code</Text>
               </View>
@@ -673,17 +792,27 @@ const VerifyDetails = ({ navigation, route }) => {
                   <ActivityIndicator size="large" color="#0000ff" />
                 ) : (
                   QrCodephoto && (
-                    <TouchableOpacity onPress={() => setModalVisible(true)} style={{width: "98%", height: 200}}>
-                      <Image
-                        source={{ uri: QrCodephoto }}
-                        style={{ width: '100%', height: 200 }}
-                        resizeMode="contain"
-                      />
-                    </TouchableOpacity>
-
+                    <>
+                      <TouchableOpacity
+                        onPress={() => setModalVisible(true)}
+                        style={{width: '98%', height: 200}}>
+                        <Image
+                          source={{uri: QrCodephoto}}
+                          style={{width: '100%', height: 200}}
+                          resizeMode="contain"
+                        />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.HomeButton, {backgroundColor: 'green'}]}
+                        onPress={() => {
+                          onShare();
+                        }}>
+                        <Text style={[styles.wewe, styles.wewe1]}>Share</Text>
+                      </TouchableOpacity>
+                    </>
                   )
                 )}
-                {loading ? null : (
+                {/* {loading ? null : (
                   <TouchableOpacity
                     style={[styles.HomeButton, { backgroundColor: 'green' }]}
                     onPress={() => {
@@ -691,11 +820,11 @@ const VerifyDetails = ({ navigation, route }) => {
                     }}>
                     <Text style={[styles.wewe, styles.wewe1]}>Share</Text>
                   </TouchableOpacity>
-                )}
+                )} */}
               </View>
             </View>
           ) : null}
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Name</Text>
             </View>
@@ -705,7 +834,7 @@ const VerifyDetails = ({ navigation, route }) => {
               </Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Phone</Text>
             </View>
@@ -713,7 +842,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.value}>{user.Phone_Number}</Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Single or Group Visit</Text>
             </View>
@@ -721,7 +850,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.value}>{user.Single_or_Group_Visit}</Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Date of Visit</Text>
             </View>
@@ -729,7 +858,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.value}>{user.Date_of_Visit}</Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Guest Category</Text>
             </View>
@@ -737,7 +866,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.value}>{user.Guest_Category}</Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Priority</Text>
             </View>
@@ -745,7 +874,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.value}>{user.Priority}</Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Remarks</Text>
             </View>
@@ -753,7 +882,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.value}>{user.Remarks}</Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Gender</Text>
             </View>
@@ -761,7 +890,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.value}>{user.Gender}</Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Photo</Text>
             </View>
@@ -771,14 +900,14 @@ const VerifyDetails = ({ navigation, route }) => {
               ) : (
                 photo && (
                   <Image
-                    source={{ uri: photo }}
-                    style={{ width: '98%', height: 200 }}
+                    source={{uri: photo}}
+                    style={{width: '98%', height: 200}}
                   />
                 )
               )}
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Referrer</Text>
             </View>
@@ -791,7 +920,7 @@ const VerifyDetails = ({ navigation, route }) => {
               </Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Department</Text>
             </View>
@@ -799,7 +928,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.value}>{user.Department.Department}</Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Number of Men</Text>
             </View>
@@ -807,7 +936,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.value}>{user.Number_of_Men}</Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Number of Women</Text>
             </View>
@@ -815,7 +944,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.value}>{user.Number_of_Women}</Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Number of Boys</Text>
             </View>
@@ -823,7 +952,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.value}>{user.Number_of_Boys}</Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Number of Girls</Text>
             </View>
@@ -831,7 +960,7 @@ const VerifyDetails = ({ navigation, route }) => {
               <Text style={styles.value}>{user.Number_of_Girls}</Text>
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20 }]}>
+          <View style={[styles.container, {marginTop: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>Vehicle Information</Text>
             </View>
@@ -839,14 +968,14 @@ const VerifyDetails = ({ navigation, route }) => {
             <View style={styles.right}>
               {user?.Vehicle_Information?.length > 0
                 ? user.Vehicle_Information.map((vehicle, index) => (
-                  <Text key={index} style={styles.value}>
-                    {vehicle.zc_display_value}
-                  </Text>
-                ))
+                    <Text key={index} style={styles.value}>
+                      {vehicle.zc_display_value}
+                    </Text>
+                  ))
                 : null}
             </View>
           </View>
-          <View style={[styles.container, { marginTop: 20, marginBottom: 20 }]}>
+          <View style={[styles.container, {marginTop: 20, marginBottom: 20}]}>
             <View style={styles.left}>
               <Text style={styles.label}>
                 Is the guest being invited to your Home or Office
@@ -861,15 +990,23 @@ const VerifyDetails = ({ navigation, route }) => {
         <Modal visible={modalVisible} transparent={true} animationType="fade">
           <View style={styles.modalContainer}>
             {/* Full-Screen Image */}
-            <Image source={{ uri: QrCodephoto }} style={styles.fullScreenImage} />
+            <Image source={{uri: QrCodephoto}} style={styles.fullScreenImage} />
 
             {/* Close and Share Button */}
-            <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
-              <Image source={require('../../../src/assets/cancel.png')} style={styles.closeButtonText} />
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}>
+              <Image
+                source={require('../../../src/assets/cancel.png')}
+                style={styles.closeButtonText}
+              />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.shareButton} onPress={onShare}>
-              <Image source={require('../../../src/assets/share.png')} style={styles.shareButtonText} />
+              <Image
+                source={require('../../../src/assets/share.png')}
+                style={styles.shareButtonText}
+              />
             </TouchableOpacity>
           </View>
         </Modal>
@@ -880,7 +1017,7 @@ const VerifyDetails = ({ navigation, route }) => {
         contentStyle={styles.detailsNotEditableDialogue}>
         <Image
           source={require('../../../src/assets/Denied.png')}
-          style={{ width: '15%', height: '25%', alignSelf: 'center', top: -85 }} // adjust as needed
+          style={{width: '15%', height: '25%', alignSelf: 'center', top: -85}} // adjust as needed
         />
         <Dialog.Title style={styles.detailsNotEditableTitle}>
           Can not edit details once Visitor is L2 approved
@@ -1429,7 +1566,7 @@ const styles = StyleSheet.create({
     padding: 15,
     ...Platform.select({
       ios: {
-        shadowOffset: { width: 2, height: 2 },
+        shadowOffset: {width: 2, height: 2},
         shadowColor: '#333',
         shadowOpacity: 0.3,
         shadowRadius: 4,
@@ -1539,7 +1676,7 @@ const styles = StyleSheet.create({
   closeButtonText: {
     width: 25,
     height: 25,
-    tintColor: '#B21E2B'
+    tintColor: '#B21E2B',
   },
   shareButton: {
     position: 'absolute',
@@ -1553,6 +1690,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     width: 30,
     height: 30,
-    tintColor: "#B21E2B"
+    tintColor: '#B21E2B',
   },
 });

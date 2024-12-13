@@ -7,10 +7,40 @@ import parseDate from '../../components/ParseDate';
 import { useFocusEffect, } from '@react-navigation/native';
 import Filter from '../../components/Filter';
 import DotsBlinkingLoaderEllipsis from '../../components/DotsBlinkingLoaderEllipsis'
+import Sort from '../../components/Sort';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import moment from 'moment';
+
+const defaultSort = (data) => {
+
+  let sortedData = [...data];
+  sortedData.sort((a, b) =>
+    (new Date(moment(a.Modified_Time, 'DD-MMM-YYYY HH:mm:ss')) -
+      new Date(moment(b.Modified_Time, 'DD-MMM-YYYY HH:mm:ss'))) * -1
+  );
+  return sortedData
+}
 
 const L2Denied = ({ navigation }) => {
+ // console.log("Logged user name in L2 denied: ", loggedUser.name)
 
-  const { loggedUser, accessToken, L2DeniedDataFetched, setL2DeniedDataFetched } = useContext(UserContext)
+  const { loggedUser, setLoggedUser, accessToken, L2DeniedDataFetched, setL2DeniedDataFetched } = useContext(UserContext)
+
+  
+  useEffect(()=>{
+    const settingLoggedUser = async() => {
+      let existedUser = await AsyncStorage.getItem('existedUser');
+      existedUser = JSON.parse(existedUser);
+      if(existedUser){
+        setLoggedUser(existedUser);
+      }
+    }
+
+    if(!loggedUser || loggedUser===null){
+      settingLoggedUser();
+    }
+  }, [])
+
   const [L2Denieds, setL2Denieds] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -24,29 +54,25 @@ const L2Denied = ({ navigation }) => {
     if (result.data === undefined) {
       setL2Denieds(null);
       setL2DeniedsData(null);
-      setL2DeniedDataFetched(false);
+      //setL2DeniedDataFetched(false);
       setLoading(false);
     }
     else {
-      all_L2denieds.sort((a, b) => {
-        // Parse the date strings into Date objects
-        const dateA = new parseDate(a.Date_of_Visit);
-        const dateB = new parseDate(b.Date_of_Visit);
-        // Compare the Date objects
-        return dateB - dateA;
-      });
-      setL2Denieds(all_L2denieds)
-      setL2DeniedsData(all_L2denieds)
+      const sortedData = defaultSort(all_L2denieds)
+      setL2Denieds(sortedData)
+      setL2DeniedsData(sortedData)
       setLoading(false)
-      setL2DeniedDataFetched(true)
+      //setL2DeniedDataFetched(true)
     }
   };
 
   useEffect(() => {
 
-    if (!L2DeniedDataFetched) {
-      fetchData();
+    const fetchLatest = async () => {
+      await fetchData(); 
     }
+
+    fetchLatest();
 
   }, [L2DeniedDataFetched]);
 
@@ -60,15 +86,9 @@ const L2Denied = ({ navigation }) => {
       setRefreshing(false);
       setLoading(false);
     } else {
-      all_L2denieds.sort((a, b) => {
-        // Parse the date strings into Date objects
-        const dateA = new parseDate(a.Date_of_Visit);
-        const dateB = new parseDate(b.Date_of_Visit);
-        // Compare the Date objects
-        return dateB - dateA;
-      });
-      setL2Denieds(all_L2denieds)
-      setL2DeniedsData(all_L2denieds);
+      const sortedData = defaultSort(all_L2denieds)
+      setL2Denieds(sortedData)
+      setL2DeniedsData(sortedData);
       setRefreshing(false);
     }
 
@@ -77,19 +97,24 @@ const L2Denied = ({ navigation }) => {
   useFocusEffect(useCallback(() => {
     onRefresh();
   }, [L2Denied]));
+
   return (
-    <><View style={{ flex: 1, paddingTop: 10 , backgroundColor: '#FFF'}}>
+    <><View style={{ flex: 1, paddingTop: 10, backgroundColor: '#FFF' }}>
       {loading ? (
         <View style={styles.loadingContainer}>
           {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
-          <DotsBlinkingLoaderEllipsis/>
+          <DotsBlinkingLoaderEllipsis />
         </View>
       ) : ((refreshing ? (<View style={styles.loadingContainer}>
         {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
-        <DotsBlinkingLoaderEllipsis/>
+        <DotsBlinkingLoaderEllipsis />
       </View>) : (
         <>
-          <Filter setFilteredData={setL2DeniedsData} ToFilterData={L2Denieds}  comingFrom={"L2Denied"}/>
+          <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+            <Sort setSortedData={setL2DeniedsData} ToSortData={L2Denieds} />
+            <Filter setFilteredData={setL2DeniedsData} ToFilterData={L2Denieds} comingFrom={"L2Denied"} />
+          </View>
+
           <FlatList
             data={L2DeniedsData}
             renderItem={({ item }) => (

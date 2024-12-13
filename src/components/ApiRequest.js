@@ -286,6 +286,7 @@ export const getDataWithoutStringAndWithInt = async (
 };
 
 export const postDataWithInt = async (reportName, user_data, token) => {
+  console.log("User data: ", user_data);
   try {
     const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/${reportName}`;
     console.log(url);
@@ -296,7 +297,9 @@ export const postDataWithInt = async (reportName, user_data, token) => {
       },
       body: JSON.stringify(user_data),
     });
-    return await response.json();
+    const res =  await response.json();
+    console.log("Response in postDataWithInt", res);
+    return res;
   } catch (err) {
     if (err.message === 'Network request failed')
       Alert.alert(

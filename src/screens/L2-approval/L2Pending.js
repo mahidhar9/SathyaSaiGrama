@@ -7,14 +7,47 @@ import parseDate from '../../components/ParseDate';
 import { useFocusEffect, } from '@react-navigation/native';
 import Filter from '../../components/Filter';
 import DotsBlinkingLoaderEllipsis from '../../components/DotsBlinkingLoaderEllipsis'
+import Sort from '../../components/Sort';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import moment from 'moment';
+
+const defaultSort = (data) => {
+
+  let sortedData = [...data];
+  sortedData.sort((a, b) =>
+    (new Date(moment(a.Modified_Time, 'DD-MMM-YYYY HH:mm:ss')) -
+      new Date(moment(b.Modified_Time, 'DD-MMM-YYYY HH:mm:ss'))) * -1
+  );
+  return sortedData
+}
 
 const L2Pending = ({ navigation }) => {
 
-  const { loggedUser, accessToken, L2PendingDataFetched, setL2PendingDataFetched } = useContext(UserContext)
+  const { loggedUser, setLoggedUser, accessToken, L2PendingDataFetched, setL2PendingDataFetched } = useContext(UserContext)
+
+  
+  useEffect(()=>{
+    const settingLoggedUser = async() => {
+      let existedUser = await AsyncStorage.getItem('existedUser');
+      existedUser = JSON.parse(existedUser);
+      if(existedUser){
+        setLoggedUser(existedUser);
+      }
+    }
+
+    if(!loggedUser || loggedUser===null){
+      settingLoggedUser();
+    }
+  }, [])
+
+  console.log("Logged user name in L2 pending: ", loggedUser.name)
+
+
   const [L2Pendings, setL2Pendings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [L2PendingsData, setL2PendingsData] = useState([]);
+
 
   const fetchData = async () => {
     setLoading(true)
@@ -24,30 +57,26 @@ const L2Pending = ({ navigation }) => {
     if (result.data === undefined) {
       setL2Pendings(null);
       setL2PendingsData(null);
-      setL2PendingDataFetched(false);
+      //setL2PendingDataFetched(false);
       setLoading(false);
     }
     else {
-      // sorting the pendings data by date
-      all_L2pendings.sort((a, b) => {
-        // Parse the date strings into Date objects
-        const dateA = new parseDate(a.Date_of_Visit);
-        const dateB = new parseDate(b.Date_of_Visit);
-        // Compare the Date objects
-        return dateB - dateA;
-      });
-      setL2Pendings(all_L2pendings)
-      setL2PendingsData(all_L2pendings);
+      const sortedData = defaultSort(all_L2pendings)
+      setL2Pendings(sortedData)
+      setL2PendingsData(sortedData);
       setLoading(false)
-      setL2PendingDataFetched(true)
+      //setL2PendingDataFetched(true)
     }
+    //console.log("object:: ", L2Pendings)
   };
 
   useEffect(() => {
 
-    if (!L2PendingDataFetched) {
-      fetchData();
+    const fetchLatest = async () => {
+      await fetchData(); 
     }
+
+    fetchLatest();
 
   }, [L2PendingDataFetched]);
 
@@ -63,18 +92,12 @@ const L2Pending = ({ navigation }) => {
 
 
     } else {
-      // sorting the pendings data by date
-      all_L2pendings.sort((a, b) => {
-        // Parse the date strings into Date objects
-        const dateA = new parseDate(a.Date_of_Visit);
-        const dateB = new parseDate(b.Date_of_Visit);
-        // Compare the Date objects
-        return dateB - dateA;
-      });
-      setL2Pendings(all_L2pendings)
-      setL2PendingsData(all_L2pendings)
+      const sortedData = defaultSort(all_L2pendings)
+      setL2Pendings(sortedData)
+      setL2PendingsData(sortedData)
       setRefreshing(false);
     }
+    //console.log("object:: ", L2Pendings)
   };
 
 
@@ -89,14 +112,18 @@ const L2Pending = ({ navigation }) => {
       {loading ? (
         <View style={styles.loadingContainer}>
           {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
-          <DotsBlinkingLoaderEllipsis/>
+          <DotsBlinkingLoaderEllipsis />
         </View>
       ) : ((refreshing ? (<View style={styles.loadingContainer}>
         {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
-        <DotsBlinkingLoaderEllipsis/>
+        <DotsBlinkingLoaderEllipsis />
       </View>) : (
         <>
-          <Filter setFilteredData={setL2PendingsData} ToFilterData={L2Pendings} comingFrom={"L2Pending"}/>
+          <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+            <Sort setSortedData={setL2PendingsData} ToSortData={L2Pendings} />
+            <Filter setFilteredData={setL2PendingsData} ToFilterData={L2Pendings} comingFrom={"L2Pending"} />
+          </View>
+
           <FlatList
             data={L2PendingsData}
             renderItem={({ item }) => (

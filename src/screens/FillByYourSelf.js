@@ -14,6 +14,7 @@ import {
   Button,
   Image,
   Dimensions,
+  Linking,
 } from 'react-native';
 
 import {
@@ -42,6 +43,7 @@ import {updateRecord} from './approval/VerifyDetails';
 import {isJSDocCommentContainingNode} from 'typescript';
 import dayjs from 'dayjs';
 import {CalendarList} from 'react-native-calendars';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 LogBox.ignoreLogs(['Warnings...']);
 LogBox.ignoreAllLogs();
@@ -70,22 +72,41 @@ const FillByYourSelf = ({navigation}) => {
   const [priority, setPriority] = useState('');
   const [vehicleType, setVehicleType] = useState('');
   const [isVehicle, setIsVehicle] = useState(false);
+  const [remarks, setRemarks] = useState('');
   const [vehicleNumber, setVehicleNumber] = useState('');
   //just so that the othe code gets commited can delete after
 
   const [vehicles, setVehicles] = useState([]);
   const [vehicleErrorMessages, setVehicleErrorMessages] = useState({});
   // Regex format for vehicle number like 'KA 01 CU 1234'
-  const vehicleNumberPattern = /^[A-Z]{2}[0-9]{2}[A-Z]{2}[0-9]{4}$/;
+
+  const vehicleNumberPattern = /^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}$/;
+  const [errType, setErrType] = useState(null);
+
   let selectedHomeOffice = '';
 
   const {
     getAccessToken,
     loggedUser,
+    setLoggedUser,
     testResident,
     accessToken,
     setApproveDataFetched,
   } = useContext(UserContext);
+
+  useEffect(() => {
+    const settingLoggedUser = async () => {
+      let existedUser = await AsyncStorage.getItem('existedUser');
+      existedUser = JSON.parse(existedUser);
+      if (existedUser) {
+        setLoggedUser(existedUser);
+      }
+    };
+
+    if (!loggedUser || loggedUser === null) {
+      settingLoggedUser();
+    }
+  }, []);
 
   // if (loggedUser.resident === true && loggedUser.employee === true) {
   //   selectedHomeOffice = '';
@@ -94,22 +115,24 @@ const FillByYourSelf = ({navigation}) => {
   // } else if (loggedUser.resident === false && loggedUser.employee === true) {
   //   selectedHomeOffice = 'Office';
   // }
-  let homeOrOffice = '';
-  if (loggedUser.resident === true && loggedUser.employee === true) {
-    homeOrOffice = '';
-  } else if (loggedUser.resident === true && loggedUser.employee === false) {
-    homeOrOffice = 'Home';
-  } else if (loggedUser.resident === false && loggedUser.employee === true) {
-    homeOrOffice = 'Office';
-  }
-  const [selectedHO, setSelectedHO] = useState(homeOrOffice);
+
+  const [selectedHO, setSelectedHO] = useState('');
+
+  useEffect(() => {
+    if (loggedUser.resident === true && loggedUser.employee === true) {
+      setSelectedHO('');
+    } else if (loggedUser.resident === true && loggedUser.employee === false) {
+      setSelectedHO('Home');
+    } else if (loggedUser.resident === false && loggedUser.employee === true) {
+      setSelectedHO('Office');
+    }
+  }, []);
 
   const [date, setDate] = useState('Select Date');
 
   const [showModal, setShowModal] = useState(false);
   const L1ID = loggedUser.userId;
 
-  console.log('L1ID', L1ID);
   const minDate = dayjs().format('YYYY-MM-DD');
   const maxDate = dayjs().add(6, 'month').format('YYYY-MM-DD');
 
@@ -189,7 +212,7 @@ const FillByYourSelf = ({navigation}) => {
     {label: 'Mrs.', value: 'Mrs.'},
     {label: 'Ms.', value: 'Ms.'},
     {label: 'Dr.', value: 'Dr.'},
-    {label: 'Prof.', value: 'Peof.'},
+    {label: 'Prof.', value: 'Prof.'},
     {label: 'Rtn.', value: 'Rtn.'},
     {label: 'Sri', value: 'Sri.'},
     {label: 'Smt.', value: 'Smt.'},
@@ -237,11 +260,22 @@ const FillByYourSelf = ({navigation}) => {
   let boysCount = '0';
   let girlsCount = '0';
 
+  console.log('Logged usename in FillByYourSelf: ', loggedUser.name);
+
   const generateQR = async passcodeData => {
     try {
-      const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${loggedUser.name}&&passcode=${passcodeData}&&date=${convertDateFormat(date)}&&key=${SECRET_KEY}`;
-      const res = await fetch(qrUrl);
+      console.log(
+        'Logged usename is generateQR in FillByYourSelf: ',
+        loggedUser.name,
+      );
+      const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${
+        loggedUser.name
+      }&&passcode=${passcodeData}&&date=${convertDateFormat(
+        date,
+      )}&&key=${SECRET_KEY}`;
+
       console.log('URL - ', qrUrl);
+      const res = await fetch(qrUrl);
       console.log('res from fetch img : ', res);
 
       if (!res.ok) {
@@ -282,6 +316,7 @@ const FillByYourSelf = ({navigation}) => {
       const payload = {
         data: {
           Generated_Passcode: passcodeData,
+          L2_Approval_Status: 'APPROVED',
         },
       };
 
@@ -295,40 +330,35 @@ const FillByYourSelf = ({navigation}) => {
           'Content-Type': 'application/json',
         },
       });
-      console.log('Posting to Zoho....');
+
       if (response1.ok) {
         console.log('Code posted successfully to Zoho.');
-        console.log('Response for the code is:', response1);
+        const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${approvalToVisitorID.current}/Generated_QR_Code/upload`;
+        console.log(url);
+        const response = await fetch(url, {
+          method: 'POST',
+          body: postData,
+          headers: {
+            Authorization: `Zoho-oauthtoken ${accessToken}`,
+            'Cache-Control': 'no-cache', // Prevent caching
+            Pragma: 'no-cache', // Prevent caching in older HTTP/1.0 proxies
+            Expires: '0',
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        if (response.ok) {
+          console.log('Image uploaded successfully to Zoho.', response);
+          return;
+        } else {
+          console.log('Failed to upload image to Zoho: ', response.status);
+          return;
+        }
       } else {
         console.log(
           'Failed to post code to Zoho:',
           response1.status,
           response1.statusText,
         );
-      }
-
-      // POST request to upload image to Zoho
-      const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${approvalToVisitorID.current}/Generated_QR_Code/upload`;
-      console.log(url);
-      const response = await fetch(url, {
-        method: 'POST',
-        body: postData,
-        headers: {
-          Authorization: `Zoho-oauthtoken ${accessToken}`,
-          'Cache-Control': 'no-cache', // Prevent caching
-          Pragma: 'no-cache', // Prevent caching in older HTTP/1.0 proxies
-          Expires: '0',
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      console.log('Posting image to Zoho....');
-
-      if (response.ok) {
-        console.log('Image uploaded successfully to Zoho.', response);
-        return;
-      } else {
-        console.log('Failed to upload image to Zoho: ', response.status);
-        return;
       }
     } catch (error) {
       console.error('Error capturing and uploading QR code:', error);
@@ -359,6 +389,8 @@ const FillByYourSelf = ({navigation}) => {
       break;
     }
 
+    generateQR(generatedPasscode);
+
     const payload = {
       data: {
         Passcode: generatedPasscode,
@@ -377,8 +409,6 @@ const FillByYourSelf = ({navigation}) => {
 
     const responseData = await passcodeResponse.json();
     console.log('response of posting passcode to zoho : ', responseData);
-
-    await generateQR(generatedPasscode);
     return;
   };
 
@@ -430,9 +460,23 @@ const FillByYourSelf = ({navigation}) => {
       menCount = men === '' ? '0' : men;
       womenCount = women === '' ? '0' : women;
     }
+
+    const uppercaseVehicles = vehicles.map(({ID, ...vehicle}) => ({
+      ...vehicle,
+      Vehicle_Number: vehicle.Vehicle_Number.toUpperCase(),
+    }));
+
+    // Calculate the total number of people
+    let people =
+      parseInt(menCount) +
+      parseInt(womenCount) +
+      parseInt(boys) +
+      parseInt(girls);
+    console.log('Total people : ', people);
+
     const formData = {
       data: {
-        Single_or_Group_Visit: selectedSG,
+        Single_or_Group_Visit: people == 1 ? 'Single' : 'Group',
         L2_Approval_Status: 'PENDING APPROVAL',
         Name_field: {
           prefix: prefix,
@@ -443,6 +487,7 @@ const FillByYourSelf = ({navigation}) => {
         Referrer_Approval: 'APPROVED',
         Department: DepartmentID,
         Phone_Number: formattedValue,
+        Remarks: remarks,
         Priority: priority,
         Date_of_Visit: convertDateFormat(date),
         Gender: selectedGender,
@@ -452,10 +497,14 @@ const FillByYourSelf = ({navigation}) => {
         Number_of_Women: womenCount,
         Number_of_Girls: girls,
         Home_or_Office: selectedHO,
-        Vehicle_Information: vehicles,
+        Vehicle_Information: uppercaseVehicles,
+        Registration_Type: 'Pre-Approval',
       },
     };
-    console.log('formData', formData);
+
+    console.log('formData...: ', formData);
+
+    console.log('vehicles :  ', formData.data.Vehicle_Information);
 
     if (loggedUser.role === 'L2') {
       if (
@@ -474,22 +523,21 @@ const FillByYourSelf = ({navigation}) => {
     }
 
     try {
-      const response = await fetch(
-        `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Approval_to_Visitor`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Zoho-oauthtoken ${getAccessToken()}`,
-          },
-          body: JSON.stringify(formData),
+      const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/form/Approval_to_Visitor`;
+      console.log('url is :::::', url);
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Zoho-oauthtoken ${getAccessToken()}`,
         },
-      );
+        body: JSON.stringify(formData),
+      });
       const res = await response.json();
       const photoUploadRes = await uploadPhoto(
         res.data.ID,
         'Approval_to_Visitor_Report',
       );
-      console.log('', photoUploadRes);
+      console.log('photo upload response : ', photoUploadRes);
       return res;
     } catch (error) {
       Alert.alert('Error', 'Something went wrong');
@@ -745,11 +793,26 @@ const FillByYourSelf = ({navigation}) => {
     }
     const errors = {};
 
+    // Validation checks for minimum counts
+    let tempErrType = null;
+    if (selectedGender === 'Male' && menCount < 1 && selectedSG === 'Group') {
+      tempErrType = 'MenCount';
+      valid = false;
+    } else if (
+      selectedGender === 'Female' &&
+      womenCount < 1 &&
+      selectedSG === 'Group'
+    ) {
+      tempErrType = 'WomenCount';
+      valid = false;
+    }
+    setErrType(tempErrType);
+
     vehicles.forEach((vehicle, index) => {
       const vehicleNumber = vehicle.Vehicle_Number;
       if (
         !vehicleNumberPattern.test(
-          vehicleNumber.replace(/\s+/g, '').toLowerCase(),
+          vehicleNumber.replace(/\s+/g, '').toUpperCase(),
         )
       ) {
         errors[vehicle.ID] = `Invalid Vehicle Number`;
@@ -776,14 +839,14 @@ const FillByYourSelf = ({navigation}) => {
   };
 
   const handleSubmit = async () => {
+    console.log('******** ', remarks);
     setSubmitFlag(true);
     if (validateForm()) {
       setIsSubmitted(true);
       let office_id;
-
       if (selectedHO === 'Home') {
         office_id = '3318254000027832015';
-        if (testResident) {
+        if (loggedUser.testResident) {
           office_id = '3318254000031368009';
         }
         console.log('In Home conditional block');
@@ -801,16 +864,13 @@ const FillByYourSelf = ({navigation}) => {
         console.log('responseFromVisitorDetails', responseFromVisitorDetails);
         if (loggedUser.role === 'L2') {
           await passcodeGenerator();
-          setIsSubmitted(false);
-          navigation.navigate('Invite');
-        } else if (loggedUser.role === 'L1') {
-          setIsSubmitted(false);
-          navigation.navigate('Invite');
         }
+        setIsSubmitted(false);
+        // navigation.navigate('Invite');
+        Linking.openURL('myapp://Approved');
       } catch (err) {
         Alert.alert(err);
       }
-      // Add form submission logic here
     }
   };
 
@@ -1175,6 +1235,12 @@ const FillByYourSelf = ({navigation}) => {
                         }}
                         selectionColor="#B21E2B"
                       />
+                      {errType == 'MenCount' && (
+                        <Text style={{color: 'red'}}>
+                          The selected gender is Male. Please enter a valid
+                          number.
+                        </Text>
+                      )}
                     </View>
                     <View style={styles.namecontainer}>
                       <Text style={styles.label}>
@@ -1191,6 +1257,12 @@ const FillByYourSelf = ({navigation}) => {
                         }}
                         selectionColor="#B21E2B"
                       />
+                      {errType == 'WomenCount' && (
+                        <Text style={{color: 'red'}}>
+                          The selected gender is Female. Please enter a valid
+                          number.
+                        </Text>
+                      )}
                     </View>
                     <View style={styles.namecontainer}>
                       <Text style={styles.label}>
@@ -1381,6 +1453,15 @@ const FillByYourSelf = ({navigation}) => {
                   </View>
 
                   <View style={styles.namecontainer}>
+                    <Text style={styles.label}>Remark</Text>
+                    <TextInput
+                      style={[styles.input, {height: 100}]}
+                      multiline={true}
+                      onChangeText={txt => setRemarks(txt)}
+                    />
+                  </View>
+
+                  <View style={styles.namecontainer}>
                     <Text style={styles.label}>Vehicle Information</Text>
                     <View style={styles.vehicle}>
                       <Text>Vehicle type</Text>
@@ -1441,6 +1522,7 @@ const FillByYourSelf = ({navigation}) => {
                             onChangeText={text =>
                               handleTextChange(index, 'Vehicle_Number', text)
                             }
+                            autoCapitalize="characters"
                           />
 
                           <TouchableOpacity
@@ -2245,6 +2327,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 15,
   },
+
   singleOptionContainer: {
     flexDirection: 'row', // ensure the circle and text are in a row
     alignItems: 'center', // vertically center align the circle and text
