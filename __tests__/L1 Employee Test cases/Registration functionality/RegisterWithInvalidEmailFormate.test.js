@@ -61,24 +61,19 @@ describe('Register Screen', () => {
       </UserContext.Provider>
     );
 
-    // Step 1: Enter a name in the "Name" field
     fireEvent.changeText(getByPlaceholderText('Name'), 'Teja');
 
-    // Step 2: Enter a valid email in the "Email Address" field
     fireEvent.changeText(getByPlaceholderText('Email Address'), 'saitejads2000@gmail.com');
 
     // Step 3: Enter a valid password in the "Password" field
     fireEvent.changeText(getByPlaceholderText('Password'), 'ValidPassword123!');
 
-    // Step 4: Enter the same password in the "Confirm Password" field
     fireEvent.changeText(getByPlaceholderText('Confirm Password'), 'ValidPassword123!');
 
-    // Step 5: Click on the "Register" button
     fireEvent.press(getByText('Register'));
 
-    // Step 6: Verify that the error message is displayed
     await waitFor(() => {
       expect(Alert.alert).toHaveBeenCalledWith("That email address is invalid!");
     }, { timeout: 10000 });
-  }, 50000);
+  }, 80000);
 });

@@ -500,7 +500,7 @@ const ViewDetails = ({ navigation, route }) => {
                 </View>
               ) : <View style={{ width: '100%', padding: 10, marginLeft: '15%' }}>
                 <TouchableOpacity style={styles.btnAccept} onPress={onApprove}>
-                  <Text style={styles.btntxt}>Approve</Text>
+                  <Text testID='AfterDenyApprove' style={styles.btntxt}>Approve</Text>
                 </TouchableOpacity>
               </View>}
             </View>
