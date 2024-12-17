@@ -43,7 +43,6 @@ jest.mock('react-native-gesture-handler',()=>{
     
     TouchableOpacity:jest.fn((props)=>{
       
-      console.log(props)
       return <MockTouchableOpacity {...props}/>
       
     }),

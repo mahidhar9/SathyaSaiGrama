@@ -660,7 +660,6 @@ const VerifyDetails = ({ navigation, route }) => {
               ) : (
                 <View style={{ width: '100%', padding: 10, marginLeft: '15%' }}>
                   <TouchableOpacity
-                    testID="approveButton"
                     style={styles.btnAccept}
                     onPress={onApprove}>
                     <Text style={styles.btntxt}>Approve</Text>

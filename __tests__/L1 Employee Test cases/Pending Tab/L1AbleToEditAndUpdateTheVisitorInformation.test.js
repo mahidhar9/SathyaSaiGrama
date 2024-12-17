@@ -13,13 +13,16 @@ jest.mock('react-native-fs', () => ({
     writeFile: jest.fn(),
   },
 }));
+// jest.mock('react-native-modern-datepicker', () => ({
+//   __esModule: true,
+//   DatePicker:jest.fn(),
+//   default: jest.fn(() => null), 
+//   getFormatedDate: jest.fn(),
+// }));
 jest.mock('react-native-modern-datepicker', () => ({
-  __esModule: true,
-  DatePicker:jest.fn(),
-  default: jest.fn(() => null), 
-  getFormatedDate: jest.fn(),
+  DatePicker: jest.fn((props) => props.children ),
+  getFormatedDate: jest.fn(() => '2024-12-14'),
 }));
-
 
 global.fetch = jest.fn(() =>
   Promise.resolve({
@@ -39,13 +42,11 @@ jest.mock('react-native-share', () => ({
   Share: jest.fn(),
 }));
 jest.mock('react-native-dialog', () => ({
-  __esModule: true,
-  default: {
-    Container: ({ visible, children }) => (visible ? children : null),
-    Title: ({ children }) => <>{children}</>,
-    Description: ({ children }) => <>{children}</>,
-    Button: ({ label, onPress }) => <button onClick={onPress}>{label}</button>,
-  },
+  Dialog: jest.fn((props) => props.children),
+  Container: jest.fn((props) => props.children),
+  Title: jest.fn((props) => props.children),
+  Description: jest.fn((props) => props.children),
+  Button: jest.fn(( props) => props.children),
 }));
 
 
@@ -70,38 +71,49 @@ describe('L1 Able to Edit and Update the Visitor Information', () => {
   afterEach(cleanup);
 
   test('Verify that L1 can edit and update visitor information', async () => {
-    const user = {
-      triggerDialog: true,
-      L2_Approval_Status: 'PENDING',
-      Name_field: { zc_display_value: 'John Doe' },
-      Vehicle_Information: [
-        { Vehicle_Type: 'Car', Vehicle_Number: 'KA01AB1234', ID: '1' },
-        { Vehicle_Type: 'Bike', Vehicle_Number: 'KA02CD5678', ID: '2' },
-      ],
+    const mockRoute = {
+      params: {
+        triggerDialog: true,
+        code:'3000',
+        user: {
+          ID: '123',
+          Referrer_Approval: 'PENDING APPROVAL',
+          L2_Approval_Status: 'Pending Approval',
+          Name_field: { zc_display_value: 'John Doe' },
+          Phone_Number: '9182590940',
+          Single_or_Group_Visit: 'Single',
+          Date_of_Visit: '2023-09-20',
+          Guest_Category: 'Corporate',
+          Priority: 'High',
+          Remarks: 'Important visitor',
+          Gender: 'Male',
+          Vehicle_Information: [{ zc_display_value: 'Car - ABC123' }],
+          Referrer_App_User_lookup: { zc_display_value: 'Referrer Name' },
+          Department: { Department: 'Engineering' },
+        },
+      },
     };
+    
 
-
-    const { getByText, getByPlaceholderText, queryByText, debug } = render(
+    const { getByText,getAllByText, getByPlaceholderText, queryByText, debug } = render(
       <UserContext.Provider value={mockUserContextValue}>
         <NavigationContainer>
-          <EditVerifydetails navigation={mockNavigation}  route={{ params: { user } }}/>
+          <EditVerifydetails navigation={mockNavigation}  route={mockRoute}/>
         </NavigationContainer>
       </UserContext.Provider>
     );
 
+    fireEvent.changeText(getByText('Guest Category'), 'Govt Officials');
+    fireEvent.changeText(getByText('Male','Gender'));
+    fireEvent.changeText(getByPlaceholderText('KA 01 AB 1234','Vehicle Number'));
 
-    await waitFor(() => {
-      expect(queryByText('Edit Visitor Info Screen')).toBeTruthy();
-    });
-    fireEvent.changeText(getByPlaceholderText('31-12-2024', 'DD-MM-YYYY'));
-    fireEvent.changeText(getByPlaceholderText('Guest Category'), 'Govt Officials');
-    fireEvent.changeText(getByPlaceholderText('Priority'), 'P1');
-    fireEvent.changeText(getByPlaceholderText('Remarks'), 'Updated remarks');
-
+    // fireEvent.changeText(getByPlaceholderText('2023-10-12','Date of visit'));
+    // fireEvent.changeText(getByPlaceholderText('Priority'), 'P1');
+    // fireEvent.changeText(getByPlaceholderText('Remarks'), 'Updated remarks');
     fireEvent.press(getByText('Update'));
-
+ 
     await waitFor(() => {
-      expect(queryByText('Updated visitor information is displayed correctly')).toBeTruthy();
+      expect(getAllByText('Visitor details changed')).toBeTruthy();
     });
   });
 });

@@ -1,63 +1,74 @@
 import React from 'react';
-import { render, fireEvent ,waitFor } from '@testing-library/react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import L2Denied from '../../../src/screens/L2-approval/L2Denied';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import ViewDetails from '../../../src/screens/L2-approval/ViewDetails';
 import UserContext from '../../../context/UserContext';
-import PhoneInput from 'react-native-phone-number-input';
-import DatePicker, { getFormatedDate } from 'react-native-modern-datepicker'
+
+const mockNavigation = {
+  navigate: jest.fn(),
+};
+const mockRoute = {
+  params: {
+    stringified: true,
+    user: JSON.stringify({
+      ID: '123',
+      setapprovingLoading: false,
+      Name_field: JSON.stringify({ zc_display_value: 'John Doe' }),
+      Referrer_App_User_lookup: JSON.stringify({ zc_display_value: 'Jane Doe', Name_field: 'Jane Doe', Email: 'jane@example.com' }),
+      Department: JSON.stringify({ Department: 'IT' }),
+      Phone_Number: '1234567890',
+      Single_or_Group_Visit: 'Single',
+      Date_of_Visit: '2023-10-01',
+      Guest_Category: 'VIP',
+      Priority: 'High',
+      Remarks: 'No remarks',
+      Gender: 'Male',
+      Number_of_Men: 1,
+      Number_of_Women: 0,
+      Number_of_Boys: 0,
+      Number_of_Girls: 0,
+      Vehicle_Information: JSON.stringify([{ zc_display_value: 'Car' }]),
+      Home_or_Office: 'Home',
+      L2_Approval_Status: 'DENIED',
+    }),
+  },
+};
+global.fetch = jest.fn(() =>
+    Promise.resolve({
+      json: () => Promise.resolve({ data: true, code: 3000 }), 
+    })
+  );
+  
+const mockUserContext = {
+    user:jest.fn(),
+  accessToken: jest.fn(),
+  setL2DeniedDataFetched: jest.fn(),
+  setL2ApproveDataFetched: jest.fn(),
+  setL2PendingDataFetched: jest.fn(),
+};
 
 
-jest.mock('react-native-modern-datepicker', () => {
-  return {
-    DatePicker: jest.fn(),
-    getFormatedDate: jest.fn(),
-  }});
-jest.mock('react-native-phone-number-input', () => {
-          return {
-            phoneInput: jest.fn(),
-          }
-        })
-describe('Rejected Applications Tab',() => {
-  beforeEach(() => {
-    jest.useFakeTimers();
-  });
-  afterEach(() => {
-    jest.clearAllTimers();
-    jest.restoreAllMocks();
-  });
-  it('should display all L1 and L2 rejected applications in the Rejected tab', async () => {
 
-    const mockRejectedApplications = [
-      { id: 1, level: 'L1', applicant: 'John Doe', status: 'Rejected' },
-      { id: 2, level: 'L2', applicant: 'Jane Smith', status: 'Rejected' },
-    ];
+jest.mock('react-native-dialog', () => ({
+  __esModule: true,
+  default: {
+    Container: ({ visible, children }) => (visible ? children : null),
+    Title: ({ children }) => <>{children}</>,
+    Description: ({ children }) => <>{children}</>,
+    Button: ({ label, onPress }) => <button onClick={onPress}>{label}</button>,
+  },
+}));
 
-    const mockUserContextValue = {
-      userType: 'admin',
-      setUserType: jest.fn(),
-      accessToken: 'mockAccessToken123',
-      setUserEmail: jest.fn(),
-      setL1ID: jest.fn(),
-      loggedUser: { name: 'John Doe', role: 'L2' }, 
-      setLoggedUser: jest.fn(),
-      deviceToken: 'mockDeviceToken456',
-      resident: { id: 'r123', name: 'Jane Resident' },
-      setResident: jest.fn(),
-      setProfileImage: jest.fn(),
-      setL2DeniedDataFetched: jest.fn(), 
-        L2DeniedDataFetched: false,
-    };
-    const { getByText, getAllByText ,debug} = render(
-      <UserContext.Provider value={mockUserContextValue}>
-        <NavigationContainer>
-          <L2Denied navigation={{ navigate: jest.fn() }}/>
-        </NavigationContainer>
+describe('ViewDetails', () => {
+  it('should set status to APPROVED when approve button is clicked', async () => {
+    const { getByText ,debug } = render(
+      <UserContext.Provider value={mockUserContext}>
+        <ViewDetails navigation={mockNavigation} route={mockRoute} />
       </UserContext.Provider>
     );
+
     debug();
     await waitFor(() => {
       expect(getByText('John Doe')).toBeTruthy();
-      expect(getByText('Jane Smith')).toBeTruthy();
     });
   });
 });

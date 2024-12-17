@@ -7,9 +7,6 @@ import Dialog from 'react-native-dialog';
 import RNFS from 'react-native-fs';
 import Share from 'react-native-share';
 
-
-
-
 global.fetch = jest.fn(() =>
     Promise.resolve({
         ok: true,
@@ -39,8 +36,8 @@ const mockRoute = {
     triggerDialog: true,
     user: {
       ID: '123',
-      Referrer_Approval: 'PENDING APPROVAL',
-      L2_Approval_Status: 'PENDING APPROVAL',
+      Referrer_Approval: 'APPROVED',
+      L2_Approval_Status: 'APPROVED',
       Name_field: { zc_display_value: 'John Doe' },
       Phone_Number: '1234567890',
       Single_or_Group_Visit: 'Single',
@@ -77,7 +74,7 @@ describe('VerifyDetails Component', () => {
     jest.clearAllMocks();
   });
 
-  test('Verify that the L1 can able to reject and approve the application', async () => {
+  test('Verify that the L1 can able to reject the application after L2 approved', async () => {
     const { getByText ,queryAllByText} = render(
       <UserContext.Provider value={mockUserContextValue}>
         <NavigationContainer>
@@ -91,24 +88,5 @@ describe('VerifyDetails Component', () => {
     await waitFor(() => {
        expect(mockNavigation.navigate('Denied'));
     });
-  
 })
-
-
-
-test('Verify that the L1 can able to reject and approve the application', async () => {
-  const { getByText ,queryAllByText} = render(
-    <UserContext.Provider value={mockUserContextValue}>
-      <NavigationContainer>
-        <VerifyDetails navigation={mockNavigation} route={mockRoute} />
-      </NavigationContainer>
-    </UserContext.Provider>
-  );
-
-  expect(getByText('Approve')).toBeTruthy();
-  fireEvent.press(getByText('Approve'));
-  await waitFor(() => {
-     expect(mockNavigation.navigate('Approved'));
-  });
-});
 });

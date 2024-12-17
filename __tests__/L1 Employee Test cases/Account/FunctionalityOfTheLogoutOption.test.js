@@ -5,16 +5,44 @@ import UserContext from '../../../context/UserContext';
 import { AuthContext } from '../../../src/auth/AuthProvider';
 import { signOut, deleteUser, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import Toast from 'react-native-toast-message';
+import { View } from 'react-native';
 
+jest.spyOn(View.prototype, 'measureInWindow').mockImplementation(callback => {
+  callback(100, 200, 300, 400);
+});
+
+const TestComponent = ({ toastVisible, onLogout }) => {
+  useEffect(() => {
+    if (toastVisible) {
+      Toast.show({
+        type: "success",
+        position: "bottom",
+        text1: "Account Deleted",
+        text2: "Your account has been deleted successfully",
+        visibilityTime: 4000,
+        autoHide: true,
+        bottomOffset: 20,
+      });
+      onLogout();
+    }
+  }, [toastVisible]);
+
+  return toastVisible; 
+};
+
+jest.mock("react-native-toast-message", () => ({
+  show: jest.fn(),
+  hide: jest.fn(),
+}));
 
 jest.mock('firebase/auth', () => ({
   getReactNativePersistence: jest.fn().mockResolvedValue('local'),
-  initializeAuth: jest.fn(),
-  signOut: jest.fn(),
-  deleteUser: jest.fn(),
-  reauthenticateWithCredential: jest.fn(),
+  initializeAuth: jest.fn((props) => props.children),
+  signOut: jest.fn((props) => props.children),
+  deleteUser: jest.fn((props) => props.children),
+  reauthenticateWithCredential: jest.fn((props) => props.children),
   EmailAuthProvider: {
-    credential: jest.fn(),
+    credential: jest.fn((props) => props.children),
   },
 }));
 
@@ -23,12 +51,7 @@ jest.mock('react-native-shimmer-placeholder', () => ({
 
 }));
 jest.mock('react-native-linear-gradient', () => 'LinearGradient');
-jest.mock('react-native-toast-message', () => ({
-  show: jest.fn(() => {
-    type: 'success'
-  }),
-  hide: jest.fn(),
-}));
+
 jest.mock('react-native-safe-area-context', () => ({
   SafeAreaView: jest.fn((props) => {
     return props.children;
@@ -93,12 +116,8 @@ const mockUserContextValue = {
   setDepartmentIds: jest.fn(),
 };
 
-const toMyprofile = jest.fn(() => {
-  mockNavigation.navigate('MyProfile');
-});
-afterEach(() => {
-  jest.clearAllMocks();
-});
+
+
   const mockAuthContextValue = {
     user: {email: 'mockuser@example.com' },
     setUser: jest.fn(),
@@ -113,7 +132,7 @@ afterEach(() => {
     )
     expect(getByText('Logout')[4])
   fireEvent.press(queryByText('Logout')[4]);
-  //   debug();
+    debug();
 
     await waitFor(() => {
       expect(mockNavigation.navigate).toHaveBeenCalledWith('Login');

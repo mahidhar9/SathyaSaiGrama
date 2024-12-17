@@ -281,11 +281,9 @@ describe('MyProfile Screen', () => {
       </AuthContext.Provider>
     );
 
-    // Step 1: Click the Edit button in the Vehicle Info section
     fireEvent.press(getByTestId('edit'));
 
 
-    // Verify that the vehicle details are updated and the success message is displayed
     await waitFor(() => {
       expect(patchDataWithInt).toHaveBeenCalledWith(
         'All_Vehicle_Information',
