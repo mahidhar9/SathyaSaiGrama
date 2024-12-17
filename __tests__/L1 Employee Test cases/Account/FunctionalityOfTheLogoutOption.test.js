@@ -6,34 +6,17 @@ import { AuthContext } from '../../../src/auth/AuthProvider';
 import { signOut, deleteUser, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import Toast from 'react-native-toast-message';
 import { View } from 'react-native';
+import { Text as MockText}  from 'react-native';
 
 jest.spyOn(View.prototype, 'measureInWindow').mockImplementation(callback => {
   callback(100, 200, 300, 400);
 });
 
-const TestComponent = ({ toastVisible, onLogout }) => {
-  useEffect(() => {
-    if (toastVisible) {
-      Toast.show({
-        type: "success",
-        position: "bottom",
-        text1: "Account Deleted",
-        text2: "Your account has been deleted successfully",
-        visibilityTime: 4000,
-        autoHide: true,
-        bottomOffset: 20,
-      });
-      onLogout();
-    }
-  }, [toastVisible]);
-
-  return toastVisible; 
-};
-
-jest.mock("react-native-toast-message", () => ({
-  show: jest.fn(),
-  hide: jest.fn(),
-}));
+jest.mock("react-native-toast-message", () => {
+  return   jest.fn().mockImplementation ((props) => {
+    return (<MockText>onLogout</MockText>)
+  })
+});
 
 jest.mock('firebase/auth', () => ({
   getReactNativePersistence: jest.fn().mockResolvedValue('local'),
@@ -132,7 +115,6 @@ const mockUserContextValue = {
     )
     expect(getByText('Logout')[4])
   fireEvent.press(queryByText('Logout')[4]);
-    debug();
 
     await waitFor(() => {
       expect(mockNavigation.navigate).toHaveBeenCalledWith('Login');
