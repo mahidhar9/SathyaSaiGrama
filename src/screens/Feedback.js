@@ -109,6 +109,7 @@ const Feedback = ({navigation}) => {
           rules={{required: 'Feedback is required'}}
           render={({field: {onChange, value}}) => (
             <TextInput
+            testID='feedbackText'
               style={styles.textInput}
               multiline
               numberOfLines={4}
