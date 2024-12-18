@@ -6,8 +6,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import {createShimmerPlaceholder} from 'react-native-shimmer-placeholder';
 import { AuthContext } from '../../../src/auth/AuthProvider';
-// import Toast from 'react-native-toast-message';
-import { signOut } from 'firebase/auth';
+import Toast from 'react-native-toast-message';
+import {Text as MockText} from 'react-native';
 
 jest.mock('firebase/auth', () => ({
   getReactNativePersistence: jest.fn().mockResolvedValue('local'),
@@ -19,20 +19,19 @@ jest.mock('firebase/auth', () => ({
     credential: jest.fn(),
   },
 }));
-// jest.mock('react-native-toast-message', () => ({
-//   show: jest.fn(),
-//    hide: jest.fn(),
-//    Toast: jest.fn(() => <div />),
-//   })),
+
+jest.mock("react-native-toast-message", () => {
+  return   jest.fn().mockImplementation ((props) => {
+    return (<MockText>onLogout</MockText>)
+  })
+});
 
 jest.mock('react-native-shimmer-placeholder', () => ({
   createShimmerPlaceholder: jest.fn(() => 'ShimmerPlaceholder'),
 
 }));
 jest.mock('react-native-linear-gradient', () => 'LinearGradient');
-jest.mock('react-native-toast-message', () => ({
-  show: jest.fn(),
-}));
+
 jest.mock('react-native-safe-area-context', () => ({
   SafeAreaView: jest.fn((props) => {
     return props.children;
@@ -59,56 +58,88 @@ jest.mock('react-native-permissions', () => ({
 
 jest.mock('../../../src/components/ApiRequest', () => ({
   getDataWithInt: jest.fn(() => Promise.resolve({
-    data: [{ ID: 'flat123', Building: 'Building A', Flat: 'Flat 101' }],
+    data: [
+      {
+        Office_lookup: {
+          Department: 'Engineering',
+          Employee: 'e123',
+        },
+        Building: 'Building A', // Directly under the main object
+        Flat: 'Flat 101',
+        ID: 'flat123',
+      },
+    ],
   })),
+  
   getDataWithoutStringAndWithInt: jest.fn(() => Promise.resolve({
-    data: [{ ID: 'family123', Flats_lookup: { Building: 'Building A', Flat: 'Flat 101' } }],
+    data: [{
+      ID: 'family123',
+      Building: 'Building A', // Directly under the main object
+      Flat: 'Flat 101',
+      Department: { ID: 'd1' },
+    }],
   })),
+  
   getDataWithString: jest.fn(() => Promise.resolve({
-    data: [{ ID: 'family123', Flats_lookup: { Building: 'Building A', Flat: 'Flat 101', Department: { ID: 'd1' } } }],
+    data: [{
+      ID: 'family123',
+      Building: 'Building A', // Directly under the main object
+      Flat: 'Flat 101',
+      Department: { ID: 'd1' },
+    }],
   })),
+  
   getDataWithEmployee: jest.fn(() => Promise.resolve({
-    data: [{ Office_lookup: { Department: 'd1', Employee: 'e123' } }],
+    data: [{
+      Office_lookup: {
+        Department: 'Engineering',
+        Employee: 'e123',
+      },
+    }],
   })),
 }));
-
-
-describe('Profile Component', () => {
-  const mockNavigation = { navigate: jest.fn() };
+const mockNavigation = { navigate: jest.fn() };
   
 const mockUserContextValue = {
-  getAccessToken: jest.fn().mockReturnValue('mockAccessToken'),
+  getAccessToken: jest.fn(),
+  userEmail: 'test@example.com',
+  L1ID: 1,
+  deviceToken: 'testDeviceToken',
+  loggedUser: { name: 'Test User', userId: 1 },
+  accessToken: 'testAccessToken',
+  profileImage: null,
+  setProfileImage: jest.fn(),
   userType: 'admin',
   setUserType: jest.fn(),
-  accessToken: 'mockAccessToken123',
   setUserEmail: jest.fn(),
   setL1ID: jest.fn(),
-  loggedUser: { name: 'John Doe' },
   setLoggedUser: jest.fn(),
-  deviceToken: 'mockDeviceToken456',
-  resident: { id: 'r123', name: 'Jane Resident' },
+  setAccessToken: jest.fn(),
+  setDeviceToken: jest.fn(),
   setResident: jest.fn(),
-  setProfileImage: jest.fn(),
-  employee: { id: 'e789', name: 'Alice Employee' },
+  resident: { id: 'r123', name: 'Jane Resident' },
   setEmployee: jest.fn(),
-  testResident: { id: 't987', name: 'Test Resident' },
+  employee: { id: 'e789', name: 'Alice Employee' },
   setTestResident: jest.fn(),
-  departmentIds: ['d1', 'd2', 'd3'],
+  testResident: { id: 't987', name: 'Test Resident' },
   setDepartmentIds: jest.fn(),
+  Office_lookup: { Department: 'd1', Employee: 'e123' },
+  departmentIds: ['d1', 'd2', 'd3'],
 };
-
-const toMyprofile = jest.fn(() => {
-  mockNavigation.navigate('MyProfile');
-});
-afterEach(() => {
-  jest.clearAllMocks();
-});
+  
   const mockAuthContextValue = {
     user: {email: 'mockuser@example.com' },
     setUser: jest.fn(),
   };
+
+
+
+describe('Profile Component', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  })
   it('test_navigation_to_my_profile', async () => {
-    const { getByText , getAllByText} = render(
+    const { getByText } = render(
       <AuthContext.Provider value={mockAuthContextValue}>
         <UserContext.Provider value={mockUserContextValue}>
           <Profile navigation={mockNavigation} />
@@ -116,9 +147,40 @@ afterEach(() => {
       </AuthContext.Provider>
     )
 
-    fireEvent.press(getAllByText('My Profile'));
+    fireEvent.press(getByText('My Profile'));
     await waitFor(() => {
-      expect(mockNavigation.navigate).toHaveBeenCalledWith('MyProfile');      
-  })
-})
+      expect(mockNavigation.navigate).toHaveBeenCalledWith('MyProfile', {
+        dapartment: 'Engineering',
+        dapartmentExists: true,
+        familyMembersData: [{
+          Building: 'Building A',
+          Department: { ID: 'd1' },
+          Flat: 'Flat 101',
+          ID: 'family123',
+        }],
+        flat: {
+          building: 'Building A',
+          flat: 'Flat 101',
+        },
+        flatExists: true,
+        flatid: 'flat123',
+        userInfo: [{
+          Building: 'Building A',
+          Department: { ID: 'd1' },
+          Flat: 'Flat 101',
+          ID: 'family123',
+        }],
+        vehicleInfo: [{
+          Building: 'Building A',
+          Flat: 'Flat 101',
+          ID: 'flat123',
+          Office_lookup: {
+            Department: 'Engineering',
+            Employee: 'e123',
+          },
+        }],
+      });
+    });
+  });
+
 });

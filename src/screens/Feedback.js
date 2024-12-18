@@ -71,12 +71,12 @@ const Feedback = ({navigation}) => {
             Pick a subject and provide your feedback
           </Text>
           <Controller
-          testID='subjectDropdown'
             name="subject"
             control={control}
             rules={{required: 'Subject is required'}}
             render={({field: {onChange, value}}) => (
               <Dropdown
+          testID='subjectDropdown'
                 style={styles.inputBox}
                 data={[
                   {label: 'Technical issue', value: 'Technical issue'},

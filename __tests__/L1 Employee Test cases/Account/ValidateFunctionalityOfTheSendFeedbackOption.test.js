@@ -7,13 +7,11 @@ import { Alert } from 'react-native';
 import { postDataWithInt } from '../../../src/components/ApiRequest';
 import { Dropdown } from 'react-native-element-dropdown';
 
-jest.mock('react-native-toast-message', () => ({
-  show: jest.fn(),
-}));
+
 
 jest.mock('../../../src/components/ApiRequest', () => ({
   postDataWithInt: jest.fn().mockResolvedValue({
-    message: 'Data Added Successfully',
+    message :'Data Added Successfully'
   }),
 }));
 
@@ -21,23 +19,7 @@ jest.mock('react-native/Libraries/Alert/Alert', () => ({
   alert: jest.fn(),
 }));
 
-jest.mock('react-native-element-dropdown', () => ({
-  Dropdown: jest.fn(({ data, value, onChange, testID }) => {
-    return (
-      <select
-        data-testid={testID}
-        value={value}
-        onChange={e => onChange(data.find(item => item.value === e.target.value))}
-      >
-        {data.map(item => (
-          <option key={item.value} value={item.value}>
-            {item.label}
-          </option>
-        ))}
-      </select>
-    );
-  }),
-}));
+
 
 const mockNavigation = { navigate: jest.fn() };
 
@@ -59,11 +41,12 @@ const mockUserContextValue = {
   setTestResident: jest.fn(),
   departmentIds: ['d1', 'd2', 'd3'],
   setDepartmentIds: jest.fn(),
-  userEmail: 'mockuser@example.com', // Mock user email
+  userEmail: 'mockuser@example.com',
+  getAccessToken: jest.fn(),
 };
 
 const mockAuthContextValue = {
-  user: { uid: '123', email: 'mockuser@example.com' },
+  user: {email: 'mockuser@example.com' }
   setUser: jest.fn(),
 };
 
@@ -72,7 +55,7 @@ describe('Feedback Screen', () => {
     jest.clearAllMocks();
   });
 
-  it('should allow the user to send feedback', async () => {
+  it('should allow the To profile when click on Cancle', async () => {
     const { getByText,getAllByTestId, getByPlaceholderText, getByTestId ,queryAllByText} = render(
       <AuthContext.Provider value={mockAuthContextValue}>
         <UserContext.Provider value={mockUserContextValue}>
@@ -80,18 +63,30 @@ describe('Feedback Screen', () => {
         </UserContext.Provider>
       </AuthContext.Provider>
     );
+expect(getByText('Cancel')).toBeTruthy();  
+fireEvent.press(getByText('Cancel'));
+await waitFor(() => {
+  expect(mockNavigation.navigate).toHaveBeenCalledWith('Profile');
+});
+});
+it('should allow the user to send feedback', async () => {
+  const { getByText, getByPlaceholderText, getByTestId ,queryAllByText} = render(
+    <AuthContext.Provider value={mockAuthContextValue}>
+      <UserContext.Provider value={mockUserContextValue}>
+        <Feedback navigation={mockNavigation} />
+      </UserContext.Provider>
+    </AuthContext.Provider>
+  );
+      expect(getByText('Pick a subject and provide your feedback')).toBeTruthy();
+fireEvent.changeText(getByText('Pick a subject and provide your feedback'), 'Technical issue');
 
-      expect(queryAllByText('Technical issue')).toBeTruthy();
-    const dropdown =  fireEvent.changeText(queryAllByText('Technical issue'), 'Technical issue');
-    console.log('dropdown',dropdown);
-
-   const Res= fireEvent.changeText(getByText('Your feedback'), 'This is a test feedback.');
-    console.log('res',Res);
+ fireEvent.changeText(getByText('Your feedback'), 'This is a test feedback.');
+ 
     fireEvent.press(getByText('Submit'));
 
     await waitFor(() => {
       expect(mockNavigation.navigate).toHaveBeenCalledWith('Profile');
      
-    });
   });
-});
+  });
+})
