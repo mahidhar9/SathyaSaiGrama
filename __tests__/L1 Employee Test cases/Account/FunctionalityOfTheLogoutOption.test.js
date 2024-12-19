@@ -70,7 +70,7 @@ import { signOut } from 'firebase/auth';
 import RNRestart from 'react-native-restart';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { findDeviceToken, updateDeviceToken } from '../../../src/components/ApiRequest';
-
+import { Alert } from 'react-native';
 
 describe('Profile Component - Logout Functionality', () => {
   const mockNavigation = { navigate: jest.fn() };
