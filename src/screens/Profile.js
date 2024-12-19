@@ -95,8 +95,6 @@ const Profile = ({navigation}) => {
     handleSubmit,
     formState: {errors},
   } = useForm();
-
-console.log('OutSide HandleDeleteAccount')
   const handleDeleteAccount = async (email, password) => {
     console.log('THis is profile Screen')
     const credential = EmailAuthProvider.credential(userEmail, password);
@@ -173,6 +171,8 @@ console.log('OutSide HandleDeleteAccount')
     console.log(userCred);
     await handleDeleteAccount(userCred.name, userCred.password);
   };
+
+  console.log('outSide onLogout')
   const onLogout = () => {
     setIsLogOutIndicator(true);
     signOut(auth)
@@ -180,8 +180,9 @@ console.log('OutSide HandleDeleteAccount')
         console.log('response :', response);
         setUser(null);
 
+        console.log('inside onLogout')
         const respon = await findDeviceToken(loggedUser.userId);
-        console.log('findDeviceToken response is: ', respon);
+        // console.log('findDeviceToken response is: ', respon);
         const replaceToken = deviceToken + '||';
         let myDeviceToken = respon.data.Device_Tokens.replace(replaceToken, '');
 
@@ -998,6 +999,7 @@ console.log('OutSide HandleDeleteAccount')
                       <TouchableOpacity
                         style={[styles.HomeButton, { backgroundColor: '#B21E2B' }]}
                         onPress={onLogout}
+                        testId="logoutButton"
                       >
                         <Text style={[styles.wewe, styles.wewe1]}>Logout</Text>
                       </TouchableOpacity>

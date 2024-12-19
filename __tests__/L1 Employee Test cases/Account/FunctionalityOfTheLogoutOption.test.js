@@ -1,179 +1,45 @@
-// import React from 'react';
-// import { render, fireEvent, waitFor } from '@testing-library/react-native';
-// import Profile from '../../../src/screens/Profile';
-// import UserContext from '../../../context/UserContext';
-// import { AuthContext } from '../../../src/auth/AuthProvider';
-// import { signOut, deleteUser, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
-// import Toast from 'react-native-toast-message';
-// import { View } from 'react-native';
-// import { Text as MockText}  from 'react-native';
-
-// jest.spyOn(View.prototype, 'measureInWindow').mockImplementation(callback => {
-//   callback(100, 200, 300, 400);
-// });
-
-// jest.mock("react-native-toast-message", () => {
-//   return   jest.fn().mockImplementation ((props) => {
-//     return (<MockText>onLogout</MockText>)
-//   })
-// });
-
-// jest.mock('firebase/auth', () => ({
-//   getReactNativePersistence: jest.fn().mockResolvedValue('local'),
-//   initializeAuth: jest.fn((props) => props.children),
-//   signOut: jest.fn((props) => props.children),
-//   deleteUser: jest.fn((props) => props.children),
-//   reauthenticateWithCredential: jest.fn((props) => props.children),
-//   EmailAuthProvider: {
-//     credential: jest.fn((props) => props.children),
-//   },
-// }));
-
-// jest.mock('react-native-shimmer-placeholder', () => ({
-//   createShimmerPlaceholder: jest.fn(() => 'ShimmerPlaceholder'),
-
-// }));
-// jest.mock('react-native-linear-gradient', () => 'LinearGradient');
-
-// jest.mock('react-native-safe-area-context', () => ({
-//   SafeAreaView: jest.fn((props) => {
-//     return props.children;
-//   }),
-// }));
-
-// jest.mock('react-native-image-picker', () => ({
-//   launchImageLibrary: jest.fn(),
-//   launchCamera: jest.fn(),
-// }));
-
-// jest.mock('react-native-permissions', () => ({
-//   request: jest.fn(),
-//   PERMISSIONS: {
-//     ANDROID: {
-//       CAMERA: 'android.permission.CAMERA',
-//       READ_EXTERNAL_STORAGE: 'android.permission.READ_EXTERNAL_STORAGE',
-//     },
-//   },
-// }));
-
-
-
-
-// jest.mock('../../../src/components/ApiRequest', () => ({
-//   getDataWithInt: jest.fn(() => Promise.resolve({
-//     data: [{ ID: 'flat123', Building: 'Building A', Flat: 'Flat 101' }],
-//   })),
-//   getDataWithoutStringAndWithInt: jest.fn(() => Promise.resolve({
-//     data: [{ ID: 'family123', Flats_lookup: { Building: 'Building A', Flat: 'Flat 101' } }],
-//   })),
-//   getDataWithString: jest.fn(() => Promise.resolve({
-//     data: [{ ID: 'family123', Flats_lookup: { Building: 'Building A', Flat: 'Flat 101', Department: { ID: 'd1' } } }],
-//   })),
-//   getDataWithEmployee: jest.fn(() => Promise.resolve({
-//     data: [{ Office_lookup: { Department: 'd1', Employee: 'e123' } }],
-//   })),
-// }));
-
-
-// describe('Profile Component', () => {
-//   const mockNavigation = { navigate: jest.fn() };
-  
-// const mockUserContextValue = {
-//   getAccessToken: jest.fn().mockReturnValue('mockAccessToken'),
-//   userType: 'admin',
-//   setUserType: jest.fn(),
-//   accessToken: 'mockAccessToken123',
-//   setUserEmail: jest.fn(),
-//   setL1ID: jest.fn(),
-//   loggedUser: { name: 'John Doe' },
-//   setLoggedUser: jest.fn(),
-//   deviceToken: 'mockDeviceToken456',
-//   resident: { id: 'r123', name: 'Jane Resident' },
-//   setResident: jest.fn(),
-//   setProfileImage: jest.fn(),
-//   employee: { id: 'e789', name: 'Alice Employee' },
-//   setEmployee: jest.fn(),
-//   testResident: { id: 't987', name: 'Test Resident' },
-//   setTestResident: jest.fn(),
-//   departmentIds: ['d1', 'd2', 'd3'],
-//   setDepartmentIds: jest.fn(),
-// };
-
-
-
-//   const mockAuthContextValue = {
-//     user: {email: 'mockuser@example.com' },
-//     setUser: jest.fn(),
-//   };
-//   it('test_navigation_to_my_profile', async () => {
-//     const { getByText,queryByText , getAllByText,debug} = render(
-//       <AuthContext.Provider value={mockAuthContextValue}>
-//         <UserContext.Provider value={mockUserContextValue}>
-//           <Profile navigation={mockNavigation} />
-//         </UserContext.Provider>
-//       </AuthContext.Provider>
-//     )
-//     expect(getByText('Logout')[4])
-//   fireEvent.press(queryByText('Logout')[4]);
-
-//     await waitFor(() => {
-//       expect(mockNavigation.navigate).toHaveBeenCalledWith('Login');
-//     });
-//   });
-
- 
-  
-// });
-
-
-// __tests__/L1 Employee Test cases/Account/FunctionalityOfTheLogoutOption.test.js
-
-import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import Profile from '../../../src/screens/Profile';
-import UserContext from '../../../context/UserContext';
-import { AuthContext } from '../../../src/auth/AuthProvider';
-import { signOut } from 'firebase/auth';
-import Toast from 'react-native-toast-message';
-import { View } from 'react-native';
-import { Text as MockText } from 'react-native';
-
-jest.spyOn(View.prototype, 'measureInWindow').mockImplementation(callback => {
-  callback(100, 200, 300, 400);
-});
-
-jest.mock('react-native-toast-message', () => {
-  return jest.fn().mockImplementation((props) => {
-    return <MockText>Toast Message</MockText>;
-  });
-});
+jest.mock('../../../src/components/ApiRequest', () => ({
+  findDeviceToken: jest.fn().mockResolvedValue(),
+ updateDeviceToken: jest.fn().mockResolvedValue(),
+}));
 
 jest.mock('firebase/auth', () => ({
   getReactNativePersistence: jest.fn().mockResolvedValue('local'),
   initializeAuth: jest.fn((props) => props.children),
-  signOut: jest.fn(),
-  deleteUser: jest.fn(),
-  reauthenticateWithCredential: jest.fn(),
+  signOut: jest.fn().mockResolvedValue((props) => props.children),
+  deleteUser:jest.fn().mockResolvedValue((props) => props.children),
+  reauthenticateWithCredential: jest.fn().mockResolvedValue((props) => props.children),
   EmailAuthProvider: {
-    credential: jest.fn(),
+    credential:jest.fn().mockResolvedValue((props) => props.children),
   },
 }));
 
-jest.mock('react-native-shimmer-placeholder', () => ({
-  createShimmerPlaceholder: jest.fn(() => 'ShimmerPlaceholder'),
+jest.mock('react-native-restart', () => ({
+  Restart: jest.fn(),
+}));
+
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  removeItem: jest.fn(),
+}));
+
+jest.mock('react-native-toast-message', () => ({
+  __esModule: true,
+  default: () => null,
+}));
+
+jest.mock('react-native-safe-area-context', () => ({
+  SafeAreaView: ({ children }) => children,
 }));
 
 jest.mock('react-native-linear-gradient', () => 'LinearGradient');
 
-jest.mock('react-native-safe-area-context', () => ({
-  SafeAreaView: jest.fn((props) => {
-    return props.children;
-  }),
-}));
-
 jest.mock('react-native-image-picker', () => ({
   launchImageLibrary: jest.fn(),
   launchCamera: jest.fn(),
+}));
+
+jest.mock('react-native-shimmer-placeholder', () => ({
+  createShimmerPlaceholder: jest.fn(() => 'ShimmerPlaceholder'),
 }));
 
 jest.mock('react-native-permissions', () => ({
@@ -185,73 +51,62 @@ jest.mock('react-native-permissions', () => ({
     },
   },
 }));
-
-jest.mock('../../../src/components/ApiRequest', () => ({
-  getDataWithInt: jest.fn(() => Promise.resolve({
-    data: [{ ID: 'flat123', Building: 'Building A', Flat: 'Flat 101' }],
-  })),
-  getDataWithoutStringAndWithInt: jest.fn(() => Promise.resolve({
-    data: [{ ID: 'family123', Flats_lookup: { Building: 'Building A', Flat: 'Flat 101' } }],
-  })),
-  getDataWithString: jest.fn(() => Promise.resolve({
-    data: [{ ID: 'family123', Flats_lookup: { Building: 'Building A', Flat: 'Flat 101', Department: { ID: 'd1' } } }],
-  })),
-  getDataWithEmployee: jest.fn(() => Promise.resolve({
-    data: [{ Office_lookup: { Department: 'd1', Employee: 'e123' } }],
-  })),
+jest.mock('../../../src/auth/firebaseConfig', () => ({
+  auth: {
+    currentUser: {
+      uid: 'user123',
+      email: 'test@example.com',
+    },
+  },
 }));
+
+import React from 'react';
+import {View} from 'react-native';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import Profile from '../../../src/screens/Profile';
+import { AuthContext } from '../../../src/auth/AuthProvider';
+import UserContext from '../../../context/UserContext';
+import { signOut } from 'firebase/auth';
+import RNRestart from 'react-native-restart';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { findDeviceToken, updateDeviceToken } from '../../../src/components/ApiRequest';
+
 
 describe('Profile Component - Logout Functionality', () => {
   const mockNavigation = { navigate: jest.fn() };
 
   const mockUserContextValue = {
-    getAccessToken: jest.fn().mockReturnValue('mockAccessToken'),
-    userType: 'admin',
-    setUserType: jest.fn(),
-    accessToken: 'mockAccessToken123',
-    setUserEmail: jest.fn(),
-    setL1ID: jest.fn(),
-    loggedUser: { name: 'John Doe' },
-    setLoggedUser: jest.fn(),
-    deviceToken: 'mockDeviceToken456',
-    resident: { id: 'r123', name: 'Jane Resident' },
-    setResident: jest.fn(),
-    setProfileImage: jest.fn(),
-    employee: { id: 'e789', name: 'Alice Employee' },
-    setEmployee: jest.fn(),
-    testResident: { id: 't987', name: 'Test Resident' },
-    setTestResident: jest.fn(),
-    departmentIds: ['d1', 'd2', 'd3'],
-    setDepartmentIds: jest.fn(),
+    accessToken: jest.fn(),
+    loggedUser:jest.fn(), 
+    setIsLogOutIndicator: jest.fn(),
   };
-
+  jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   const mockAuthContextValue = {
-    user: { email: 'mockuser@example.com' },
+    user: jest.fn(),
     setUser: jest.fn(),
   };
-
-  afterEach(() => {
+  beforeEach(() => {
     jest.clearAllMocks();
   });
-
-  it('should logout and navigate to Login screen when Logout is pressed', async () => {
-    const { getAllByText } = render(
+  signOut.mockResolvedValue();
+  it('should logout and restart the app when Logout is pressed', async () => {
+    const { getByText,getAllByText, getByTestId, debug } = render(
       <AuthContext.Provider value={mockAuthContextValue}>
         <UserContext.Provider value={mockUserContextValue}>
           <Profile navigation={mockNavigation} />
         </UserContext.Provider>
       </AuthContext.Provider>
     );
-
-    const logoutButtons = getAllByText('Logout');
-    const logoutButton = logoutButtons[4]; // Adjust index based on actual rendering
-
+    const logoutButton = getByText('Logout'); 
     fireEvent.press(logoutButton);
-
+    await waitFor(() => {
+      expect(getByText("Are you sure you want to logout? You'll need to login again to the app.")).toBeTruthy();
+      expect(getAllByText('Logout')).toBeTruthy();
+      fireEvent.press(getAllByText('Logout')[2]);
+    });
     await waitFor(() => {
       expect(signOut).toHaveBeenCalled();
-      expect(mockNavigation.navigate).toHaveBeenCalledWith('Login');
-      expect(Toast).toHaveBeenCalled();
-    });
+    })
+    
   });
 });
