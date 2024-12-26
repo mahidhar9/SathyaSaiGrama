@@ -40,6 +40,8 @@ const Edit = ({ route, navigation }) => {
     formType,
     route.params?.departmentName, // Ensure the parameter names match
     route.params?.departmentNameExists,
+    userdata?.Gender,memberdata?.App_User_lookup.Gender,
+    
   );
   const dept = route.params?.departmentName;
   const deptExists = route.params?.departmentNameExists;
@@ -369,7 +371,7 @@ const Edit = ({ route, navigation }) => {
     };
 
     console.log(relationUpdate);
-    console.log(getAccessToken());
+    console.log(getAccessToken);
 
     const resFromRelation = await patchDataWithInt(
       'All_Residents',
@@ -559,7 +561,7 @@ const Edit = ({ route, navigation }) => {
 
                 <View style={styles.field}>
                   <Text style={styles.label}>
-                    Gender <Text style={{ color: 'red' }}>*</Text>
+                  Gender <Text style={{ color: 'red' }}>*</Text>
                   </Text>
                   <Controller
                     control={control}
@@ -654,6 +656,7 @@ const Edit = ({ route, navigation }) => {
                             defaultValue={vehicle.Vehicle_Type}
                             render={({ field: { onChange, value } }) => (
                               <Dropdown
+                              testID={`dropdown-vehicleType${index}`}
                                 style={[
                                   styles.dropdownVehicle,
                                   styles.inputBox,
@@ -739,7 +742,7 @@ const Edit = ({ route, navigation }) => {
                             data =>
                               saveDataFromVehicleInfo(data, vehicle.ID, index), // Passed index correctly to handleSubmit
                           )}>
-                          <Text style={styles.buttonText}>Update</Text>
+                          <Text testID="vehicleSubmit" style={styles.buttonText}>Update</Text>
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -845,7 +848,7 @@ const Edit = ({ route, navigation }) => {
                   )}
                 </View>
 
-                <View style={styles.field}>
+                <View testID="gender" style={styles.field}>
                   <Text style={styles.label}>
                     Gender <Text style={{ color: 'red' }}>*</Text>
                   </Text>

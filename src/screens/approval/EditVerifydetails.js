@@ -170,10 +170,12 @@ const EditVerifyDetails = ({navigation, route}) => {
       console.log(
         '--------------------------------------------------------------------------------------------------------',
       );
-      console.log('@@@@@@@@@@@@@@@@@', responseData);
+      console.log('@@@@@@@@@@@@@@@@@', responseData); 
 
       if (responseData.code === 3000) {
+        
         if (user.Referrer_Approval === 'PENDING APPROVAL') {
+          console.log('3000 running fine')
           setTimeout(() => Alert.alert('Visitor details changed'), 2000);
           setTimeout(() => navigation.navigate('Pending'), 2000);
         } else if (user.Referrer_Approval === 'APPROVED') {
@@ -195,7 +197,7 @@ const EditVerifyDetails = ({navigation, route}) => {
           'Failed to fetch data. Please check your network connection and try again.',
         );
       else {
-        Alert.alert('Error: ', err);
+        Alert.alert('Error:', err);
         console.log(err);
       }
       setUpdateLoading(false);
@@ -277,8 +279,9 @@ const EditVerifyDetails = ({navigation, route}) => {
         updateData,
         getAccessToken(),
       );
-
-      if (response.result[0].code === 3000) {
+console.log('response is:', response);
+console.log('update record',updateRecord)
+      if (response?.result[0].code === 3000) {
         console.log(
           '----------------------------Update Successful---------------------------------',
         );
@@ -286,7 +289,7 @@ const EditVerifyDetails = ({navigation, route}) => {
         console.log('New user data is:', newUser);
         navigation.navigate('VerifyDetails', {user: {...user, ...updateField}});
       } else {
-        Alert.alert('Error: ', response.code);
+        Alert.alert('Error in updating details: ', response?.code);
       }
      }
       else{
@@ -459,6 +462,7 @@ const EditVerifyDetails = ({navigation, route}) => {
                 <TouchableWithoutFeedback onPress={() => {}}>
                   <View style={styles.modalContent}>
                     <DatePicker
+                    testID='DatePickerMock'
                       mode="calender"
                       onSelectedChange={handleDateChange}
                       minimumDate={startDate}
@@ -641,6 +645,7 @@ const EditVerifyDetails = ({navigation, route}) => {
         <View style={styles.v}>
           <Text style={styles.txt}>Guest Category</Text>
           <Dropdown
+          testID= 'GuestCategory'
             style={styles.dropdownstyle}
             data={guestCategory}
             maxHeight={300}
@@ -659,6 +664,7 @@ const EditVerifyDetails = ({navigation, route}) => {
         <View style={styles.v}>
           <Text style={styles.txt}>Priority</Text>
           <Dropdown
+          testID='priorityInput'
             style={styles.dropdownstyle}
             data={guestPriority}
             maxHeight={300}
@@ -677,6 +683,7 @@ const EditVerifyDetails = ({navigation, route}) => {
         <View style={styles.v}>
           <Text style={styles.txt}>Remark</Text>
           <TextInput
+          testID='remarkInput'
             style={{
               height: 100,
               borderWidth: 1,
@@ -700,8 +707,8 @@ const EditVerifyDetails = ({navigation, route}) => {
             <Text>Vehicle Number</Text>
           </View>
           {vehicles.map((vehicle, index) => (
-            <View style={{flexDirection: 'column', width: 350}}>
-              <View key={index} style={styles.newvehicle}>
+            <View key={index} style={{flexDirection: 'column', width: 350}}>
+              <View  style={styles.newvehicle}>
                 <Picker
                   selectedValue={vehicle.Vehicle_Type}
                   style={styles.picker}
@@ -782,11 +789,12 @@ const EditVerifyDetails = ({navigation, route}) => {
 
         <View style={styles.btnRoot}>
           <TouchableOpacity
+          testID='updateButton'
             style={styles.save}
             onPress={onSave}
             disabled={updateLoading} // Disable the button when loading
           >
-            <Text style={styles.btnsave}>Update</Text>
+            <Text  style={styles.btnsave}>Update</Text>
           </TouchableOpacity>
         </View>
 
