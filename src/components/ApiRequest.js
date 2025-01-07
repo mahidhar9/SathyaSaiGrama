@@ -1,6 +1,42 @@
 import {BASE_APP_URL, APP_OWNER_NAME, APP_LINK_NAME} from '@env';
 import {Alert} from 'react-native';
 
+
+////Fetching All the visitors data
+
+export const getRecentVisitors = async (token, id) => {
+  try {
+    // Get today's date in the format "DD-MMM-YYYY" (e.g., "06-Jan-2025")
+    const today = new Date().toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }).replace(/ /g, '-'); // Format to match Zoho's Date_of_Visit format
+
+    console.log("Date is: ", today);
+
+    const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report?criteria=Referrer_App_User_lookup==${id}%26%26Date_of_Visit>="${today}"`;
+
+    console.log("Url in getRecentRequest: ", url);
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Zoho-oauthtoken ${token}`,
+      },
+    });
+
+    const result = await response.json();
+    const res = result.data.slice(0, 8);
+    return res;
+
+  } catch (error) {
+    console.log("Error: ", error);
+  }
+}
+
+
+
 export const getDataWithInt = async (reportName, criteria, value, token) => {
   try {
     const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}?criteria=${criteria}==${value}`;

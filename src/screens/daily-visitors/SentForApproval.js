@@ -9,7 +9,7 @@ const SentForApproval = () => {
         style={{
           marginTop: '20%',
         }}
-        source={require('../../src/assets/Group.png')}
+        source={require('../../assets/Group.png')}
       />
       <View style={{flex: 1, width: 259, height: 60, gap: 10}}>
         <Text
