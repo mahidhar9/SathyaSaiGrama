@@ -1,7 +1,18 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 
-const ApprovedCard = () => {
+
+import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import React, { useContext, useEffect, useState, useFocusEffect } from 'react'
+import RNFS from 'react-native-fs';
+
+const ApprovedCard = ({ route }) => {
+    const { visitor } = route.params;
+    let visitorID = visitor.ID;
+    const { profileImage } = route.params;
+    const [QrCodephoto, setQrCodephoto] = useState();
+    const [photo, setPhoto] = useState();
+    const [loading, setLoading] = useState(true);
+    console.log("Visitor is: ", profileImage);
+
     return (
         <View style={styles.container}>
 
@@ -12,30 +23,39 @@ const ApprovedCard = () => {
                     <View >
                         <TouchableOpacity>
                             <Image
-                                source={require('../../assets/profileImg.png')}
+                                source={profileImage}
                                 style={styles.propic}
                             />
                         </TouchableOpacity>
-                        <Text style={styles.nameText}>Ravi</Text>
+                        <Text style={styles.nameText}>{visitor.Name_field.first_name} {visitor.Name_field.last_name}</Text>
                         <View style={styles.row}>
                             <Text style={styles.label}>Gender: </Text>
-                            <Text style={styles.value}>Male</Text>
+                            <Text style={styles.value}>{visitor.Gender}</Text>
                         </View>
                         <View style={styles.row}>
                             <Text style={styles.label}>Number: </Text>
-                            <Text style={styles.value}>9898989899</Text>
+                            <Text style={styles.value}>{visitor.Phone_Number}</Text>
                         </View>
                         <View style={styles.row}>
                             <Text style={styles.label}>Date of Visit: </Text>
-                            <Text style={styles.value}>12/12/2024</Text>
+                            <Text style={styles.value}>{visitor.Date_of_Visit}</Text>
                         </View>
                         <View style={styles.row}>
                             <Text style={styles.label}>L1 Approver: </Text>
-                            <Text style={styles.value}>Gangi Reddy</Text>
+                            <Text style={styles.value}>{visitor.Referrer_App_User_lookup.Name_field}</Text>
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.label}>No. of Boys: </Text>
+                            <Text style={styles.value}>{visitor.Number_of_Boys}</Text>
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.label}>No. of Girls: </Text>
+                            <Text style={styles.value}>{visitor.Number_of_Girls}</Text>
                         </View>
                     </View>
                     <View style={{ marginLeft: "8%" }}>
-                        <TouchableOpacity style={styles.shareButton}>
+                        <TouchableOpacity style={styles.shareButton} onPress={() => {
+                        }}>
                             <View style={{ flexDirection: 'row' }}>
                                 <Image
                                     source={require('../../assets/share.png')}
@@ -46,19 +66,27 @@ const ApprovedCard = () => {
                         </TouchableOpacity>
                         <View style={styles.row}>
                             <Text style={styles.label}>Place of Visit: </Text>
-                            <Text style={styles.value}>Office</Text>
+                            <Text style={styles.value}>{visitor.Home_or_Office}</Text>
                         </View>
                         <View style={styles.row}>
                             <Text style={styles.label}>No. of People: </Text>
-                            <Text style={styles.value}>5</Text>
+                            <Text style={styles.value}>{visitor.Number_of_People}</Text>
                         </View>
                         <View style={styles.row}>
                             <Text style={styles.label}>Guest Category: </Text>
-                            <Text style={styles.value}>VIP</Text>
+                            <Text style={styles.value}>{visitor.Guest_Category}</Text>
                         </View>
                         <View style={styles.row}>
                             <Text style={styles.label}>Priority: </Text>
-                            <Text style={styles.value}>P1</Text>
+                            <Text style={styles.value}>{visitor.Priority}</Text>
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.label}>No. of Men: </Text>
+                            <Text style={styles.value}>{visitor.Number_of_Men}</Text>
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.label}>No. of Women: </Text>
+                            <Text style={styles.value}>{visitor.Number_of_Women}</Text>
                         </View>
                     </View>
                 </View>
@@ -78,10 +106,6 @@ const ApprovedCard = () => {
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.rejectButton}>
                     <View style={{ flexDirection: 'row' }}>
-                        <Image
-                            source={require('../../assets/edit.png')}
-                            style={styles.shareIcon}
-                        />
                         <Text style={styles.rejectButtonText}>Reject</Text>
                     </View>
                 </TouchableOpacity>
@@ -98,11 +122,10 @@ const styles = StyleSheet.create({
         padding: '5%',
     },
     card: {
-        backgroundColor: '#fffffsf',
+        backgroundColor: '#fff',
         borderRadius: 8,
         padding: 16,
         shadowColor: '#000',
-        height: '26%',
         shadowOpacity: 0.1,
         shadowOffset: { width: 0, height: '1%' },
         shadowRadius: '1%',
@@ -129,11 +152,10 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         borderRadius: 8,
         width: '80%',
-        height: '22%',
         justifyContent: "center",
         alignSelf: 'flex-end',
         marginTop: '7%',
-        marginBottom: '7%',
+        marginBottom: '18%',
         flexDirection: 'row',
     },
     shareButtonText: {
@@ -181,8 +203,8 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     propic: {
-        width: '38%',
-        height: 43,
+        width: 50,
+        height: 50,
         borderRadius: 85,
         textAlign: 'center',
         borderWidth: 0.2,
