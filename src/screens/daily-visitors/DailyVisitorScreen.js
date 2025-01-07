@@ -103,26 +103,27 @@ const styles = StyleSheet.create({
         marginTop: 5
     },
     bannertitle: {
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: "800",
         fontFamily: "Roboto",
         color: "#000000",
         marginTop: 12
     },
     bannerdescription: {
-        fontSize: 12,
+        fontSize: 10,
         fontWeight: "400",
         fontFamily: "Roboto",
         color: "#000000",
         fontStyle: "italic",
-        marginTop: 5
+        marginTop: 5,
+        marginBottom:10
     },
     visitorscountview: {
         width: "100%",
         height: "50%",
         flexDirection: "row",
         justifyContent: "space-between",
-        padding: 10
+        padding:"3%"
     },
 
     countview: {
@@ -146,8 +147,8 @@ const styles = StyleSheet.create({
         marginHorizontal: 20
     },
     invitebtn: {
-        borderBlockColor: "#B3261E",
-        borderWidth: 2,
+        borderColor: "#B3261E",
+        borderWidth: 3,
         width: "48%",
         borderRadius: 10,
         height: 40,
