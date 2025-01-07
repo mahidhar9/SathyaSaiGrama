@@ -30,7 +30,8 @@ import DotsBlinkingLoaderEllipsis from '../components/DotsBlinkingLoaderEllipsis
 const Login = ({navigation}) => {
   const screenWidth = Dimensions.get('window').width;
   const [loading, setLoading] = useState(false);
-  const [dotsBlinkingLoaderEllipsis,setDotsBlinkingLoaderEllipsis] =useState(false);
+  const [dotsBlinkingLoaderEllipsis, setDotsBlinkingLoaderEllipsis] =
+    useState(false);
   const {
     control,
     handleSubmit,
@@ -53,7 +54,7 @@ const Login = ({navigation}) => {
     testResident,
     setTestResident,
     departmentIds,
-    setDepartmentIds
+    setDepartmentIds,
   } = useContext(UserContext);
   let residentLocalVar = resident;
   let employeeLocalVar = employee;
@@ -310,26 +311,25 @@ const Login = ({navigation}) => {
     );
     console.log('Whether user exis or not in login: ', res);
     if (res.code === 3000) {
-
       setDotsBlinkingLoaderEllipsis(true);
-    
-    await isResident(res.data[0].ID);
-    await isEmployee(res.data[0].ID);
-    console.log(
-      'resident || employee boolean',
-      residentLocalVar,
-      employeeLocalVar,
-    );
-    await isTestResident(res.data[0].ID);
-    if (res && res.data && (residentLocalVar || employeeLocalVar)) {
-      try {
-        fetchDataFromOffice(res.data[0].ID);
-        const userCredential = await signInWithEmailAndPassword(
-          auth,
-          userCred.email.toLowerCase().trim(),
-          userCred.password,
-        );
-        const user = userCredential.user;
+
+      await isResident(res.data[0].ID);
+      await isEmployee(res.data[0].ID);
+      console.log(
+        'resident || employee boolean',
+        residentLocalVar,
+        employeeLocalVar,
+      );
+      await isTestResident(res.data[0].ID);
+      if (res && res.data && (residentLocalVar || employeeLocalVar)) {
+        try {
+          fetchDataFromOffice(res.data[0].ID);
+          const userCredential = await signInWithEmailAndPassword(
+            auth,
+            userCred.email.toLowerCase().trim(),
+            userCred.password,
+          );
+          const user = userCredential.user;
 
           if (user.emailVerified) {
             setL1ID(res.data[0].ID);
@@ -412,244 +412,195 @@ const Login = ({navigation}) => {
 
   return (
     <>
-      {loading ? dotsBlinkingLoaderEllipsis?(<DotsBlinkingLoaderEllipsis />): (
-        <ActivityIndicator
-          size="large"
-          color="#752A26"
-          style={styles.loadingContainer}
-        />
-        
+      {loading ? (
+        dotsBlinkingLoaderEllipsis ? (
+          <DotsBlinkingLoaderEllipsis />
+        ) : (
+          <ActivityIndicator
+            size="large"
+            color="#752A26"
+            style={styles.loadingContainer}
+          />
+        )
       ) : (
         <>
-          <ScrollView>
-            <KeyboardAvoidingView>
-              <Image
-                source={require('../../src/assets/aashram.png')}
-                resizeMode="cover"
-                style={{
-                  width: '100%',
-                  height: 340,
-                  marginTop: 0,
-                }}
-              />
-
-              <View style={[styles.head]}>
-                <Text style={styles.login}>Welcome!</Text>
-                <View
-                  style={[
-                    styles.email,
-                    focusedInput === 'email' && styles.inputFocused,
-                  ]}>
-                  <Controller
-                    name="email"
-                    control={control}
-                    render={({field: {onChange, value}}) => (
-                      <TextInput
-                        placeholder="Email Address"
-                        value={value}
-                        selectionColor="#B21E2B"
-                        onFocus={() => setFocusedInput('email')}
-                        onChangeText={value =>
-                          onChange(value.toLowerCase().trim())
-                        }
-                        autoCapitalize="none"
-                        style={styles.inputBox}
-                      />
-                    )}
-                    rules={{required: true, pattern: /^\S+@\S+$/i}}
-                  />
-                </View>
-                {errors.email?.type === 'required' && (
-                  <Text style={styles.textError}>Email is required</Text>
-                )}
-                {errors.email?.type === 'pattern' && (
-                  <Text style={styles.textError}>Enter valid email</Text>
-                )}
-
-                {/* <View
-                  style={[
-                    styles.passBorder,
-                    focusedInput === 'password' && styles.inputFocused,
-                  ]}>
-                  <Controller
-                    name="password"
-                    control={control}
-                    render={({field: {onChange, value}}) => (
-                      <TextInput
-                        placeholder="Password"
-                        style={styles.inputBox}
-                        value={value}
-                        selectionColor="#B21E2B"
-                        onFocus={() => setFocusedInput('password')}
-                        secureTextEntry={!showPassword}
-                        onChangeText={value => onChange(value.trim())}
-                      />
-                    )}
-                    rules={{
-                      required: true,
-                      minLength: 6,
+          <ImageBackground
+            source={require('../assets/vector-2.png')}
+            style={styles.backgroundImage}
+            resizeMode="cover">
+            <View style={styles.container}>
+              <ScrollView>
+                <KeyboardAvoidingView>
+                  <Image
+                    source={require('../../src/assets/aashram.png')}
+                    resizeMode="cover"
+                    style={{
+                      width: '100%',
+                      height: 250,
+                      marginTop: 0,
                     }}
                   />
-                  {showPassword === false ? (
-                    <TouchableOpacity
-                      onPress={() => {
-                        setShowPassword(!showPassword);
-                      }}>
-                      <Image
-                        source={require('../assets/eyestrike.png')}
-                        style={{width: 16, height: 16}}
-                      />
-                    </TouchableOpacity>
-                  ) : (
-                    <TouchableOpacity
-                      onPress={() => setShowPassword(!showPassword)}>
-                      <Image
-                        source={require('../assets/eye.png')}
-                        style={{width: 16, height: 16}}
-                      />
-                    </TouchableOpacity>
-                  )}
-                </View>
 
-                {errors.password?.type === 'required' && (
-                  <Text style={styles.textError}>Password is required</Text>
-                )}
-                {errors.password?.type === 'minLength' && (
-                  <Text style={styles.textError}>
-                    Password must be 6 characters long
-                  </Text>
-                )} */}
-                <View
-                  style={[
-                    styles.passBorder,
-                    focusedInput === 'password' && styles.inputFocused,
-                  ]}>
-                  <Controller
-                    name="password"
-                    control={control}
-                    render={({field: {onChange, value}}) => (
-                      <TextInput
-                        placeholder="Password"
-                        style={styles.inputBox}
-                        value={value}
-                        selectionColor="#B21E2B"
-                        onFocus={() => setFocusedInput('password')}
-                        secureTextEntry={!showPassword}
-                        onChangeText={value => {
-                          const trimmedValue = value.trim();
-                          onChange(trimmedValue);
-                          setPassword(trimmedValue);
+                  <View style={[styles.head]}>
+                    <Text style={styles.login}>Login Details</Text>
+                    <View
+                      style={[
+                        styles.email,
+                        focusedInput === 'email' && styles.inputFocused,
+                      ]}>
+                      <Controller
+                        name="email"
+                        control={control}
+                        render={({field: {onChange, value}}) => (
+                          <TextInput
+                            placeholder="Email Address"
+                            value={value}
+                            selectionColor="#B21E2B"
+                            onFocus={() => setFocusedInput('email')}
+                            onChangeText={value =>
+                              onChange(value.toLowerCase().trim())
+                            }
+                            autoCapitalize="none"
+                            style={styles.inputBox}
+                          />
+                        )}
+                        rules={{required: true, pattern: /^\S+@\S+$/i}}
+                      />
+                    </View>
+                    {errors.email?.type === 'required' && (
+                      <Text style={styles.textError}>Email is required</Text>
+                    )}
+                    {errors.email?.type === 'pattern' && (
+                      <Text style={styles.textError}>Enter valid email</Text>
+                    )}
+                    <View
+                      style={[
+                        styles.passBorder,
+                        focusedInput === 'password' && styles.inputFocused,
+                      ]}>
+                      <Controller
+                        name="password"
+                        control={control}
+                        render={({field: {onChange, value}}) => (
+                          <TextInput
+                            placeholder="Password"
+                            style={styles.inputBox}
+                            value={value}
+                            selectionColor="#71727A"
+                            onFocus={() => setFocusedInput('password')}
+                            secureTextEntry={!showPassword}
+                            onChangeText={value => {
+                              const trimmedValue = value.trim();
+                              onChange(trimmedValue);
+                              setPassword(trimmedValue);
+                            }}
+                          />
+                        )}
+                        rules={{
+                          required: true,
                         }}
                       />
+                      {showPassword === false ? (
+                        <TouchableOpacity
+                          onPress={() => {
+                            setShowPassword(!showPassword);
+                          }}>
+                          <Image
+                            source={require('../assets/eyestrike.png')}
+                            style={{width: 16, height: 16}}
+                          />
+                        </TouchableOpacity>
+                      ) : (
+                        <TouchableOpacity
+                          onPress={() => setShowPassword(!showPassword)}>
+                          <Image
+                            source={require('../assets/eye.png')}
+                            style={{width: 16, height: 16}}
+                          />
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                    {errors.password?.type === 'required' && (
+                      <Text style={styles.textError}>Password is required</Text>
                     )}
-                    rules={{
-                      required: true,
-                      // minLength: 8,
-                      //         maxLength:20,
-                      // pattern:
-                      //           /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/,
-                    }}
-                  />
-                  {showPassword === false ? (
-                    <TouchableOpacity
-                      onPress={() => {
-                        setShowPassword(!showPassword);
-                      }}>
-                      <Image
-                        source={require('../assets/eyestrike.png')}
-                        style={{width: 16, height: 16}}
-                      />
-                    </TouchableOpacity>
-                  ) : (
-                    <TouchableOpacity
-                      onPress={() => setShowPassword(!showPassword)}>
-                      <Image
-                        source={require('../assets/eye.png')}
-                        style={{width: 16, height: 16}}
-                      />
-                    </TouchableOpacity>
-                  )}
-                </View>
-                {/* {errors.password?.type === 'pattern' && (
-              <Text style={styles.errorMessage}>
-          Password must be at least 8 characters long, contains both upper and lower case letters, includes at least one number, and has at least one special character<Text style={styles.errMes} >(e.g., !@#$%^&*).</Text>
-        </Text> 
-      )}*/}
-                {errors.password?.type === 'required' && (
-                  <Text style={styles.textError}>Password is required</Text>
-                )}
 
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('ForgotPassword')}>
-                  <Text style={styles.forgotPassword}>Forgot password?</Text>
-                </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate('ForgotPassword')}>
+                      <Text style={styles.forgotPassword}>
+                        Forgot password?
+                      </Text>
+                    </TouchableOpacity>
 
-                <TouchableOpacity
-                  onPress={handleSubmit(handleLoginForm)}
-                  // disabled={!isValidPassword()}
-                  style={[styles.register]}>
-                  {/* style={styles.register}> */}
-                  <Text style={styles.registerTitle}>Login</Text>
-                </TouchableOpacity>
-                <View style={styles.redirect}>
-                  <Text
-                    style={{
-                      width: 154,
-                      color: '#71727A',
-                      textAlign: 'right',
-                      marginEnd: 4,
-                      fontFamily: 'Inter',
-                      fontSize: 12,
-                      flexShrink: 0,
-                      fontStyle: 'normal',
-                      fontWeight: '600',
-                      letterSpacing: 0.12,
-                    }}>
-                    Don't have an account?
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => {
-                      navigation.navigate('Register');
-                    }}>
-                    <Text
-                      style={{
-                        color: '#B21E2B',
-                        width: 124,
-                        fontFamily: 'Inter',
-                        fontSize: 12,
-                        flexShrink: 0,
-                        fontStyle: 'normal',
-                        fontWeight: '600',
-                        letterSpacing: 0.12,
-                      }}>
-                      Register now
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </KeyboardAvoidingView>
-          </ScrollView>
-          <Dialog.Container
-            visible={DialogVisible}
-            contentStyle={{borderRadius: 10}}>
-            <Dialog.Title style={styles.dialogTitle}>
-              Unable to find user
-            </Dialog.Title>
-            <Dialog.Description style={{color: '#2F3036'}}>
-              Please check your email or password and try again. Otherwise
-              please register.
-            </Dialog.Description>
-            <Dialog.Button
-              style={{color: '#B21E2B'}}
-              label="Register"
-              onPress={onPressRegister}
-            />
-            <Dialog.Button
-              style={{color: 'black'}}
-              label="Cancel"
-              onPress={onPressOk}
-            />
-          </Dialog.Container>
+                    <TouchableOpacity
+                      onPress={handleSubmit(handleLoginForm)}
+                      // disabled={!isValidPassword()}
+                      style={[styles.register]}>
+                      {/* style={styles.register}> */}
+                      <Text style={styles.registerTitle}>Login</Text>
+                    </TouchableOpacity>
+                    <View style={styles.redirect}>
+                      <Text
+                        style={{
+                          width: 154,
+                          color: '#71727A',
+                          textAlign: 'right',
+                          marginEnd: 4,
+                          fontFamily: 'Inter',
+                          fontSize: 12,
+                          flexShrink: 0,
+                          fontStyle: 'normal',
+                          fontWeight: '600',
+                          letterSpacing: 0.12,
+                        }}>
+                        Don't have an account?
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => {
+                          navigation.navigate('Register');
+                        }}>
+                        <Text
+                          style={{
+                            color: '#C00F0C',
+                            width: 124,
+                            fontFamily: 'Inter',
+                            fontSize: 12,
+                            flexShrink: 0,
+                            fontStyle: 'normal',
+                            fontWeight: '600',
+                            letterSpacing: 0.12,
+                          }}>
+                          Register now
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </KeyboardAvoidingView>
+              </ScrollView>
+              {/* <Image 
+                      source={require('../assets/vector.png')}></Image> */}
+              <Dialog.Container
+                visible={DialogVisible}
+                contentStyle={{borderRadius: 10}}>
+                <Dialog.Title style={styles.dialogTitle}>
+                  Unable to find user
+                </Dialog.Title>
+                <Dialog.Description style={{color: '#2F3036'}}>
+                  Please check your email or password and try again. Otherwise
+                  please register.
+                </Dialog.Description>
+                <Dialog.Button
+                  style={{color: '#B21E2B'}}
+                  label="Register"
+                  onPress={onPressRegister}
+                />
+                <Dialog.Button
+                  style={{color: 'black'}}
+                  label="Cancel"
+                  onPress={onPressOk}
+                />
+              </Dialog.Container>
+            </View>
+          </ImageBackground>
         </>
       )}
     </>
@@ -666,12 +617,13 @@ const styles = StyleSheet.create({
   },
   container: {
     justifyContent: 'center',
-    backgroundColor: '#FFF',
+    backgroundColor: 'rgba(0, 0, 0, 0)',
+    height: '100%',
     flex: 1,
   },
   head: {
     paddingHorizontal: 24,
-    paddingVertical: 40,
+    paddingVertical: 15,
     flexDirection: 'column',
   },
   redirect: {
@@ -679,14 +631,15 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 10,
     justifyContent: 'center',
+    zIndex: 1,
   },
   inputBox: {
-    color: '#1F2024',
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    paddingEnd: 4,
+    color: 'red',
+    paddingHorizontal: '8%',
+    paddingVertical: '3%',
+    paddingEnd: '2%',
     alignItems: 'center',
-    height: 47,
+    //height: 50,
     width: '93%',
     fontFamily: 'Inter',
     fontSize: 14,
@@ -704,7 +657,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingEnd: 18,
-    height: 48,
+    height: '12%',
     alignSelf: 'center',
     marginBottom: 8,
   },
@@ -714,26 +667,26 @@ const styles = StyleSheet.create({
     fontStyle: 'normal',
     fontWeight: '400',
     marginBottom: 8,
-    color: '#1F2024',
+    color: '#F5F5F5',
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#C5C6CC',
     paddingHorizontal: -1,
   },
   register: {
-    width: 216,
-    backgroundColor: '#B21E2B',
+    width: '60%',
+    backgroundColor: '#C00F0C',
     paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingHorizontal: '18%',
     height: 48,
     justifyContent: 'center',
     borderRadius: 12,
     alignItems: 'center',
-    gap: 8,
+    //gap: 8,
     flexShrink: 0,
-    marginTop: 40,
+    marginTop: '8%',
     alignSelf: 'center',
-    marginBottom: 30,
+    marginBottom: '8%',
   },
   registerTitle: {
     fontSize: 12,
@@ -741,18 +694,18 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontFamily: 'Inter',
     fontStyle: 'normal',
-    width: 33,
-    height: 15,
+    width: '50%',
+    height: '90%',
   },
   login: {
     color: '#000',
-    fontFamily: 'Inter',
-    fontSize: 24,
+    fontFamily: 'Outfit',
+    fontSize: 20,
     fontStyle: 'normal',
     fontWeight: '900',
     letterSpacing: 0.24,
-    width: 124,
-    height: 29,
+    width: '50%',
+    height: '8%',
     marginBottom: 24,
   },
   textError: {
@@ -761,7 +714,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   forgotPassword: {
-    color: '#B21E2B',
+    color: '#C00F0C',
     fontFamily: 'Inter',
     fontSize: 12,
     fontStyle: 'normal',
@@ -773,24 +726,13 @@ const styles = StyleSheet.create({
   dialogTitle: {
     color: 'black',
   },
-  errorMessage: {
-    color: '#2F3036',
-    fontFamily: 'Inter',
-    fontSize: 12,
-    fontStyle: 'normal',
-    fontWeight: '600',
-    alignSelf: 'stretch',
-    marginStart: 6,
-    marginBottom: 10,
-  },
-  errMes: {
-    color: '#B21E2B',
-    fontFamily: 'Inter',
-    fontSize: 12,
-    fontStyle: 'normal',
-    fontWeight: '600',
-    alignSelf: 'stretch',
-    marginStart: 6,
-    marginBottom: 10,
+  backgroundImage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
+    width: '100%',
+    height: '100%',
   },
 });

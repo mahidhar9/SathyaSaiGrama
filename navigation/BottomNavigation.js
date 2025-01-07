@@ -1,10 +1,10 @@
 import React from 'react'
 import { View, Text, Image, StyleSheet } from 'react-native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import BuggyServiceTab from './buttom-tabs/BuggyServiceTab'
-import DailyVisitorTab from './buttom-tabs/DailyVisitorTab'
-import LateEntryTab from './buttom-tabs/LateEntryTab'
-import MoreTab from './buttom-tabs/MoreTab'
+import BuggyServiceTab from './bottom-tabs/BuggyServiceTab'
+import DailyVisitorTab from './bottom-tabs/DailyVisitorTab'
+import LateEntryTab from './bottom-tabs/LateEntryTab'
+import MoreTab from './bottom-tabs/MoreTab'
 
 function BottomNavigation() {
 

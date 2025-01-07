@@ -14,7 +14,7 @@ export default function DailyVisitorScreen({ navigation }) {
         const getVisitorData = async () => {
             const visitors = await getRecentVisitors(accessToken, loggedUser.userId)
             setAllVisitors(visitors)
-            console.log("Visitors are: ", visitors)
+            //console.log("Visitors are: ", visitors)
         }
         getVisitorData();
 
@@ -71,7 +71,7 @@ export default function DailyVisitorScreen({ navigation }) {
                     renderItem={({ item }) => (
                         <VisitorComponent visitor={item} navigation={navigation} />
                     )}
-                    keyExtractor={item => item.ID.toString()}
+                    keyExtractor={item => item.ID?.toString() || Math.random().toString()}
                 />
             </View>
         </SafeAreaView>
