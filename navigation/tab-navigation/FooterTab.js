@@ -314,7 +314,7 @@ function FooterTab({navigation}) {
                     resizeMode="contain"
                     style={{
                       width: 30,
-                      height: 30,
+                      height: 30, 
                       tintColor: focused ? '#B21E2B' : '#D4D6DD',
                     }}
                   />

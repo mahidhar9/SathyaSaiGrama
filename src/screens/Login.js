@@ -421,6 +421,7 @@ const Login = ({navigation}) => {
         
       ) : (
         <>
+          <View style={styles.container}>
           <ScrollView>
             <KeyboardAvoidingView>
               <Image
@@ -428,11 +429,11 @@ const Login = ({navigation}) => {
                 resizeMode="cover"
                 style={{
                   width: '100%',
-                  height: 340,
+                  height: 300,
                   marginTop: 0,
                 }}
               />
-
+             
               <View style={[styles.head]}>
                 <Text style={styles.login}>Welcome!</Text>
                 <View
@@ -478,7 +479,7 @@ const Login = ({navigation}) => {
                         placeholder="Password"
                         style={styles.inputBox}
                         value={value}
-                        selectionColor="#B21E2B"
+                        selectionColor="#71727A"
                         onFocus={() => setFocusedInput('password')}
                         secureTextEntry={!showPassword}
                         onChangeText={value => {
@@ -550,7 +551,7 @@ const Login = ({navigation}) => {
                     }}>
                     <Text
                       style={{
-                        color: '#B21E2B',
+                        color: '#C00F0C',
                         width: 124,
                         fontFamily: 'Inter',
                         fontSize: 12,
@@ -564,6 +565,7 @@ const Login = ({navigation}) => {
                   </TouchableOpacity>
                 </View>
               </View>
+              
             </KeyboardAvoidingView>
           </ScrollView>
           <Dialog.Container
@@ -587,6 +589,7 @@ const Login = ({navigation}) => {
               onPress={onPressOk}
             />
           </Dialog.Container>
+          </View>
         </>
       )}
     </>
@@ -603,7 +606,8 @@ const styles = StyleSheet.create({
   },
   container: {
     justifyContent: 'center',
-    backgroundColor: '#FFF',
+    backgroundColor: 'white',
+    height:'100%',
     flex: 1,
   },
   head: {
@@ -618,12 +622,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   inputBox: {
-    color: '#1F2024',
+    color: 'red',
     paddingHorizontal: "8%",
-    paddingVertical: "7%",
+    paddingVertical: "4%",
     paddingEnd: "2%",
     alignItems: 'center',
-    height: "10%",
+    //height: 50,
     width: '93%',
     fontFamily: 'Inter',
     fontSize: 14,
@@ -651,7 +655,7 @@ const styles = StyleSheet.create({
     fontStyle: 'normal',
     fontWeight: '400',
     marginBottom: 8,
-    color: '#1F2024',
+    color: '#F5F5F5',
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#C5C6CC',
@@ -668,9 +672,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     //gap: 8,
     flexShrink: 0,
-    marginTop: "10%",
+    marginTop: "8%",
     alignSelf: 'center',
-    marginBottom: "10%",
+    marginBottom: "8%",
   },
   registerTitle: {
     fontSize: 12,

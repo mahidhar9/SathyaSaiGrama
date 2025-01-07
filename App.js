@@ -22,6 +22,9 @@ import NoNetworkScreen from './src/screens/NoNetworkScreen';
 import CodePush from 'react-native-code-push';
 import { getDataWithInt, getDataWithTwoInt } from './src/components/ApiRequest';
 
+////// New Changes 
+import RootNavigation from './navigation/RootNavigation';
+
 const lightTheme = {
   ...DefaultTheme,
   colors: {
@@ -186,7 +189,7 @@ const App = () => {
 
 
     setLoggedUser(data);
-    console.log("Data to be set in AsyncStorage: ", data); // Log the data before setting
+    //console.log("Data to be set in AsyncStorage: ", data); // Log the data before setting
 
     await AsyncStorage.setItem('existedUser', JSON.stringify(data));
 
@@ -235,7 +238,7 @@ const App = () => {
         // <ActivityIndicator size="large" color="#752A26" style={styles.loadingContainer}/>
         <SplashScreen />
       ) : (
-        <BaseRoute />
+        <RootNavigation />
       )}
     </PaperProvider>
   );
