@@ -250,3 +250,263 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
+
+// import React, { useState } from "react"; 
+// import { SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Image } from "react-native";
+// import { Picker } from "@react-native-picker/picker";
+// const InvitationForm = () => {
+//   const [prefix, setPrefix] = useState("");
+//   const [fullName, setFullName] = useState("");
+//   const [phone, setPhone] = useState("");
+//   const [dateOfVisit, setDateOfVisit] = useState(new Date());
+//   const [visitType, setVisitType] = useState("Single");
+//   const [gender, setGender] = useState("Male");
+//   const [photo, setPhoto] = useState(null);
+//   const [guestCategory, setGuestCategory] = useState("");
+//   const [priority, setPriority] = useState("");
+//   const [remark, setRemark] = useState("");
+//   const [vehicleType, setVehicleType] = useState("");
+//   const [vehicleNumber, setVehicleNumber] = useState("");
+
+//   return (
+//     <SafeAreaView style={styles.container}>
+//       <ScrollView contentContainerStyle={styles.card}>
+//         <Text style={styles.label}>Name</Text>
+//         <Picker
+//           selectedValue={prefix}
+//           onValueChange={(itemValue) => setPrefix(itemValue)}
+//           style={styles.input}
+//         >
+//           <Picker.Item label="Mr." value="Mr." />
+//           <Picker.Item label="Ms." value="Ms." />
+//           <Picker.Item label="Dr." value="Dr." />
+//         </Picker>
+//         <Text style={styles.label}>FULL Name</Text>
+//         <TextInput
+//             style={styles.input}
+//             value={fullName}
+//             onChangeText={setFullName}
+//             placeholder="Enter Full Name"
+//         />
+//         <Text style={styles.label}>Phone</Text>
+//         <TextInput
+//           style={styles.input}
+//           value={phone}
+//           onChangeText={setPhone}
+//           placeholder="Enter phone number"
+//           keyboardType="phone-pad"
+//         />
+//         <Text style={styles.label}>Date of Visit</Text>
+//         <TouchableOpacity onPress={() => {}}>
+//           <Text style={styles.input}>{dateOfVisit.toDateString()}</Text>
+//         </TouchableOpacity>
+//         <Text style={styles.label}>Single or Group Visit</Text>
+//         <View style={styles.buttonGroup}>
+//           <TouchableOpacity
+//             style={[styles.button, visitType === "Single" && styles.activeButton]}
+//             onPress={() => setVisitType("Single")}
+//           >
+//             <Text style={styles.buttonText}>Single</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity
+//             style={[styles.button, visitType === "Group" && styles.activeButton]}
+//             onPress={() => setVisitType("Group")}
+//           >
+//             <Text style={styles.buttonText}>Group</Text>
+//           </TouchableOpacity>
+//         </View>
+//         <Text style={styles.label}>Select Gender</Text>
+//         <View style={styles.buttonGroup}>
+//           <TouchableOpacity
+//             style={[styles.button, gender === "Male" && styles.activeButton]}
+//             onPress={() => setGender("Male")}
+//           >
+//             <Text style={styles.buttonText}>Male</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity
+//             style={[styles.button, gender === "Female" && styles.activeButton]}
+//             onPress={() => setGender("Female")}
+//           >
+//             <Text style={styles.buttonText}>Female</Text>
+//           </TouchableOpacity>
+//         </View>
+//         <Text style={styles.label}>Photo</Text>
+//         <TouchableOpacity style={styles.uploadButton}>
+//           <Text style={styles.uploadButtonText}>Select Image</Text>
+//         </TouchableOpacity>
+//         <Text style={styles.label}>Guest Category</Text>
+//         <Picker
+//           selectedValue={guestCategory}
+//           onValueChange={(itemValue) => setGuestCategory(itemValue)}
+//           style={styles.input}
+//         >
+//           <Picker.Item label='Govt Officials' value='Govt Officials'/>
+//           <Picker.Item label= 'Politician' value= 'Politician'/>
+//           <Picker.Item label= 'Corporate' value='Corporate'/>
+//           <Picker.Item label= 'Press' value='Press'/>
+//           <Picker.Item label= 'Parent' value='Parent'/>
+//           <Picker.Item label= 'Devotee' value='Devotee'/>
+//         </Picker>
+//         <Text style={styles.label}>Priority</Text>
+//         <Picker
+//           selectedValue={priority}
+//           onValueChange={(itemValue) => setPriority(itemValue)}
+//           style={styles.input}
+//         >
+//           <Picker.Item label="High" value="High" />
+//           <Picker.Item label="Medium" value="Medium" />
+//           <Picker.Item label="Low" value="Low" />
+//         </Picker>
+//         <Text style={styles.label}>Remark</Text>
+//         <TextInput
+//           style={styles.input}
+//           value={remark}
+//           onChangeText={setRemark}
+//           placeholder="Enter remark"
+//         />
+//         <Text style={styles.label}>Vehicle Information</Text>
+//         <View style={styles.rowGroup}>
+//           <TextInput
+//             style={styles.input}
+//             value={vehicleType}
+//             onChangeText={setVehicleType}
+//             placeholder="Vehicle type"
+//           />
+//           <TextInput
+//             style={styles.input}
+//             value={vehicleNumber}
+//             onChangeText={setVehicleNumber}
+//             placeholder="Vehicle Number"
+//           />
+//         </View>
+//         <TouchableOpacity style={styles.submitButton}>
+//           <Text style={styles.submitButtonText}>Submit</Text>
+//         </TouchableOpacity>
+//       </ScrollView>
+//     </SafeAreaView>
+//   );
+// };
+
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     backgroundColor: "#f8f8f8",
+//   },
+//   card: {
+//     backgroundColor: "#fff",
+//     padding: 20,
+//     borderRadius: 10,
+//     shadowColor: "#000",
+//     shadowOpacity: 0.2,
+//     shadowOffset: { width: 0, height: 1 },
+//     shadowRadius: 3,
+//     marginTop: "5%",
+//     width: "90%",
+//     elevation: 3,
+//     marginHorizontal: "5%",
+//   },
+//   label: {
+//     fontFamily: "System",
+//     fontSize: 16,
+//     fontWeight: "400",
+//     lineHeight: 22.4,
+//     textAlign: "left",
+//     marginBottom: 5,
+//     color: "#333",
+//   },
+//   input: {
+//     borderWidth: 1,
+//     borderColor: "#ccc",
+//     borderRadius: 10,
+//     padding: 12,
+//     marginBottom: 15,
+//     backgroundColor: "#fff",
+//     fontFamily: "Roboto",
+//     fontSize: 14,
+//     color: "#333",
+//   },
+//   rowGroup: {
+//     flexDirection: "row",
+//     justifyContent: "space-between",
+//     alignItems: "center",
+//   },
+//   buttonGroup: {
+//     flexDirection: "row",
+//     marginBottom: 10,
+//   },
+//   button: {
+//     flex: 1,
+//     borderWidth: 1,
+//     borderColor: "#ccc",
+//     padding: 12,
+//     borderRadius: 5,
+//     marginHorizontal: 5,
+//     alignItems: "center",
+//     backgroundColor: "#fff",
+//   },
+//   activeButton: {
+//     backgroundColor: "#E8B931",
+//     borderColor: "#E8B931",
+//   },
+//   buttonText: {
+//     color: "#000",
+//     fontSize: 14,
+//   },
+//   uploadButton: {
+//     borderWidth: 1,
+//     borderColor: "#ccc",
+//     borderRadius: 5,
+//     padding: 12,
+//     alignItems: "center",
+//     marginBottom: 10,
+//     backgroundColor: "#fff",
+//   },
+//   uploadButtonText: {
+//     color: "#000",
+//     fontSize: 14,
+//   },
+//   submitButton: {
+//     backgroundColor: "#C00F0C",
+//     padding: 15,
+//     borderRadius: 5,
+//     alignItems: "center",
+//     marginTop: 20,
+//   },
+//   submitButtonText: {
+//     color: "#fff",
+//     fontSize: 16,
+//     fontWeight: "bold",
+//   },
+//   radioButtonGroup: {
+//     flexDirection: "row",
+//     justifyContent: "space-around",
+//     marginBottom: 15,
+//   },
+//   radioButton: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     marginRight: 20,
+//   },
+//   radioCircle: {
+//     width: 20,
+//     height: 20,
+//     borderRadius: 10,
+//     borderWidth: 2,
+//     borderColor: "#E8B931",
+//     marginRight: 8,
+//     justifyContent: "center",
+//     alignItems: "center",
+//   },
+//   selectedCircle: {
+//     width: 12,
+//     height: 12,
+//     borderRadius: 6,
+//     backgroundColor: "#E8B931",
+//   },
+//   radioText: {
+//     fontSize: 16,
+//     color: "#333",
+//   },
+// });
+
+// export default InvitationForm;

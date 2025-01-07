@@ -6,7 +6,6 @@ import {
   StyleSheet,
   Alert,
   Modal,
-  // TouchableOpacity,
   Pressable,
   ScrollView,
   LogBox,
@@ -16,7 +15,6 @@ import {
   Dimensions,
   Linking,
 } from 'react-native';
-
 import {
   GestureHandlerRootView,
   TouchableOpacity,
@@ -24,7 +22,6 @@ import {
 import {encode} from 'base64-arraybuffer';
 import RNFS from 'react-native-fs';
 import {Picker} from '@react-native-picker/picker';
-
 import DatePicker from 'react-native-modern-datepicker';
 import {getToday, getFormatedDate} from 'react-native-modern-datepicker';
 import PhoneInput from 'react-native-phone-number-input';
@@ -33,18 +30,14 @@ import UserContext from '../../context/UserContext';
 import {Dropdown} from 'react-native-element-dropdown';
 import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME, SECRET_KEY} from '@env';
 import moment from 'moment';
-
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {launchImageLibrary} from 'react-native-image-picker';
-
 import SentForApproval from './SentForApproval';
-
 import {updateRecord} from './approval/VerifyDetails';
 import {isJSDocCommentContainingNode} from 'typescript';
 import dayjs from 'dayjs';
 import {CalendarList} from 'react-native-calendars';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
 LogBox.ignoreLogs(['Warnings...']);
 LogBox.ignoreAllLogs();
 const FillByYourSelf = ({navigation}) => {
@@ -59,7 +52,7 @@ const FillByYourSelf = ({navigation}) => {
   const [girls, setGirls] = useState('0');
   const [selectedGender, setSelectedGender] = useState('');
   const [selectedSG, setSelectedSG] = useState('');
-
+  //const singleorgroup = ['Single Visit', 'Group Visit'];
   const [value, setValue] = useState('');
   const [formattedValue, setFormattedValue] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -108,14 +101,6 @@ const FillByYourSelf = ({navigation}) => {
     }
   }, []);
 
-  // if (loggedUser.resident === true && loggedUser.employee === true) {
-  //   selectedHomeOffice = '';
-  // } else if (loggedUser.resident === true && loggedUser.employee === false) {
-  //   selectedHomeOffice = 'Home';
-  // } else if (loggedUser.resident === false && loggedUser.employee === true) {
-  //   selectedHomeOffice = 'Office';
-  // }
-
   const [selectedHO, setSelectedHO] = useState('');
 
   useEffect(() => {
@@ -154,31 +139,8 @@ const FillByYourSelf = ({navigation}) => {
       setVisitingMonth(monthNumber);
       console.log('Visiting month :', monthNumber);
     }
-
-    // const today = new Date();
-
-    // const startDate = getFormatedDate(
-    //   today.setDate(today.getDate()),
-    //   'YYYY/MM/DD',
-    // );
-    // const addDaysToDate = (dateString, daysToAdd) => {
-    //   // Convert the input string (YYYY/MM/DD) into a Date object
-    //   const [year, month, day] = dateString.split('/'); // Split the string by '/'
-    //   const date = new Date(year, month - 1, day); // Month is 0-indexed in JavaScript
-
-    //   // Add the specified number of days (60 days in this case)
-    //   date.setDate(date.getDate() + daysToAdd);
-
-    //   // Format the new date back to 'YYYY/MM/DD'
-    //   const newYear = date.getFullYear();
-    //   const newMonth = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed, so add 1
-    //   const newDay = String(date.getDate()).padStart(2, '0');
-
-    //   return `${newYear}/${newMonth}/${newDay}`;
-    // };
   };
-  // const endDate = addDaysToDate(startDate, 60);
-  // console.log('endDate', endDate);
+
   const approvalToVisitorID = useRef(null);
   const viewRef = useRef();
 
@@ -700,35 +662,18 @@ const FillByYourSelf = ({navigation}) => {
         !validateInput(firstName, setNameErr) ||
         !validateInput(lastName, setNameErr)
       ) {
-        // setNameErr('Prefix, First Name and Last Name are required');
-        // Alert.alert('Error', '20 letters Only letters are allowed in the name field ');
         console.log('inside !validateInput');
         valid = false;
       } else {
         setNameErr(null);
       }
     }
-
-    // const isDateWithinTwoMonths = selectedDate => {
-    //   const currentDate = new Date(); // Get current date
-
-    //   // Create a date 2 months from today
-    //   const twoMonthsLater = new Date();
-    //   twoMonthsLater.setMonth(currentDate.getDate() + 1);
-
-    //   // Compare the selected date with the date 2 months later
-    //   return selectedDate <= twoMonthsLater;
     // };
     if (date === 'Select Date') {
       setDateOfVisitErr('Date of visit is required');
       console.log('inside Select Date');
       valid = false;
     } else {
-      // if (!isDateWithinTwoMonths(date)) {
-      //   setDateOfVisitErr('Please select a date within 2 months from today');
-      //   console.log('inside 2 months from today');
-      //   valid = false;
-      // }
       setDateOfVisitErr(null);
     }
 
@@ -875,43 +820,8 @@ const FillByYourSelf = ({navigation}) => {
   };
 
   const handleReset = () => {
-    // setBoys('0');
-    // setWomen('0');
-    // setMen('0');
-    // setGirls('0');
-    // setPrefix(' ');
-    // setDate('Select Date');
-    // setSelectedGender('');
-    // setSelectedHO('');
-    // setSelectedSG('');
-    // setLastName('');
-    // setFirstName('');
-    // setValue('');
-    // setImage(null);
-    // setGuestCategory('');
-    // setPriority('');
-    // setVehicleType('');
-    // setVehicleNumber('');
-    // setIsVehicle(false);
-    // setIsFocus(false);
-    // setFocus(false);
-    // setNameErr(null);
-    // setDateOfVisitErr(null);
-    // setPhoneErr(null);
-    // setSingleOrGroupErr(null);
-    // setHomeOrOfficeErr(null);
-    // setGenderErr(null);
-    // setPhoneValidErr(null);
     navigation.navigate('Invite');
   };
-  let heightStyles;
-  if (height > 900) {
-    heightStyles = normalScreen;
-  } else if (height > 750) {
-    heightStyles = mediumScreen;
-  } else {
-    heightStyles = smallScreen;
-  }
 
   const [firstNameError, setFirstNameError] = useState('');
   const [lastNameError, setLastNameError] = useState('');
@@ -950,7 +860,7 @@ const FillByYourSelf = ({navigation}) => {
       ) : (
         <SafeAreaView style={styles.container}>
           <GestureHandlerRootView>
-            <ScrollView style={{paddingStart: 8}}>
+            <ScrollView style={styles.card}>
               <View>
                 <View style={styles.namecontainer}>
                   <Text style={[styles.label, {marginTop: 20}]}>
@@ -1109,20 +1019,6 @@ const FillByYourSelf = ({navigation}) => {
                       />
                     </Pressable>
                   )}
-                  {/* <TouchableWithoutFeedback
-                    onPress={() => {
-                      console.log('clicked on date of visit field input');
-                      setShowModal(true);
-                    }}>
-                    <TextInput
-                      style={[
-                        styles.phoneInputContainer,
-                        {paddingLeft: 12, color: '#71727A'},
-                      ]}
-                      value={convertDateFormat(date)}
-                      editable={false}
-                    />
-                  </TouchableWithoutFeedback> */}
                   {dateOfVisitErr && (
                     <Text style={styles.errorText}>{dateOfVisitErr}</Text>
                   )}
@@ -1161,29 +1057,13 @@ const FillByYourSelf = ({navigation}) => {
                               theme={{
                                 textSectionTitleColor: '#000',
                                 selectedDayBackgroundColor: '#B21E2B',
+                                textDayStyle: {marginVertical: 1}, // Adjust day spacing
                                 todayTextColor: '#FFBE65',
                                 calendarBackground: '#ECECEC',
                                 agendaKnobColor: '#B21E2B',
-                                calendarWidth: 430,
-                                borderRadius: 90,
                               }}
                               showScrollIndicator={true}
                             />
-                            {/* <DatePicker
-                          mode="calendar"
-                          minimumDate={startDate}
-                          maximumDate={endDate}
-                          onSelectedChange={handleDateChange}
-                          options={{
-                            backgroundColor: 'white',
-                            textHeaderColor: '#B21E2b',
-                            textDefaultColor: '#333',
-                            selectedTextColor: '#B21E2b',
-                            mainColor: 'white',
-                            textSecondaryColor: 'black',
-                            borderColor: '#B21E2B',
-                          }}
-                        /> */}
                           </View>
                         </TouchableWithoutFeedback>
                       </View>
@@ -1194,30 +1074,27 @@ const FillByYourSelf = ({navigation}) => {
                   <Text style={styles.label}>
                     Single or Group Visit <Text style={{color: 'red'}}>*</Text>
                   </Text>
-                  <View style={styles.radioButtonContainer}>
-                    {singleorgroup.map(optionss => {
-                      return (
-                        <TouchableOpacity
-                          key={optionss}
-                          style={styles.singleOptionContainer}
-                          onPress={() => {
-                            setSelectedSG(optionss);
-                            setSingleOrGroupErr(null);
-                          }}>
-                          <View style={styles.outerCircle}>
-                            {selectedSG === optionss ? (
-                              <View style={styles.innerCircle} />
-                            ) : null}
-                          </View>
-                          <Text style={{marginLeft: 10}}>{optionss}</Text>
-                        </TouchableOpacity>
-                      );
-                    })}
+                  <View style={styles.buttonGroup}>
+                    {singleorgroup.map(optionss => (
+                      <TouchableOpacity
+                        key={optionss}
+                        style={[
+                          styles.button,
+                          selectedSG === optionss && styles.activeButton,
+                        ]}
+                        onPress={() => {
+                          setSelectedSG(optionss);
+                          setSingleOrGroupErr(null);
+                        }}>
+                        <Text style={styles.buttonText}>{optionss}</Text>
+                      </TouchableOpacity>
+                    ))}
                   </View>
                   {singleOrGroupErr && (
                     <Text style={styles.errorText}>{singleOrGroupErr}</Text>
                   )}
                 </View>
+
                 {selectedSG === 'Group' ? (
                   <View>
                     <View style={styles.namecontainer}>
@@ -1305,26 +1182,22 @@ const FillByYourSelf = ({navigation}) => {
                       Is the Guest being invited to Home or Office
                       <Text style={{color: 'red'}}> *</Text>
                     </Text>
-                    <View style={styles.radioButtonContainer}>
-                      {homeoroffice.map(option => {
-                        return (
-                          <TouchableOpacity
-                            key={option}
-                            style={styles.singleOptionContainer}
-                            onPress={() => {
-                              setSelectedHO(option);
-                              setHomeOrOfficeErr(null);
-                            }}>
-                            <View style={styles.outerCircle}>
-                              {selectedHO === option ? (
-                                <View style={styles.innerCircle} />
-                              ) : null}
-                            </View>
-                            <Text style={{marginLeft: 10}}>{option}</Text>
-                          </TouchableOpacity>
-                        );
-                      })}
-                    </View>
+                    <View style={styles.buttonGroup}>
+                    {homeoroffice.map(optionss => (
+                      <TouchableOpacity
+                        key={optionss}
+                        style={[
+                          styles.button,
+                          selectedHO === optionss && styles.activeButton,
+                        ]}
+                        onPress={() => {
+                          setSelectedHO(optionss);
+                          setHomeOrOfficeErr(null);
+                        }}>
+                        <Text style={styles.buttonText}>{optionss}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
                     {homeOrOfficeErr && (
                       <Text style={styles.errorText}>{homeOrOfficeErr}</Text>
                     )}
@@ -1334,25 +1207,21 @@ const FillByYourSelf = ({navigation}) => {
                   <Text style={styles.label}>
                     Select Gender <Text style={{color: 'red'}}>*</Text>
                   </Text>
-                  <View style={styles.radioButtonContainer}>
-                    {options.map(option => {
-                      return (
-                        <TouchableOpacity
-                          key={option}
-                          style={styles.singleOptionContainer}
-                          onPress={() => {
-                            setSelectedGender(option);
-                            setGenderErr(null);
-                          }}>
-                          <View style={styles.outerCircle}>
-                            {selectedGender === option ? (
-                              <View style={styles.innerCircle} />
-                            ) : null}
-                          </View>
-                          <Text style={{marginLeft: 10}}>{option}</Text>
-                        </TouchableOpacity>
-                      );
-                    })}
+                  <View style={styles.buttonGroup}>
+                    {options.map(optionss => (
+                      <TouchableOpacity
+                        key={optionss}
+                        style={[
+                          styles.button,
+                          selectedGender === optionss && styles.activeButton,
+                        ]}
+                        onPress={() => {
+                          setSelectedGender(optionss);
+                          setGenderErr(null);
+                        }}>
+                        <Text style={styles.buttonText}>{optionss}</Text>
+                      </TouchableOpacity>
+                    ))}
                   </View>
                   {genderErr && (
                     <Text style={styles.errorText}>{genderErr}</Text>
@@ -1387,18 +1256,12 @@ const FillByYourSelf = ({navigation}) => {
                       </View>
                     </View>
                   </View>
-                  {/* <Button
-                  title={imageUri ? 'Update Image' : 'Select Image'}
-                  onPress={selectImage}
-                /> */}
-
                   {imageUri && (
                     <>
                       <Image
                         source={{uri: imageUri}}
                         style={{width: 100, height: 100}}
                       />
-                      {/* <Button title="Remove Image" onPress={removeImage} /> */}
                     </>
                   )}
                   <View style={styles.namecontainer}>
@@ -1512,7 +1375,6 @@ const FillByYourSelf = ({navigation}) => {
                               label="Roller Machine"
                               value="Roller Machine"
                             />
-                            {/* Add more vehicle types as needed */}
                           </Picker>
                           <TextInput
                             style={styles.vehicleinput}
@@ -1544,7 +1406,7 @@ const FillByYourSelf = ({navigation}) => {
                         )}
                       </>
                     ))}
-                    {addNewButtonVisibility && (
+                    {true && (
                       <TouchableOpacity
                         style={styles.addvehicle}
                         onPress={handleAddVehicle}>
@@ -1559,16 +1421,15 @@ const FillByYourSelf = ({navigation}) => {
                     )}
                   </View>
                 </View>
-
                 <View style={styles.footer}>
                   <TouchableOpacity
                     onPress={handleSubmit}
                     style={styles.submit}>
-                    <Text style={styles.buttonText}>Submit</Text>
+                    <Text style={{color:"white"}}>Submit</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={handleReset} style={styles.Cancel}>
+                  {/* <TouchableOpacity onPress={handleReset} style={styles.Cancel}>
                     <Text style={styles.buttonText1}>Cancel</Text>
-                  </TouchableOpacity>
+                  </TouchableOpacity> */}
                 </View>
               </View>
             </ScrollView>
@@ -1578,499 +1439,26 @@ const FillByYourSelf = ({navigation}) => {
     </>
   );
 };
-
-const mediumScreen = StyleSheet.create({
-  apprejBtnPosition: {
-    marginLeft: '30%',
-  },
-
-  ApproveActivityIndicatorContainer: {
-    top: 10,
-    backgroundColor: '#9FE2BF',
-    zIndex: 1,
-    borderRadius: 40,
-    width: 300,
-  },
-
-  RejectActivityIndicatorContainer: {
-    top: 10,
-    backgroundColor: 'pink',
-    zIndex: 1,
-    borderRadius: 40,
-    width: 300,
-  },
-
-  ActivityIndicator: {
-    top: -10,
-    right: -60,
-  },
-  ActivityIndicatorText: {
-    bottom: -20,
-    right: -90,
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  hidden: {
-    opacity: 0,
-    position: 'absolute',
-    zIndex: 0,
-  },
-
-  gradient: {
-    ...StyleSheet.absoluteFillObject,
-    position: 'absolute',
-    left: 0,
-    top: 0,
-  },
-
-  topGradient: {
-    top: 0,
-    height: '180%',
-  },
-
-  bottomGradient: {
-    bottom: 0,
-    height: '9%',
-    backgroundColor: '#F9ECDF',
-  },
-
-  BottomImage: {
-    flex: 1,
-    position: 'relative',
-    justifyContent: 'flex-end',
-    alignSelf: 'center',
-    width: 385,
-    height: 130, // height as a percentage of screen height
-    position: 'absolute',
-    bottom: -79,
-  },
-
-  BottomLogoImage: {
-    flex: 1,
-    position: 'relative',
-    justifyContent: 'flex-end',
-    alignSelf: 'center',
-    width: 145,
-    height: 95, // height as a percentage of screen height
-    position: 'absolute',
-    bottom: -76,
-  },
-
-  pageContainer: {
-    backgroundColor: 'white',
-  },
-
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F9ECDF',
-    width: 385,
-    height: 612,
-  },
-
-  title: {
-    fontSize: 25,
-    textAlign: 'center',
-    margin: 0,
-    color: '#6E260E',
-    fontWeight: 'bold',
-  },
-
-  title2: {
-    fontSize: 25,
-    textAlign: 'center',
-    marginBottom: 10,
-    color: '#6E260E',
-    fontWeight: 'bold',
-  },
-
-  code: {
-    fontSize: 35,
-    textAlign: 'center',
-    color: 'brown',
-  },
-
-  codeBackdrop: {
-    marginTop: 12,
-    backgroundColor: 'pink',
-    borderRadius: 20,
-    flexGrow: 0,
-    width: 170,
-    height: 50,
-  },
-
-  text: {
-    fontSize: 14,
-    textAlign: 'center',
-    color: '#6E260E',
-    marginBottom: 10,
-  },
-
-  middleText: {
-    fontSize: 17,
-    color: '#6E260E',
-    marginTop: 10,
-  },
-
-  BottomtextContainer: {
-    marginTop: 15,
-  },
-
-  Bottomtext: {
-    fontSize: 10,
-    textAlign: 'center',
-    color: '#6E260E',
-  },
-
-  dateOfArrivalText: {
-    color: '#6E260E',
-    fontWeight: 'bold',
-    alignSelf: 'center',
-    fontSize: 20,
-  },
-
-  qrCodeContainer: {
-    flex: 0.92,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  Buttons: {
-    marginTop: 100,
-  },
-});
-
-const smallScreen = StyleSheet.create({
-  apprejBtnPosition: {
-    marginLeft: '37%',
-  },
-
-  ApproveActivityIndicatorContainer: {
-    top: 10,
-    backgroundColor: '#9FE2BF',
-    zIndex: 1,
-    borderRadius: 40,
-    width: 350,
-  },
-
-  RejectActivityIndicatorContainer: {
-    top: 10,
-    backgroundColor: 'pink',
-    zIndex: 1,
-    borderRadius: 40,
-    width: 350,
-  },
-
-  ActivityIndicator: {
-    top: -10,
-    right: -60,
-  },
-
-  ActivityIndicatorText: {
-    bottom: -20,
-    right: -110,
-    fontSize: 17,
-    fontWeight: 'bold',
-  },
-
-  hidden: {
-    opacity: 0,
-    position: 'absolute',
-    zIndex: 0,
-  },
-
-  topGradient: {
-    top: 0,
-    height: '180%',
-  },
-
-  bottomGradient: {
-    bottom: 0,
-    height: '9%',
-    backgroundColor: '#F9ECDF',
-  },
-
-  BottomImage: {
-    flex: 1,
-    position: 'relative',
-    justifyContent: 'flex-end',
-    alignSelf: 'center',
-    width: 440,
-    height: 90, // height as a percentage of screen height
-    position: 'absolute',
-    bottom: -35,
-  },
-
-  BottomLogoImage: {},
-
-  gradient: {
-    ...StyleSheet.absoluteFillObject,
-    ...StyleSheet.absoluteFillObject,
-    position: 'absolute',
-    left: 0,
-    top: 0,
-  },
-
-  pageContainer: {
-    backgroundColor: 'white',
-  },
-
-  container: {
-    flex: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F9ECDF',
-    width: 430,
-    height: 570,
-  },
-
-  title: {
-    fontSize: 25,
-    textAlign: 'center',
-    margin: 0,
-    color: '#6E260E',
-    fontWeight: 'bold',
-  },
-
-  title2: {
-    fontSize: 25,
-    textAlign: 'center',
-    marginBottom: 5,
-    color: '#6E260E',
-    fontWeight: 'bold',
-  },
-
-  code: {
-    fontSize: 35,
-    textAlign: 'center',
-    color: 'brown',
-  },
-
-  codeBackdrop: {
-    marginTop: 12,
-    backgroundColor: 'pink',
-    borderRadius: 20,
-    flexGrow: 0,
-    width: 170,
-    height: 50,
-  },
-
-  text: {
-    fontSize: 14,
-    textAlign: 'center',
-    color: '#6E260E',
-    marginBottom: 10,
-  },
-
-  middleText: {
-    fontSize: 17,
-    color: '#6E260E',
-    marginTop: 10,
-  },
-
-  BottomtextContainer: {
-    marginTop: 15,
-  },
-
-  Bottomtext: {
-    fontSize: 10,
-    textAlign: 'center',
-    color: '#6E260E',
-  },
-
-  dateOfArrivalText: {
-    color: '#6E260E',
-    fontWeight: 'bold',
-    alignSelf: 'center',
-    fontSize: 20,
-  },
-
-  qrCodeContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  Buttons: {
-    marginTop: 100,
-  },
-});
-
-const normalScreen = StyleSheet.create({
-  apprejBtnPosition: {
-    marginLeft: '40%',
-  },
-  ApproveActivityIndicatorContainer: {
-    top: 10,
-    backgroundColor: '#9FE2BF',
-    zIndex: 1,
-    borderRadius: 40,
-    width: 350,
-    right: -10,
-  },
-
-  RejectActivityIndicatorContainer: {
-    top: 10,
-    backgroundColor: 'pink',
-    zIndex: 1,
-    borderRadius: 40,
-    width: 350,
-    right: -10,
-  },
-
-  ActivityIndicator: {
-    top: -10,
-    right: -60,
-  },
-
-  ActivityIndicatorText: {
-    bottom: -20,
-    right: -100,
-    fontSize: 15,
-    fontWeight: 'bold',
-  },
-
-  hidden: {
-    opacity: 0,
-    position: 'absolute',
-    zIndex: 0,
-  },
-
-  gradient: {
-    ...StyleSheet.absoluteFillObject,
-    position: 'absolute',
-    left: 0,
-    top: 0,
-  },
-
-  topGradient: {
-    top: 0,
-    height: '180%',
-  },
-
-  bottomGradient: {
-    bottom: 0,
-    height: '10%',
-    backgroundColor: '#F9ECDF',
-  },
-
-  pageContainer: {
-    backgroundColor: 'white',
-  },
-
-  BottomLogoImage: {
-    flex: 1,
-    position: 'relative',
-    justifyContent: 'flex-end',
-    alignSelf: 'center',
-    width: 170,
-    height: 120, // height as a percentage of screen height
-    position: 'absolute',
-    bottom: -40,
-    alignItems: 'center',
-  },
-
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F9ECDF',
-    width: 450,
-    height: 780,
-  },
-
-  title: {
-    fontSize: 25,
-    textAlign: 'center',
-    margin: 0,
-    color: '#6E260E',
-    fontWeight: 'bold',
-  },
-
-  title2: {
-    fontSize: 25,
-    textAlign: 'center',
-    marginBottom: 10,
-    color: '#6E260E',
-    fontWeight: 'bold',
-  },
-
-  code: {
-    fontSize: 35,
-    textAlign: 'center',
-    color: 'brown',
-  },
-
-  codeBackdrop: {
-    marginTop: 12,
-    backgroundColor: 'pink',
-    borderRadius: 20,
-    flexGrow: 0,
-    width: 170,
-    height: 50,
-  },
-
-  text: {
-    fontSize: 14,
-    textAlign: 'center',
-    color: '#6E260E',
-    marginBottom: 10,
-  },
-
-  middleText: {
-    fontSize: 17,
-    color: '#6E260E',
-    marginTop: 10,
-  },
-
-  BottomtextContainer: {
-    marginTop: 19,
-  },
-
-  Bottomtext: {
-    fontSize: 18,
-    textAlign: 'center',
-    color: '#6E260E',
-  },
-
-  dateOfArrivalText: {
-    color: '#6E260E',
-    fontWeight: 'bold',
-    alignSelf: 'center',
-    fontSize: 20,
-  },
-
-  qrCodeContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  Buttons: {
-    marginTop: 100,
-  },
-
-  BottomImage: {
-    flex: 1,
-    position: 'relative',
-    justifyContent: 'flex-end',
-    alignSelf: 'center',
-    width: 500,
-    height: 200, // height as a percentage of screen height
-    position: 'absolute',
-    bottom: -78,
-  },
-});
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: 'white',
     flexShrink: 0,
-    justifyContent: 'center',
-    paddingLeft: 12,
-    zIndex: 1,
+    width: '90%',
+    alignContent: 'center',
+    marginTop: '5%',
+    marginBottom: '5%',
+    marginHorizontal: '5%',
+  },
+  card: {
+    backgroundColor: '#fff',
+    padding: "4%", 
+    borderRadius: 8,
+    shadowColor: 'black',
+    shadowOpacity: 0.1,
+    shadowOffset: {width: 0, height: 1},
+    shadowRadius: 5,
+    elevation: 2,
   },
   vehicle: {
     flex: 1,
@@ -2093,17 +1481,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginVertical: 5,
-    padding: 10,
+    padding: 1,
     borderRadius: 10,
-    borderColor: '#B21E2B',
+    borderColor: '#F5F5F5',
     borderWidth: 1,
     height: 50,
-    marginHorizontal: 20,
+    marginHorizontal: 2,
+
   },
   picker: {
     flex: 1,
     height: 40,
-    paddingRight: 10,
+    paddingRight:0,
+    fontSize: 8,
   },
   vehicleinput: {
     flex: 1,
@@ -2117,21 +1507,10 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
   },
-  header: {
-    fontFamily: 'Inter',
-    fontSize: 16,
-    fontStyle: 'normal',
-    fontWeight: 'bold',
-    color: '#1F2024',
-    marginBottom: 24,
-  },
   namecontainer: {
     flex: 1,
     gap: 16,
     marginBottom: 16,
-  },
-  row: {
-    flexDirection: 'row',
   },
   dropdown: {
     height: 48,
@@ -2142,7 +1521,7 @@ const styles = StyleSheet.create({
     paddingRight: 7,
     alignItems: 'center',
     borderStyle: 'solid',
-    borderColor: '#B21E2B',
+    borderColor: '#F5F5F5',
     borderWidth: 1.5,
     borderRadius: 12,
     paddingHorizontal: 8,
@@ -2163,15 +1542,35 @@ const styles = StyleSheet.create({
     color: '#2F3036',
     fontWeight: '500',
   },
+  activeButton: {
+    backgroundColor: '#E8B931',
+    borderColor: '#E8B931',
+  },
   phoneInputContainer: {
     height: 50,
     width: '95%',
     borderStyle: 'solid',
-    borderColor: '#B21E2B',
-    borderWidth: 1.5,
+    borderColor: '#F5F5F5',
+    borderWidth: 1.0,
     borderRadius: 12,
     flexDirection: 'row',
     alignItems: 'center',
+    shadowColor:'black'
+  },
+  buttonGroup: {
+    flexDirection: 'row',
+    marginBottom: 10,
+
+  },
+  button: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 12,
+    borderRadius: 5,
+    marginHorizontal: 5,
+    alignItems: 'center',
+    backgroundColor: '#fff',
   },
   footer: {
     flex: 1,
@@ -2189,34 +1588,16 @@ const styles = StyleSheet.create({
   submit: {
     height: 50,
     width: 110,
-    backgroundColor: '#B21E2B',
+    backgroundColor: '#C00F0C',
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  Cancel: {
-    height: 50,
-    width: 110,
-    borderWidth: 1,
-    borderStyle: 'solid',
-    borderColor: '#B21e2B',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
+    marginBottom: '50%',
   },
   buttonText: {
-    color: 'white',
-    fontSize: 14,
-    fontStyle: 'normal',
-    fontFamily: 'Inter',
-    fontWeight: '700',
-  },
-  buttonText1: {
-    color: '#B21E2B',
+    color: 'black',
     fontSize: 14,
     fontStyle: 'normal',
     fontFamily: 'Inter',
@@ -2245,17 +1626,14 @@ const styles = StyleSheet.create({
     color: 'red',
     marginBottom: 5,
   },
-  placeholderStyle: {
-    fontSize: 16,
-  },
 
   placeholderStyle: {
-    fontSize: 16,
+    fontSize: 12,
   },
   selectedTextStyle: {
     flex: 1,
 
-    fontSize: 16,
+    fontSize: 13,
   },
 
   inputSearchStyle: {
@@ -2270,10 +1648,9 @@ const styles = StyleSheet.create({
   modalView: {
     margin: 20,
     backgroundColor: '#ECECEC',
-    borderRadius: 30,
-    width: '100%',
+    borderRadius: 10,
+    width: '96%',
     height: '60%',
-    padding: 9,
     alignItems: 'center',
     elevation: 5,
     borderColor: '#B21E2B',
@@ -2318,7 +1695,7 @@ const styles = StyleSheet.create({
   input: {
     alignItems: 'center',
     borderStyle: 'solid',
-    borderColor: '#B21E2B',
+    borderColor: '#F5F5F5',
     borderWidth: 1.5,
     borderRadius: 12,
     paddingLeft: 10,
@@ -2327,33 +1704,5 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 15,
   },
-
-  singleOptionContainer: {
-    flexDirection: 'row', // ensure the circle and text are in a row
-    alignItems: 'center', // vertically center align the circle and text
-    marginRight: 60, // add space between the buttons
-    marginVertical: 10, // add vertical margin for spacing above and below buttons
-  },
-  outerCircle: {
-    width: 20,
-    height: 20,
-    borderRadius: 15,
-    borderWidth: 1.5,
-    borderColor: '#B21E2B',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'white',
-  },
-  innerCircle: {
-    width: 12,
-    height: 12,
-    borderRadius: 11,
-    backgroundColor: '#B21E2B',
-  },
-  radioButtonContainer: {
-    flexDirection: 'row',
-    alignSelf: 'auto',
-  },
 });
-
 export default FillByYourSelf;

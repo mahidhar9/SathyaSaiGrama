@@ -465,60 +465,6 @@ const Login = ({navigation}) => {
                 {errors.email?.type === 'pattern' && (
                   <Text style={styles.textError}>Enter valid email</Text>
                 )}
-
-                {/* <View
-                  style={[
-                    styles.passBorder,
-                    focusedInput === 'password' && styles.inputFocused,
-                  ]}>
-                  <Controller
-                    name="password"
-                    control={control}
-                    render={({field: {onChange, value}}) => (
-                      <TextInput
-                        placeholder="Password"
-                        style={styles.inputBox}
-                        value={value}
-                        selectionColor="#B21E2B"
-                        onFocus={() => setFocusedInput('password')}
-                        secureTextEntry={!showPassword}
-                        onChangeText={value => onChange(value.trim())}
-                      />
-                    )}
-                    rules={{
-                      required: true,
-                      minLength: 6,
-                    }}
-                  />
-                  {showPassword === false ? (
-                    <TouchableOpacity
-                      onPress={() => {
-                        setShowPassword(!showPassword);
-                      }}>
-                      <Image
-                        source={require('../assets/eyestrike.png')}
-                        style={{width: 16, height: 16}}
-                      />
-                    </TouchableOpacity>
-                  ) : (
-                    <TouchableOpacity
-                      onPress={() => setShowPassword(!showPassword)}>
-                      <Image
-                        source={require('../assets/eye.png')}
-                        style={{width: 16, height: 16}}
-                      />
-                    </TouchableOpacity>
-                  )}
-                </View>
-
-                {errors.password?.type === 'required' && (
-                  <Text style={styles.textError}>Password is required</Text>
-                )}
-                {errors.password?.type === 'minLength' && (
-                  <Text style={styles.textError}>
-                    Password must be 6 characters long
-                  </Text>
-                )} */}
                 <View
                   style={[
                     styles.passBorder,
@@ -544,10 +490,6 @@ const Login = ({navigation}) => {
                     )}
                     rules={{
                       required: true,
-                      // minLength: 8,
-                      //         maxLength:20,
-                      // pattern:
-                      //           /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/,
                     }}
                   />
                   {showPassword === false ? (
@@ -570,11 +512,6 @@ const Login = ({navigation}) => {
                     </TouchableOpacity>
                   )}
                 </View>
-                {/* {errors.password?.type === 'pattern' && (
-              <Text style={styles.errorMessage}>
-          Password must be at least 8 characters long, contains both upper and lower case letters, includes at least one number, and has at least one special character<Text style={styles.errMes} >(e.g., !@#$%^&*).</Text>
-        </Text> 
-      )}*/}
                 {errors.password?.type === 'required' && (
                   <Text style={styles.textError}>Password is required</Text>
                 )}
@@ -682,11 +619,11 @@ const styles = StyleSheet.create({
   },
   inputBox: {
     color: '#1F2024',
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    paddingEnd: 4,
+    paddingHorizontal: "8%",
+    paddingVertical: "7%",
+    paddingEnd: "2%",
     alignItems: 'center',
-    height: 47,
+    height: "10%",
     width: '93%',
     fontFamily: 'Inter',
     fontSize: 14,
@@ -704,7 +641,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingEnd: 18,
-    height: 48,
+    height: "11%",
     alignSelf: 'center',
     marginBottom: 8,
   },
@@ -721,19 +658,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: -1,
   },
   register: {
-    width: 216,
-    backgroundColor: '#B21E2B',
+    width: "60%",
+    backgroundColor: '#C00F0C',
     paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingHorizontal:"18%",
     height: 48,
     justifyContent: 'center',
     borderRadius: 12,
     alignItems: 'center',
-    gap: 8,
+    //gap: 8,
     flexShrink: 0,
-    marginTop: 40,
+    marginTop: "10%",
     alignSelf: 'center',
-    marginBottom: 30,
+    marginBottom: "10%",
   },
   registerTitle: {
     fontSize: 12,
@@ -741,8 +678,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontFamily: 'Inter',
     fontStyle: 'normal',
-    width: 33,
-    height: 15,
+    width:"50%",
+    height:"90%",
+
   },
   login: {
     color: '#000',
@@ -751,8 +689,8 @@ const styles = StyleSheet.create({
     fontStyle: 'normal',
     fontWeight: '900',
     letterSpacing: 0.24,
-    width: 124,
-    height: 29,
+    width: "50%",
+    height: "8%",
     marginBottom: 24,
   },
   textError: {
@@ -761,7 +699,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   forgotPassword: {
-    color: '#B21E2B',
+    color: '#C00F0C',
     fontFamily: 'Inter',
     fontSize: 12,
     fontStyle: 'normal',
@@ -772,25 +710,5 @@ const styles = StyleSheet.create({
 
   dialogTitle: {
     color: 'black',
-  },
-  errorMessage: {
-    color: '#2F3036',
-    fontFamily: 'Inter',
-    fontSize: 12,
-    fontStyle: 'normal',
-    fontWeight: '600',
-    alignSelf: 'stretch',
-    marginStart: 6,
-    marginBottom: 10,
-  },
-  errMes: {
-    color: '#B21E2B',
-    fontFamily: 'Inter',
-    fontSize: 12,
-    fontStyle: 'normal',
-    fontWeight: '600',
-    alignSelf: 'stretch',
-    marginStart: 6,
-    marginBottom: 10,
   },
 });
