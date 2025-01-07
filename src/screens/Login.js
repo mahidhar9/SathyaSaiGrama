@@ -30,7 +30,8 @@ import DotsBlinkingLoaderEllipsis from '../components/DotsBlinkingLoaderEllipsis
 const Login = ({navigation}) => {
   const screenWidth = Dimensions.get('window').width;
   const [loading, setLoading] = useState(false);
-  const [dotsBlinkingLoaderEllipsis,setDotsBlinkingLoaderEllipsis] =useState(false);
+  const [dotsBlinkingLoaderEllipsis, setDotsBlinkingLoaderEllipsis] =
+    useState(false);
   const {
     control,
     handleSubmit,
@@ -53,7 +54,7 @@ const Login = ({navigation}) => {
     testResident,
     setTestResident,
     departmentIds,
-    setDepartmentIds
+    setDepartmentIds,
   } = useContext(UserContext);
   let residentLocalVar = resident;
   let employeeLocalVar = employee;
@@ -310,26 +311,25 @@ const Login = ({navigation}) => {
     );
     console.log('Whether user exis or not in login: ', res);
     if (res.code === 3000) {
-
       setDotsBlinkingLoaderEllipsis(true);
-    
-    await isResident(res.data[0].ID);
-    await isEmployee(res.data[0].ID);
-    console.log(
-      'resident || employee boolean',
-      residentLocalVar,
-      employeeLocalVar,
-    );
-    await isTestResident(res.data[0].ID);
-    if (res && res.data && (residentLocalVar || employeeLocalVar)) {
-      try {
-        fetchDataFromOffice(res.data[0].ID);
-        const userCredential = await signInWithEmailAndPassword(
-          auth,
-          userCred.email.toLowerCase().trim(),
-          userCred.password,
-        );
-        const user = userCredential.user;
+
+      await isResident(res.data[0].ID);
+      await isEmployee(res.data[0].ID);
+      console.log(
+        'resident || employee boolean',
+        residentLocalVar,
+        employeeLocalVar,
+      );
+      await isTestResident(res.data[0].ID);
+      if (res && res.data && (residentLocalVar || employeeLocalVar)) {
+        try {
+          fetchDataFromOffice(res.data[0].ID);
+          const userCredential = await signInWithEmailAndPassword(
+            auth,
+            userCred.email.toLowerCase().trim(),
+            userCred.password,
+          );
+          const user = userCredential.user;
 
           if (user.emailVerified) {
             setL1ID(res.data[0].ID);
@@ -412,184 +412,195 @@ const Login = ({navigation}) => {
 
   return (
     <>
-      {loading ? dotsBlinkingLoaderEllipsis?(<DotsBlinkingLoaderEllipsis />): (
-        <ActivityIndicator
-          size="large"
-          color="#752A26"
-          style={styles.loadingContainer}
-        />
-        
+      {loading ? (
+        dotsBlinkingLoaderEllipsis ? (
+          <DotsBlinkingLoaderEllipsis />
+        ) : (
+          <ActivityIndicator
+            size="large"
+            color="#752A26"
+            style={styles.loadingContainer}
+          />
+        )
       ) : (
         <>
-          <View style={styles.container}>
-          <ScrollView>
-            <KeyboardAvoidingView>
-              <Image
-                source={require('../../src/assets/aashram.png')}
-                resizeMode="cover"
-                style={{
-                  width: '100%',
-                  height: 300,
-                  marginTop: 0,
-                }}
-              />
-             
-              <View style={[styles.head]}>
-                <Text style={styles.login}>Welcome!</Text>
-                <View
-                  style={[
-                    styles.email,
-                    focusedInput === 'email' && styles.inputFocused,
-                  ]}>
-                  <Controller
-                    name="email"
-                    control={control}
-                    render={({field: {onChange, value}}) => (
-                      <TextInput
-                        placeholder="Email Address"
-                        value={value}
-                        selectionColor="#B21E2B"
-                        onFocus={() => setFocusedInput('email')}
-                        onChangeText={value =>
-                          onChange(value.toLowerCase().trim())
-                        }
-                        autoCapitalize="none"
-                        style={styles.inputBox}
-                      />
-                    )}
-                    rules={{required: true, pattern: /^\S+@\S+$/i}}
-                  />
-                </View>
-                {errors.email?.type === 'required' && (
-                  <Text style={styles.textError}>Email is required</Text>
-                )}
-                {errors.email?.type === 'pattern' && (
-                  <Text style={styles.textError}>Enter valid email</Text>
-                )}
-                <View
-                  style={[
-                    styles.passBorder,
-                    focusedInput === 'password' && styles.inputFocused,
-                  ]}>
-                  <Controller
-                    name="password"
-                    control={control}
-                    render={({field: {onChange, value}}) => (
-                      <TextInput
-                        placeholder="Password"
-                        style={styles.inputBox}
-                        value={value}
-                        selectionColor="#71727A"
-                        onFocus={() => setFocusedInput('password')}
-                        secureTextEntry={!showPassword}
-                        onChangeText={value => {
-                          const trimmedValue = value.trim();
-                          onChange(trimmedValue);
-                          setPassword(trimmedValue);
-                        }}
-                      />
-                    )}
-                    rules={{
-                      required: true,
+          <ImageBackground
+            source={require('../assets/vector-2.png')}
+            style={styles.backgroundImage}
+            resizeMode="cover">
+            <View style={styles.container}>
+              <ScrollView>
+                <KeyboardAvoidingView>
+                  <Image
+                    source={require('../../src/assets/aashram.png')}
+                    resizeMode="cover"
+                    style={{
+                      width: '100%',
+                      height: 250,
+                      marginTop: 0,
                     }}
                   />
-                  {showPassword === false ? (
-                    <TouchableOpacity
-                      onPress={() => {
-                        setShowPassword(!showPassword);
-                      }}>
-                      <Image
-                        source={require('../assets/eyestrike.png')}
-                        style={{width: 16, height: 16}}
-                      />
-                    </TouchableOpacity>
-                  ) : (
-                    <TouchableOpacity
-                      onPress={() => setShowPassword(!showPassword)}>
-                      <Image
-                        source={require('../assets/eye.png')}
-                        style={{width: 16, height: 16}}
-                      />
-                    </TouchableOpacity>
-                  )}
-                </View>
-                {errors.password?.type === 'required' && (
-                  <Text style={styles.textError}>Password is required</Text>
-                )}
 
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('ForgotPassword')}>
-                  <Text style={styles.forgotPassword}>Forgot password?</Text>
-                </TouchableOpacity>
+                  <View style={[styles.head]}>
+                    <Text style={styles.login}>Login Details</Text>
+                    <View
+                      style={[
+                        styles.email,
+                        focusedInput === 'email' && styles.inputFocused,
+                      ]}>
+                      <Controller
+                        name="email"
+                        control={control}
+                        render={({field: {onChange, value}}) => (
+                          <TextInput
+                            placeholder="Email Address"
+                            value={value}
+                            selectionColor="#B21E2B"
+                            onFocus={() => setFocusedInput('email')}
+                            onChangeText={value =>
+                              onChange(value.toLowerCase().trim())
+                            }
+                            autoCapitalize="none"
+                            style={styles.inputBox}
+                          />
+                        )}
+                        rules={{required: true, pattern: /^\S+@\S+$/i}}
+                      />
+                    </View>
+                    {errors.email?.type === 'required' && (
+                      <Text style={styles.textError}>Email is required</Text>
+                    )}
+                    {errors.email?.type === 'pattern' && (
+                      <Text style={styles.textError}>Enter valid email</Text>
+                    )}
+                    <View
+                      style={[
+                        styles.passBorder,
+                        focusedInput === 'password' && styles.inputFocused,
+                      ]}>
+                      <Controller
+                        name="password"
+                        control={control}
+                        render={({field: {onChange, value}}) => (
+                          <TextInput
+                            placeholder="Password"
+                            style={styles.inputBox}
+                            value={value}
+                            selectionColor="#71727A"
+                            onFocus={() => setFocusedInput('password')}
+                            secureTextEntry={!showPassword}
+                            onChangeText={value => {
+                              const trimmedValue = value.trim();
+                              onChange(trimmedValue);
+                              setPassword(trimmedValue);
+                            }}
+                          />
+                        )}
+                        rules={{
+                          required: true,
+                        }}
+                      />
+                      {showPassword === false ? (
+                        <TouchableOpacity
+                          onPress={() => {
+                            setShowPassword(!showPassword);
+                          }}>
+                          <Image
+                            source={require('../assets/eyestrike.png')}
+                            style={{width: 16, height: 16}}
+                          />
+                        </TouchableOpacity>
+                      ) : (
+                        <TouchableOpacity
+                          onPress={() => setShowPassword(!showPassword)}>
+                          <Image
+                            source={require('../assets/eye.png')}
+                            style={{width: 16, height: 16}}
+                          />
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                    {errors.password?.type === 'required' && (
+                      <Text style={styles.textError}>Password is required</Text>
+                    )}
 
-                <TouchableOpacity
-                  onPress={handleSubmit(handleLoginForm)}
-                  // disabled={!isValidPassword()}
-                  style={[styles.register]}>
-                  {/* style={styles.register}> */}
-                  <Text style={styles.registerTitle}>Login</Text>
-                </TouchableOpacity>
-                <View style={styles.redirect}>
-                  <Text
-                    style={{
-                      width: 154,
-                      color: '#71727A',
-                      textAlign: 'right',
-                      marginEnd: 4,
-                      fontFamily: 'Inter',
-                      fontSize: 12,
-                      flexShrink: 0,
-                      fontStyle: 'normal',
-                      fontWeight: '600',
-                      letterSpacing: 0.12,
-                    }}>
-                    Don't have an account?
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => {
-                      navigation.navigate('Register');
-                    }}>
-                    <Text
-                      style={{
-                        color: '#C00F0C',
-                        width: 124,
-                        fontFamily: 'Inter',
-                        fontSize: 12,
-                        flexShrink: 0,
-                        fontStyle: 'normal',
-                        fontWeight: '600',
-                        letterSpacing: 0.12,
-                      }}>
-                      Register now
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-              
-            </KeyboardAvoidingView>
-          </ScrollView>
-          <Dialog.Container
-            visible={DialogVisible}
-            contentStyle={{borderRadius: 10}}>
-            <Dialog.Title style={styles.dialogTitle}>
-              Unable to find user
-            </Dialog.Title>
-            <Dialog.Description style={{color: '#2F3036'}}>
-              Please check your email or password and try again. Otherwise
-              please register.
-            </Dialog.Description>
-            <Dialog.Button
-              style={{color: '#B21E2B'}}
-              label="Register"
-              onPress={onPressRegister}
-            />
-            <Dialog.Button
-              style={{color: 'black'}}
-              label="Cancel"
-              onPress={onPressOk}
-            />
-          </Dialog.Container>
-          </View>
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate('ForgotPassword')}>
+                      <Text style={styles.forgotPassword}>
+                        Forgot password?
+                      </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      onPress={handleSubmit(handleLoginForm)}
+                      // disabled={!isValidPassword()}
+                      style={[styles.register]}>
+                      {/* style={styles.register}> */}
+                      <Text style={styles.registerTitle}>Login</Text>
+                    </TouchableOpacity>
+                    <View style={styles.redirect}>
+                      <Text
+                        style={{
+                          width: 154,
+                          color: '#71727A',
+                          textAlign: 'right',
+                          marginEnd: 4,
+                          fontFamily: 'Inter',
+                          fontSize: 12,
+                          flexShrink: 0,
+                          fontStyle: 'normal',
+                          fontWeight: '600',
+                          letterSpacing: 0.12,
+                        }}>
+                        Don't have an account?
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => {
+                          navigation.navigate('Register');
+                        }}>
+                        <Text
+                          style={{
+                            color: '#C00F0C',
+                            width: 124,
+                            fontFamily: 'Inter',
+                            fontSize: 12,
+                            flexShrink: 0,
+                            fontStyle: 'normal',
+                            fontWeight: '600',
+                            letterSpacing: 0.12,
+                          }}>
+                          Register now
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </KeyboardAvoidingView>
+              </ScrollView>
+              {/* <Image 
+                      source={require('../assets/vector.png')}></Image> */}
+              <Dialog.Container
+                visible={DialogVisible}
+                contentStyle={{borderRadius: 10}}>
+                <Dialog.Title style={styles.dialogTitle}>
+                  Unable to find user
+                </Dialog.Title>
+                <Dialog.Description style={{color: '#2F3036'}}>
+                  Please check your email or password and try again. Otherwise
+                  please register.
+                </Dialog.Description>
+                <Dialog.Button
+                  style={{color: '#B21E2B'}}
+                  label="Register"
+                  onPress={onPressRegister}
+                />
+                <Dialog.Button
+                  style={{color: 'black'}}
+                  label="Cancel"
+                  onPress={onPressOk}
+                />
+              </Dialog.Container>
+            </View>
+          </ImageBackground>
         </>
       )}
     </>
@@ -606,13 +617,13 @@ const styles = StyleSheet.create({
   },
   container: {
     justifyContent: 'center',
-    backgroundColor: 'white',
-    height:'100%',
+    backgroundColor: 'rgba(0, 0, 0, 0)',
+    height: '100%',
     flex: 1,
   },
   head: {
     paddingHorizontal: 24,
-    paddingVertical: 40,
+    paddingVertical: 15,
     flexDirection: 'column',
   },
   redirect: {
@@ -620,12 +631,13 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 10,
     justifyContent: 'center',
+    zIndex: 1,
   },
   inputBox: {
     color: 'red',
-    paddingHorizontal: "8%",
-    paddingVertical: "4%",
-    paddingEnd: "2%",
+    paddingHorizontal: '8%',
+    paddingVertical: '3%',
+    paddingEnd: '2%',
     alignItems: 'center',
     //height: 50,
     width: '93%',
@@ -645,7 +657,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingEnd: 18,
-    height: "11%",
+    height: '12%',
     alignSelf: 'center',
     marginBottom: 8,
   },
@@ -662,19 +674,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: -1,
   },
   register: {
-    width: "60%",
+    width: '60%',
     backgroundColor: '#C00F0C',
     paddingVertical: 12,
-    paddingHorizontal:"18%",
+    paddingHorizontal: '18%',
     height: 48,
     justifyContent: 'center',
     borderRadius: 12,
     alignItems: 'center',
     //gap: 8,
     flexShrink: 0,
-    marginTop: "8%",
+    marginTop: '8%',
     alignSelf: 'center',
-    marginBottom: "8%",
+    marginBottom: '8%',
   },
   registerTitle: {
     fontSize: 12,
@@ -682,19 +694,18 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontFamily: 'Inter',
     fontStyle: 'normal',
-    width:"50%",
-    height:"90%",
-
+    width: '50%',
+    height: '90%',
   },
   login: {
     color: '#000',
-    fontFamily: 'Inter',
-    fontSize: 24,
+    fontFamily: 'Outfit',
+    fontSize: 20,
     fontStyle: 'normal',
     fontWeight: '900',
     letterSpacing: 0.24,
-    width: "50%",
-    height: "8%",
+    width: '50%',
+    height: '8%',
     marginBottom: 24,
   },
   textError: {
@@ -714,5 +725,14 @@ const styles = StyleSheet.create({
 
   dialogTitle: {
     color: 'black',
+  },
+  backgroundImage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
+    width: '100%',
+    height: '100%',
   },
 });
