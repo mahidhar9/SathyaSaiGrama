@@ -26,5 +26,19 @@
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
 	<string>1:142974661728:ios:a08d6f153b073fcb8f7f05</string>
+	<key>CFBundleIconName</key>
+	<string>AppIcon</string>
+	<key>CFBundleIcons</key>
+	<dict>
+    	<key>CFBundlePrimaryIcon</key>
+    	<dict>
+        	<key>CFBundleIconFiles</key>
+        	<array>
+            	<string>AppIcon</string>
+        	</array>
+        	<key>UIPrerenderedIcon</key>
+        	<false/>
+    	</dict>
+	</dict>
 </dict>
 </plist>
