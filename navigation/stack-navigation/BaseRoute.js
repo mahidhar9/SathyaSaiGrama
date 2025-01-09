@@ -13,7 +13,7 @@ import UserContext from '../../context/UserContext';
 import VerificationNotice from '../../src/auth/VerificationNotice';
 import messaging from '@react-native-firebase/messaging';
 import * as RootNavigation from './RootNavigation';
-import PushNotification from 'react-native-push-notification';
+// import PushNotification from 'react-native-push-notification';
 import {
   DATABASE_ID,
   COLLECTION_ID,
@@ -172,6 +172,15 @@ const BaseRoute = () => {
 
   const Stack = createNativeStackNavigator();
 
+  //New Code added for push notification
+  // async function requestUserPermission() {
+  //   const authorizationStatus = await messaging().requestPermission();
+
+  //   if (authorizationStatus) {
+  //     console.log('Permission status:', authorizationStatus);
+  //   }
+  // }
+
   //To get Apprwrite token
   const getAppWriteToken = async () => {
     try {
@@ -204,16 +213,16 @@ const BaseRoute = () => {
   }, []);
 
   // Handle foreground notifications
-  useEffect(() => {
-    const unsubscribe = messaging().onMessage(async remoteMessage => {
-      console.log('Foreground notification received:', remoteMessage);
-      PushNotification.localNotification({
-        title: remoteMessage.notification?.title || 'Notification',
-        message: remoteMessage.notification?.body || 'You have a new message',
-      });
-    });
-    return unsubscribe;
-  }, []);
+  // useEffect(() => {
+  //   const unsubscribe = messaging().onMessage(async remoteMessage => {
+  //     console.log('Foreground notification received:', remoteMessage);
+  //     PushNotification.localNotification({
+  //       title: remoteMessage.notification?.title || 'Notification',
+  //       message: remoteMessage.notification?.body || 'You have a new message',
+  //     });
+  //   });
+  //   return unsubscribe;
+  // }, []);
 
   // useEffect(() => {
   //   const checkUserExist = async () => {
