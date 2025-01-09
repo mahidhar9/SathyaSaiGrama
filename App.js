@@ -1,10 +1,12 @@
 import BaseRoute from './navigation/stack-navigation/BaseRoute';
 import UserContext from './context/UserContext';
-import { useContext, useEffect, useState } from 'react';
-import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
+import {useContext, useEffect, useState} from 'react';
+import {DefaultTheme, Provider as PaperProvider} from 'react-native-paper';
 import NetInfo from '@react-native-community/netinfo';
 
-import { StyleSheet } from 'react-native';
+import {StyleSheet} from 'react-native';
+
+import {NativeModules} from 'react-native';
 
 import {
   DATABASE_ID,
@@ -13,14 +15,14 @@ import {
   APPWRITE_API_KEY,
 } from '@env';
 
-import { ActivityIndicator, Alert } from 'react-native';
-import { AuthContext, AuthProvider } from './src/auth/AuthProvider';
+import {ActivityIndicator, Alert} from 'react-native';
+import {AuthContext, AuthProvider} from './src/auth/AuthProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SplashScreen from './src/screens/SplashScreen';
-import { getDeviceToken } from './src/utils/notificationService';
+import {getDeviceToken} from './src/utils/notificationService';
 import NoNetworkScreen from './src/screens/NoNetworkScreen';
 import CodePush from 'react-native-code-push';
-import { getDataWithInt, getDataWithTwoInt } from './src/components/ApiRequest';
+import {getDataWithInt, getDataWithTwoInt} from './src/components/ApiRequest';
 
 const lightTheme = {
   ...DefaultTheme,
@@ -34,8 +36,10 @@ const lightTheme = {
 
 const App = () => {
   const [isNetworkAvailable, setIsNetworkAvailable] = useState(true);
-  const { user } = useContext(AuthContext);
-  
+  const {user} = useContext(AuthContext);
+
+  console.log('NativeModules:', NativeModules);
+
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
       setIsNetworkAvailable(state.isConnected);
@@ -79,18 +83,16 @@ const App = () => {
             'X-Appwrite-Project': APPWRITE_FUNCTION_PROJECT_ID,
             'X-Appwrite-Key': APPWRITE_API_KEY,
           },
-        }
+        },
       );
       res = await res.json();
-      console.log(res.documents[0].Token)
+      console.log(res.documents[0].Token);
       await setAccessToken(res.documents[0].Token);
       setIsTokenFetched(true);
     } catch (error) {
       console.log('Error fetching AppWrite token:', error);
     }
   };
-
-
 
   //UseEffect to call Appwrite and device token functions
   useEffect(() => {
@@ -100,7 +102,7 @@ const App = () => {
       const dToken = await getDeviceToken();
       setDeviceToken(dToken);
     };
-    
+
     if (isNetworkAvailable) {
       fetchToken();
     }
@@ -123,50 +125,69 @@ const App = () => {
     };
 
     checkUserExist();
-
   }, []);
-
 
   //==================================
   // check whether user is changed from L2 to L1 or not
 
-
   const checkRoleChanged = async () => {
     let changerUserType = userType;
-    const res = await getDataWithInt('All_Offices', 'Approver_app_user_lookup', loggedUser.userId, accessToken);
+    const res = await getDataWithInt(
+      'All_Offices',
+      'Approver_app_user_lookup',
+      loggedUser.userId,
+      accessToken,
+    );
     if (res && res.data) {
-      if (loggedUser.role === "L1") changerUserType = "L2";
+      if (loggedUser.role === 'L1') changerUserType = 'L2';
       const deptIds = res.data.map(dept => dept.ID);
       setDepartmentIds(deptIds);
     } else {
-      if (loggedUser.role === "L2") changerUserType = "L1"; 
+      if (loggedUser.role === 'L2') changerUserType = 'L1';
     }
     return changerUserType;
   };
 
   const checkIsResident = async () => {
-    const res = await getDataWithInt('All_Residents', 'App_User_lookup', loggedUser.userId, accessToken);
-    if(res && res.data && res.data[0].Accommodation_Approval === 'APPROVED'){
+    const res = await getDataWithInt(
+      'All_Residents',
+      'App_User_lookup',
+      loggedUser.userId,
+      accessToken,
+    );
+    if (res && res.data && res.data[0].Accommodation_Approval === 'APPROVED') {
       return true;
-    }else{
+    } else {
       return false;
     }
   };
 
   const checkIsEmployee = async () => {
-    const res = await getDataWithInt('All_Employees', 'App_User_lookup', loggedUser.userId, accessToken);
-    if(res && res.data && res.data[0].Department_Approval === 'APPROVED'){
+    const res = await getDataWithInt(
+      'All_Employees',
+      'App_User_lookup',
+      loggedUser.userId,
+      accessToken,
+    );
+    if (res && res.data && res.data[0].Department_Approval === 'APPROVED') {
       return true;
-    }else{
+    } else {
       return false;
     }
   };
 
   const checkIsTestResident = async () => {
-    const res = await getDataWithTwoInt('All_Residents', 'App_User_lookup', loggedUser.userId, 'Flats_lookup', '3318254000031368021', accessToken);
-    if(res && res.data && res.data[0].Accommodation_Approval === 'APPROVED'){
+    const res = await getDataWithTwoInt(
+      'All_Residents',
+      'App_User_lookup',
+      loggedUser.userId,
+      'Flats_lookup',
+      '3318254000031368021',
+      accessToken,
+    );
+    if (res && res.data && res.data[0].Accommodation_Approval === 'APPROVED') {
       return true;
-    }else{
+    } else {
       return false;
     }
   };
@@ -184,14 +205,12 @@ const App = () => {
       testResident: testResident,
     };
 
-
     setLoggedUser(data);
-    console.log("Data to be set in AsyncStorage: ", data); // Log the data before setting
+    console.log('Data to be set in AsyncStorage: ', data); // Log the data before setting
 
     await AsyncStorage.setItem('existedUser', JSON.stringify(data));
 
     const existedUser = await AsyncStorage.getItem('existedUser');
-    
   };
 
   const runChecks = async () => {
@@ -204,8 +223,7 @@ const App = () => {
 
     await setModifyData(role, resident, employee, testResident);
 
-   // console.log("loggedUser after setting: ", loggedUser)
-
+    // console.log("loggedUser after setting: ", loggedUser)
   };
 
   useEffect(() => {
@@ -214,18 +232,15 @@ const App = () => {
     }
   }, [isTokenFetched]);
 
-
-
   useEffect(() => {
     if (accessToken) {
-      console.log("Access token found, stopping loading", accessToken);
+      console.log('Access token found, stopping loading', accessToken);
 
       setLoading(false);
     } else {
-      console.log("Access token missing, still loading");
+      console.log('Access token missing, still loading');
     }
   }, [accessToken]);
-
 
   return (
     <PaperProvider theme={lightTheme}>

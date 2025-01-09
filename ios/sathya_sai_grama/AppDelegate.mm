@@ -1,12 +1,12 @@
 #import "AppDelegate.h"
 #import <Firebase.h>
-
 #import <React/RCTBundleURLProvider.h>
+#import <UIKit/UIKit.h>
+#import <FirebaseCore/FirebaseCore.h>
 
 @implementation AppDelegate
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
-{
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   [FIRApp configure];
   self.moduleName = @"sathya_sai_grama";
   // You can add your custom initial props in the dictionary below.
@@ -16,13 +16,11 @@
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
-- (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
-{
+- (NSURL *)sourceURLForBridge:(RCTBridge *)bridge {
   return [self bundleURL];
 }
 
-- (NSURL *)bundleURL
-{
+- (NSURL *)bundleURL {
 #if DEBUG
   return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index"];
 #else

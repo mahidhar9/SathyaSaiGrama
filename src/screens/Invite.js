@@ -22,22 +22,28 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const Invite = ({navigation}) => {
   const {user} = useContext(AuthContext);
 
-  const {userEmail, getAccessToken, loggedUser, setLoggedUser, employee, resident} =
-    useContext(UserContext);
+  const {
+    userEmail,
+    getAccessToken,
+    loggedUser,
+    setLoggedUser,
+    employee,
+    resident,
+  } = useContext(UserContext);
 
-    useEffect(()=>{
-      const settingLoggedUser = async() => {
-        let existedUser = await AsyncStorage.getItem('existedUser');
-        existedUser = JSON.parse(existedUser);
-        if(existedUser){
-          setLoggedUser(existedUser);
-        }
+  useEffect(() => {
+    const settingLoggedUser = async () => {
+      let existedUser = await AsyncStorage.getItem('existedUser');
+      existedUser = JSON.parse(existedUser);
+      if (existedUser) {
+        setLoggedUser(existedUser);
       }
-  
-      if(!loggedUser || loggedUser===null){
-        settingLoggedUser();
-      }
-    }, [])
+    };
+
+    if (!loggedUser || loggedUser === null) {
+      settingLoggedUser();
+    }
+  }, []);
 
   const L1ID = loggedUser.userId;
   const [selectedOption, setSelectedOption] = useState(null);
@@ -217,24 +223,40 @@ const Invite = ({navigation}) => {
               source={require('../../src/assets/welcomeimage.png')}
             /> */}
             <View>
-              <Text style={[styles.text1, styles.text]}>
-                A visitor information form needs to be filled to invite a
-                visitor.
+              <Text
+                style={{
+                  fontFamily: 'Inter',
+                  fontWeight: '800',
+                  fontSize: 18,
+                  fontStyle: 'normal',
+                  borderRadius: 8,
+                  textAlign: 'center',
+                  color: '#B21E2B',
+                }}>
+                Visitor's Particulars
               </Text>
-              <Text style={[styles.text2, styles.text]}>
+              <Text style={[styles.text1, styles.text]}>
+                If you’re inviting someone to Sathya Sai Grama, you’ll need to
+                provide the details of the visitor(s) beforehand.
+              </Text>
+              {/* <Text style={[styles.text2, styles.text]}>
                 Visitor can fill the form or you can fill it yourself.
               </Text>
               <Text style={[styles.text3, styles.text]}>
                 Please select one.
-              </Text>
+              </Text> */}
             </View>
           </View>
-          <View>
+          <View style={{flexDirection: 'row', marginTop: 50}}>
             <TouchableOpacity
-              style={[styles.register, styles.register1]}
-              onPress={handleModal}>
-              <Text style={[styles.registerTitle, {color: '#fff'}]}>
-                Visitor fills the form
+              style={styles.buttonBox}
+              onPress={() => navigation.navigate('FillByYourSelf')}>
+              <Image
+                style={{alignSelf: 'center'}}
+                source={require('../assets/fillbyyourselficon.png')}
+              />
+              <Text style={styles.buttonText}>
+                I will {'\n'}complete {'\n'}the form
               </Text>
             </TouchableOpacity>
             <View style={styles.wrapper}>
@@ -307,11 +329,13 @@ const Invite = ({navigation}) => {
                 </TouchableWithoutFeedback>
               </Modal>
             </View>
-            <TouchableOpacity
-              style={[styles.register, styles.register2]}
-              onPress={() => navigation.navigate('FillByYourSelf')}>
-              <Text style={[styles.registerTitle, {color: '#B21E2B'}]}>
-                Fill it by yourself!
+            <TouchableOpacity style={styles.buttonBox} onPress={handleModal}>
+              <Image
+                style={{alignSelf: 'center'}}
+                source={require('../assets/PaperPlane.png')}
+              />
+              <Text style={styles.buttonText}>
+                Visitor {'\n'}to complete {'\n'}the form
               </Text>
             </TouchableOpacity>
           </View>
@@ -396,6 +420,31 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffbe65',
     marginLeft: 35,
     marginBottom: 30,
+  },
+  buttonBox: {
+    width: 120,
+    height: 170,
+    // backgroundColor: '#752A26',
+    paddingTop: 12,
+    paddingBottom: 12,
+    paddingLeft: 10,
+    paddingRight: 10,
+    borderRadius: 12,
+    gap: 8,
+    marginBottom: 20,
+    borderColor: '#B21E2B',
+    borderWidth: 2,
+    alignContent: 'center',
+    margin: 10,
+  },
+  buttonText: {
+    fontSize: 15,
+    fontFamily: 'Inter',
+    fontStyle: 'normal',
+    fontWeight: '800',
+    textAlign: 'center',
+    lineHeight: 26,
+    color: '#B21E2B',
   },
   registerTitle: {
     fontSize: 15,
