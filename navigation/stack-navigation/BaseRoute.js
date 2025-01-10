@@ -13,6 +13,7 @@ import UserContext from '../../context/UserContext';
 import VerificationNotice from '../../src/auth/VerificationNotice';
 import messaging from '@react-native-firebase/messaging';
 import * as RootNavigation from './RootNavigation';
+import Sound from 'react-native-sound'; 
 // import PushNotification from 'react-native-push-notification';
 import {
   DATABASE_ID,
@@ -130,6 +131,7 @@ const linking = {
       },
     },
   },
+  
   async getInitialURL() {
     const url = await Linking.getInitialURL();
     if (typeof url === 'string') {
@@ -137,32 +139,91 @@ const linking = {
     }
     //getInitialNotification: When the application is opened from a quit state.
     const message = await messaging().getInitialNotification();
-    const deeplinkURL = buildDeepLinkFromNotificationData(message?.data);
-    if (typeof deeplinkURL === 'string') {
-      return deeplinkURL;
+    if (message) {
+      playCustomSound(); // Play sound for the initial notification
+      const deeplinkURL = buildDeepLinkFromNotificationData(message.data);
+      if (typeof deeplinkURL === 'string') {
+        return deeplinkURL;
+      }
     }
   },
-  subscribe(listener) {
-    const onReceiveURL = ({url}) => listener(url);
+  // subscribe(listener) {
+  //   const onReceiveURL = ({url}) => listener(url);
+  //   //playCustomSound();
+  //   // Listen to incoming links from deep linking
+  //   const linkingSubscription = Linking.addEventListener('url', onReceiveURL);
 
+  //   //onNotificationOpenedApp: When the application is running, but in the background.
+  //   const unsubscribe = messaging().onNotificationOpenedApp(remoteMessage => {
+  //     if (remoteMessage) {
+  //       //playCustomSound(); // Play sound for the notification
+  //       const url = buildDeepLinkFromNotificationData(remoteMessage.data);
+  //       if (typeof url === 'string') {
+  //         listener(url);
+  //       }
+  //     }
+  //   });
+  //    const backgroundSound = messaging().setBackgroundMessageHandler(async remoteMessage => {
+  //     console.log('Message handled in the background!', remoteMessage);
+  //     playCustomSound();
+  //   });
+
+  //   return () => {
+  //     linkingSubscription.remove();
+  //     unsubscribe();
+  //     backgroundSound();
+  //   };
+  // },
+
+
+  subscribe(listener) {
+    const onReceiveURL = ({ url }) => listener(url);
+    
     // Listen to incoming links from deep linking
     const linkingSubscription = Linking.addEventListener('url', onReceiveURL);
-
-    //onNotificationOpenedApp: When the application is running, but in the background.
+  
+    // Handle notification when the app is opened from the background
     const unsubscribe = messaging().onNotificationOpenedApp(remoteMessage => {
-      const url = buildDeepLinkFromNotificationData(remoteMessage.data);
-      if (typeof url === 'string') {
-        listener(url);
+      if (remoteMessage) {
+        const url = buildDeepLinkFromNotificationData(remoteMessage.data);
+        if (typeof url === 'string') {
+          listener(url);
+        }
       }
     });
-
+  
+    // Handle background notifications
+    const backgroundSound = messaging().setBackgroundMessageHandler(async remoteMessage => {
+      console.log('Message handled in the background!', remoteMessage);
+      playCustomSound(); // Play sound for the notification
+    });
+  
     return () => {
       linkingSubscription.remove();
       unsubscribe();
+      backgroundSound();
     };
   },
+  
+  
 };
 
+
+const playCustomSound = () => {
+  const sound = new Sound('hello.wav', Sound.MAIN_BUNDLE, error => {
+    if (error) {
+      console.log('Failed to load the sound', error);
+      return;
+    }
+    sound.play(success => {
+      if (success) {
+        console.log('Sound played successfully');
+      } else {
+        console.log('Sound playback failed');
+      }
+    });
+  });
+};
 const BaseRoute = () => {
   // const { user } = useContext(AuthContext);
 
@@ -240,6 +301,7 @@ const BaseRoute = () => {
   // }, []);
 
   // console.log("Existed user in base route ", loggedUser)
+  
 
   return (
     // <>
