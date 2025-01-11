@@ -558,6 +558,7 @@ const Profile = ({navigation}) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <ScrollView>
       {loading ? (
         <View style={styles.loadingContainer}>
           {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
@@ -1083,6 +1084,7 @@ const Profile = ({navigation}) => {
       )}
 
       <Toast />
+      </ScrollView>
     </SafeAreaView>
   );
 };

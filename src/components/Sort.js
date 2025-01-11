@@ -14,71 +14,23 @@ const Sort = ({ ToSortData, setSortedData }) => {
 
   const handleSort = (sort) => {
     setSortBy(sort);
-    setSortOrder('Ascending')
-    sortData(sort); // Sort immediately when an option is selected
-    handleSortModal();
+
+    // Set default sort order based on the selected sort criterion
+    let defaultSortOrder = 'Ascending';
+    if (sort === 'DateOfVisit' || sort === 'ModifiedTime') {
+      defaultSortOrder = 'Descending';
+    }
+
+    setSortOrder(defaultSortOrder);
+
+    // Perform sorting with the default order
+    sortData(sort, defaultSortOrder === 'Ascending');
+
+    handleSortModal(); // Close the modal
   };
 
-  const handleSortOrder = (sortorder) => {
-    setSortOrder(sortorder);
-    if (sortBy != '' && sortorder == 'Ascending') {
-      let sortedData = [...ToSortData]; // Copy to avoid mutating original data
 
-      switch (sortBy) {
-        case 'NameOfVisitor':
-          sortedData.sort((a, b) =>
-            a.Name_field.first_name.localeCompare(b.Name_field.first_name)
-          );
-          break;
-        case 'ModifiedTime':
-          sortedData.sort((a, b) =>
-            (new Date(moment(a.Modified_Time, 'DD-MMM-YYYY HH:mm:ss')) -
-              new Date(moment(b.Modified_Time, 'DD-MMM-YYYY HH:mm:ss'))) * -1
-          );
-
-          break;
-        case 'DateOfVisit':
-          sortedData.sort((a, b) =>
-            (new Date(moment(a.Date_of_Visit, 'DD-MMM-YYYY')) - new Date(moment(b.Date_of_Visit, 'DD-MMM-YYYY'))) * -1
-          );
-          break;
-        default:
-          break;
-      }
-
-      setSortedData(sortedData);
-    }
-    else if (sortBy != '' && sortorder == 'Descending') {
-      let sortedData = [...ToSortData]; // Copy to avoid mutating original data
-
-      switch (sortBy) {
-        case 'NameOfVisitor':
-          sortedData.sort((a, b) =>
-            a.Name_field.first_name.localeCompare(b.Name_field.first_name) * -1
-          );
-          break;
-        case 'ModifiedTime':
-          sortedData.sort((a, b) =>
-          (new Date(moment(a.Modified_Time, 'DD-MMM-YYYY HH:mm:ss')) -
-            new Date(moment(b.Modified_Time, 'DD-MMM-YYYY HH:mm:ss')))
-          );
-
-          break;
-        case 'DateOfVisit':
-          sortedData.sort((a, b) =>
-            (new Date(moment(a.Date_of_Visit, 'DD-MMM-YYYY')) - new Date(moment(b.Date_of_Visit, 'DD-MMM-YYYY')))
-          );
-          break;
-        default:
-          break;
-      }
-
-      setSortedData(sortedData);
-    }
-    setIsSortVisible(!isSortVisible)
-  }
-
-  const sortData = (sortCriteria) => {
+  const sortData = (sortCriteria, isAscending = true) => {
     let sortedData = [...ToSortData]; // Copy to avoid mutating original data
 
     switch (sortCriteria) {
@@ -89,21 +41,36 @@ const Sort = ({ ToSortData, setSortedData }) => {
         break;
       case 'ModifiedTime':
         sortedData.sort((a, b) =>
-          (new Date(moment(a.Modified_Time, 'DD-MMM-YYYY HH:mm:ss')) -
-            new Date(moment(b.Modified_Time, 'DD-MMM-YYYY HH:mm:ss'))) * -1
+          new Date(moment(a.Modified_Time, 'DD-MMM-YYYY HH:mm:ss')) -
+          new Date(moment(b.Modified_Time, 'DD-MMM-YYYY HH:mm:ss'))
         );
-
         break;
       case 'DateOfVisit':
         sortedData.sort((a, b) =>
-          (new Date(moment(a.Date_of_Visit, 'DD-MMM-YYYY')) - new Date(moment(b.Date_of_Visit, 'DD-MMM-YYYY'))) * -1
+          new Date(moment(a.Date_of_Visit, 'DD-MMM-YYYY')) -
+          new Date(moment(b.Date_of_Visit, 'DD-MMM-YYYY'))
         );
         break;
-      default:
-        break;
+      default: break;
     }
 
-    setSortedData(sortedData); // Update sorted data
+    // Reverse if descending
+    if (!isAscending) {
+      sortedData.reverse();
+    }
+
+    setSortedData(sortedData);
+  };
+
+  const handleSortOrder = (sortOrder) => {
+    if (!sortBy) return; // Exit if no sort criteria is selected
+
+    setSortOrder(sortOrder);
+
+    const isAscending = sortOrder === 'Ascending';
+    sortData(sortBy, isAscending);
+
+    setIsSortVisible(false); // Close the modal
   };
 
   return (
@@ -185,7 +152,7 @@ const Sort = ({ ToSortData, setSortedData }) => {
                     )
                   }
                   <Text style={[styles.optionText, sortOrder === 'Ascending' && styles.selectedText]}>
-                    Descending
+                    Ascending
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => handleSortOrder('Descending')} >
@@ -197,7 +164,7 @@ const Sort = ({ ToSortData, setSortedData }) => {
                     )
                   }
                   <Text style={[styles.optionText, sortOrder === 'Descending' && styles.selectedText]}>
-                    Ascending
+                    Descending
                   </Text>
                 </TouchableOpacity>
               </View>
