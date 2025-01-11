@@ -268,7 +268,7 @@ const FillByYourSelf = ({navigation}) => {
         'Logged usename is generateQR in FillByYourSelf: ',
         loggedUser.name,
       );
-      const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${
+      const qrUrl = `https://oyster-app-7jt2c.ondigitalocean.app/generate-image?name=${
         loggedUser.name
       }&&passcode=${passcodeData}&&date=${convertDateFormat(
         date,

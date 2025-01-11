@@ -109,18 +109,18 @@ const Sort = ({ ToSortData, setSortedData }) => {
   return (
     <View style={styles.filterview}>
       <TouchableOpacity style={styles.filterbtn} onPress={handleSortModal}>
-      {
-        ToSortData != null && (
-        <View style={{ flexDirection: "row" }}>
-          <Text style={styles.filter}>Sort</Text>
-          <Image source={sortIcon} style={styles.image} />
+        {
+          ToSortData != null && (
+            <View style={{ flexDirection: "row" }}>
+              <Text style={styles.filter}>Sort</Text>
+              <Image source={sortIcon} style={styles.image} />
 
-          {sortBy && (
-            <View style={styles.sortbubble}>
+              {sortBy && (
+                <View style={styles.sortbubble}>
+                </View>
+              )}
             </View>
           )}
-        </View>
-        )}
       </TouchableOpacity>
 
       <Modal
@@ -185,7 +185,7 @@ const Sort = ({ ToSortData, setSortedData }) => {
                     )
                   }
                   <Text style={[styles.optionText, sortOrder === 'Ascending' && styles.selectedText]}>
-                    Ascending
+                    Descending
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => handleSortOrder('Descending')} >
@@ -197,7 +197,7 @@ const Sort = ({ ToSortData, setSortedData }) => {
                     )
                   }
                   <Text style={[styles.optionText, sortOrder === 'Descending' && styles.selectedText]}>
-                    Descending
+                    Ascending
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
   select: {
     flexDirection: 'row',
   },
-  sortbubble:{
+  sortbubble: {
     position: "absolute",
     top: -3,
     right: -2,
