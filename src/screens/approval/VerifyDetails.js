@@ -245,7 +245,7 @@ const VerifyDetails = ({navigation, route}) => {
 
   const generateQR = async passcodeData => {
     try {
-      const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${user.Referrer_App_User_lookup.Name_field}&&passcode=${passcodeData}&&date=${user.Date_of_Visit}&&key=${SECRET_KEY}`;
+      const qrUrl = `https://oyster-app-7jt2c.ondigitalocean.app/generate-image?name=${user.Referrer_App_User_lookup.Name_field}&&passcode=${passcodeData}&&date=${user.Date_of_Visit}&&key=${SECRET_KEY}`;
       const res = await fetch(qrUrl);
       console.log('URL - ', qrUrl);
       console.log('res from fetch img : ', res);
