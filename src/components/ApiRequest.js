@@ -91,16 +91,20 @@ export const getDataWithIntAndString = async (
   token,
 ) => {
   try {
-    const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}?criteria=${criteria1}=${encodeURIComponent(value1)}&&${criteria2}=${encodeURIComponent(value2)}`;
-    console.log('url : ', url);
+     // Get today's date in the format "DD-MMM-YYYY" (e.g., "06-Jan-2025")
+     const today = new Date().toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }).replace(/ /g, '-'); // Format to match Zoho's Date_of_Visit format
+
+    const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}?criteria=${criteria1}=${encodeURIComponent(value1)}%26%26${criteria2}="${encodeURIComponent(value2)}"%26%26Date_of_Visit>="${today}"`;
+    console.log('url in getDataWithIntAndString: ', url);
     const response = await fetch(url, {
       method: 'GET',
       headers: {
         Authorization: `Zoho-oauthtoken ${token}`,
         'Content-Type': 'application/json',
-      },
-      params: {
-        criteria: `${criteria1}==${value1}&&${criteria2}=="${value2}"`,
       },
     });
     const res = await response.json();
@@ -131,15 +135,21 @@ export const getL2Data = async (
   token,
 ) => {
   try {
-    const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}?criteria=${encodeURIComponent(criteria1)}==${encodeURIComponent(`[${value1}]`)}%26%26${encodeURIComponent(criteria2)}==${encodeURIComponent(`"${value2}"`)}%26%26${encodeURIComponent(criteria3)}==${encodeURIComponent(`"${value3}"`)}%26%26${encodeURIComponent(criteria4)}!=${encodeURIComponent(value4)}`;
-    console.log('url : ', url);
+    const today = new Date().toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }).replace(/ /g, '-'); // Format to match Zoho's Date_of_Visit format
+    console.log("criteria1: ", criteria1, "value1: ", value1);
+    console.log("criteria2: ", criteria2, "value2: ", value2);
+    console.log("criteria3: ", criteria3, "value3: ", value3);
+    console.log("criteria4: ", criteria4, "value4: ", value4);
+    const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}?criteria=${criteria1}=${value1}%26%26${criteria2}="${value2}"%26%26${criteria3}="${value3}"%26%26${criteria4}!=${value4}%26%26Date_of_Visit>="${today}"`;
+    console.log('url : ', url, "Token - ", token);
     const response = await fetch(url, {
       method: 'GET',
       headers: {
         Authorization: `Zoho-oauthtoken ${token}`,
-      },
-      params: {
-        criteria: `${criteria1}==${value1}&&${criteria2}=="${value2}"&&${criteria3}=="${value3}"&&${criteria4}!=${value4}`,
       },
     });
     const res = await response.json();

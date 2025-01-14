@@ -109,8 +109,9 @@ const Pending = ({ navigation }) => {
 
   useFocusEffect(
     useCallback(() => {
+      console.log("useFocusEffect called")
       onRefresh();
-    }, [Pending]),
+    }, []),
   );
 
   return (

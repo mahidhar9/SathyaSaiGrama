@@ -206,7 +206,7 @@ const App = () => {
     };
 
     setLoggedUser(data);
-    console.log('Data to be set in AsyncStorage: ', data); // Log the data before setting
+    //console.log('Data to be set in AsyncStorage: ', data); // Log the data before setting
 
     await AsyncStorage.setItem('existedUser', JSON.stringify(data));
 

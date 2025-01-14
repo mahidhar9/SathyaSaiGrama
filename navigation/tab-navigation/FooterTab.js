@@ -36,8 +36,7 @@ const ProfileStack = createNativeStackNavigator();
 const ApproveStack = createNativeStackNavigator();
 const LApprovalStack = createNativeStackNavigator();
 
-function InviteStackScreen() {
-  const navigation = useNavigation();
+function InviteStackScreen({navigation}) {
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       // Reset stack to the initial route (ScreenA)
@@ -87,7 +86,7 @@ function InviteStackScreen() {
   );
 }
 
-function ProfileStackScreen() {
+function ProfileStackScreen({navigation}) {
   return (
     <ProfileStack.Navigator
       screenOptions={{
@@ -189,7 +188,7 @@ const ApprovalStack = ({navigation}) => {
   );
 };
 
-const AppApproveStack = () => {
+const AppApproveStack = ({navigation}) => {
   return (
     <LApprovalStack.Navigator screenOptions={{headerShown: false}}>
       <ApproveStack.Screen name="ApprovalStack" component={ApprovalStack} />
