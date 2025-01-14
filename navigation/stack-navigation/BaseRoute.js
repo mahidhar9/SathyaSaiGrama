@@ -30,14 +30,6 @@ const NAVIGATION_IDS = [
 ];
 
 function buildDeepLinkFromNotificationData(data) {
-  // if (JSON.isRawJSON(dataString)) {
-  //   console.log('rawJson');
-  // } else {
-  //   console.log('Not raw Json');
-  // }
-  // data = JSON.parse(dataString);
-  // console.log(data);
-  // const data = dataString;
   const navigationId = data?.navigationId;
   console.log(data.navigationId);
   if (!NAVIGATION_IDS.includes(navigationId)) {
@@ -59,26 +51,6 @@ function buildDeepLinkFromNotificationData(data) {
     const dataString = JSON.stringify(data);
     return `myapp://ViewDetails?user=${dataString}&stringified=true`;
   }
-  // if (navigationId === 'Approved') {
-  //   return `myapp://Approved`;
-  // }
-  // if (navigationId === 'L2Approved') {
-  //   return `myapp://L2Approved`;
-  // }
-  // if (navigationId === 'Denied') {
-  //   return `myapp://Denied`;
-  // }
-  // if (navigationId === 'L2Denied') {
-  //   return `myapp://L2Denied`;
-  // }
-
-  // if (navigationId === 'L2Pending') {
-  //   return `myapp://L2Pending`;
-  // }
-  // const postId = data?.postId;
-  // if (typeof postId === 'string') {
-  //   return `myapp://post/${postId}`;
-  // }
   console.warn('Missing navigationId');
   return null;
 }
@@ -163,6 +135,17 @@ const linking = {
   },
 };
 
+// Handle background notifications
+messaging().setBackgroundMessageHandler(async remoteMessage => {
+  console.log('Background notification received:', remoteMessage);
+  // You can process the notification data here if needed
+  const url = buildDeepLinkFromNotificationData(remoteMessage.data);
+  if (typeof url === 'string') {
+    // Handle the deep link as needed
+    console.log('Deep link from background message:', url);
+  }
+});
+
 const BaseRoute = () => {
   // const { user } = useContext(AuthContext);
 
@@ -172,16 +155,6 @@ const BaseRoute = () => {
 
   const Stack = createNativeStackNavigator();
 
-  //New Code added for push notification
-  // async function requestUserPermission() {
-  //   const authorizationStatus = await messaging().requestPermission();
-
-  //   if (authorizationStatus) {
-  //     console.log('Permission status:', authorizationStatus);
-  //   }
-  // }
-
-  //To get Apprwrite token
   const getAppWriteToken = async () => {
     try {
       let res = await fetch(
@@ -212,40 +185,7 @@ const BaseRoute = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  // Handle foreground notifications
-  // useEffect(() => {
-  //   const unsubscribe = messaging().onMessage(async remoteMessage => {
-  //     console.log('Foreground notification received:', remoteMessage);
-  //     PushNotification.localNotification({
-  //       title: remoteMessage.notification?.title || 'Notification',
-  //       message: remoteMessage.notification?.body || 'You have a new message',
-  //     });
-  //   });
-  //   return unsubscribe;
-  // }, []);
-
-  // useEffect(() => {
-  //   const checkUserExist = async () => {
-  //     let existedUser = await AsyncStorage.getItem('existedUser');
-  //     existedUser = JSON.parse(existedUser);
-  //     //console.log('Existed user in Base route useEffect:', existedUser);
-  //     if (existedUser) {
-  //       setLoggedUser(existedUser);
-  //     }
-  //   };
-
-  //   if (!loggedUser) {
-  //     checkUserExist();
-  //   }
-  // }, []);
-
-  // console.log("Existed user in base route ", loggedUser)
-
   return (
-    // <>
-    //   {loading ? (
-    //     <ActivityIndicator size="large" color="#752A26" style={styles.loadingContainer} />
-    //   ) : (
     <SafeAreaView style={{flex: 1}}>
       <NavigationContainer
         linking={linking}

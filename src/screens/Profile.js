@@ -559,150 +559,155 @@ const Profile = ({navigation}) => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
-      {loading ? (
-        <View style={styles.loadingContainer}>
-          {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
-          <MyProfileSkeletonLoader />
-        </View>
-      ) : isLogOutIndicator ? (
-        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-          <TouchableOpacity>
-            {profileImage != null ? (
-              <Image source={{uri: profileImage}} style={styles.propic} />
-            ) : (
-              <Image
-                source={require('../assets/profileImg.png')}
-                style={styles.propic}
-              />
-            )}
-          </TouchableOpacity>
-
-          <Text style={[styles.name]}>{loggedUser.name}</Text>
-          <Text style={[styles.emailVisible, {marginTop: 5}]}>{userEmail}</Text>
-          <View style={styles.indicatorBox}>
-            <ActivityIndicator
-              style={styles.activityIndicator}
-              size="large"
-              color="#B21E2B"
-            />
-            <Text style={styles.text}>Logging Out...</Text>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
+            <MyProfileSkeletonLoader />
           </View>
-        </View>
-      ) : (
-        <View>
-          <View style={styles.account}>
-            <Text style={styles.accountTitle}>Account</Text>
-          </View>
-          <View style={styles.topSection}>
-            <View>
-              <TouchableOpacity>
-                {profileImage != null ? (
-                  <Image source={{uri: profileImage}} style={styles.propic} />
-                ) : (
-                  <Image
-                    source={require('../assets/profileImg.png')}
-                    style={styles.propic}
-                  />
-                )}
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={openProfileModal}
-                style={styles.editContainer}>
+        ) : isLogOutIndicator ? (
+          <View
+            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+            <TouchableOpacity>
+              {profileImage != null ? (
+                <Image source={{uri: profileImage}} style={styles.propic} />
+              ) : (
                 <Image
-                  source={require('../assets/edit.png')}
-                  style={styles.editIcon}
+                  source={require('../assets/profileImg.png')}
+                  style={styles.propic}
                 />
-              </TouchableOpacity>
-
-              {/* profile picture selector modal */}
-              <Modal
-                transparent={true}
-                visible={frofileModalVisible}
-                animationType="none"
-                onRequestClose={closeProfileModal}>
-                <KeyboardAvoidingView
-                  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                  style={{flex: 1}}>
-                  <ScrollView contentContainerStyle={{flexGrow: 1}}>
-                    {/* Close Modal when clicking outside */}
-                    <TouchableWithoutFeedback onPress={closeProfileModal}>
-                      <View style={styles.overlay}>
-                        <Animated.View
-                          style={[
-                            styles.modalContent,
-                            {transform: [{translateY: slideAnim}]},
-                          ]}>
-                          <View style={{width: '100%'}}>
-                            <Text style={styles.uploadHead}>Profile Photo</Text>
-                            <View style={styles.profileUpload}>
-                              <TouchableOpacity
-                                onPress={takePhoto}
-                                style={styles.iconButton}>
-                                <Image
-                                  source={require('../assets/cameraImg.png')}
-                                  style={styles.uploadImg}
-                                />
-                                <Text>Camera</Text>
-                              </TouchableOpacity>
-                              <TouchableOpacity
-                                onPress={selectImage}
-                                style={styles.iconButton}>
-                                <Image
-                                  source={require('../assets/galleryImg.png')}
-                                  style={styles.uploadImg}
-                                />
-                                <Text>Gallery</Text>
-                              </TouchableOpacity>
-                              {profileImage && (
-                                <TouchableOpacity
-                                  onPress={deleteProfileImage}
-                                  style={styles.iconButton}>
-                                  <Image
-                                    source={require('../assets/delete.png')}
-                                    style={styles.uploadImg}
-                                  />
-                                  <Text>Delete</Text>
-                                </TouchableOpacity>
-                              )}
-                            </View>
-                          </View>
-                        </Animated.View>
-                      </View>
-                    </TouchableWithoutFeedback>
-                  </ScrollView>
-                </KeyboardAvoidingView>
-              </Modal>
-            </View>
-
-            <Text style={styles.name}>{loggedUser.name}</Text>
-            <View style={styles.imgdel}>
-              <Text style={styles.emailVisible}>{userEmail}</Text>
-              <TouchableOpacity
-                activeOpacity={0.9}
-                onPress={() => setModalVisible(true)}>
-                <Image
-                  source={require('../assets/delete.png')}
-                  style={{width: 20, height: 20}}
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View style={styles.options}>
-            <TouchableOpacity
-              style={styles.buttonSection}
-              onPress={toMyprofile}>
-              <View style={styles.buttonArea}>
-                <Text style={styles.buttonName}>My Profile</Text>
-                <Image
-                  source={require('../assets/RightArrow.png')}
-                  style={styles.img}
-                />
-              </View>
+              )}
             </TouchableOpacity>
 
-            {/* <TouchableOpacity
+            <Text style={[styles.name]}>{loggedUser.name}</Text>
+            <Text style={[styles.emailVisible, {marginTop: 5}]}>
+              {userEmail}
+            </Text>
+            <View style={styles.indicatorBox}>
+              <ActivityIndicator
+                style={styles.activityIndicator}
+                size="large"
+                color="#B21E2B"
+              />
+              <Text style={styles.text}>Logging Out...</Text>
+            </View>
+          </View>
+        ) : (
+          <View>
+            <View style={styles.account}>
+              <Text style={styles.accountTitle}>Account</Text>
+            </View>
+            <View style={styles.topSection}>
+              <View>
+                <TouchableOpacity>
+                  {profileImage != null ? (
+                    <Image source={{uri: profileImage}} style={styles.propic} />
+                  ) : (
+                    <Image
+                      source={require('../assets/profileImg.png')}
+                      style={styles.propic}
+                    />
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={openProfileModal}
+                  style={styles.editContainer}>
+                  <Image
+                    source={require('../assets/edit.png')}
+                    style={styles.editIcon}
+                  />
+                </TouchableOpacity>
+
+                {/* profile picture selector modal */}
+                <Modal
+                  transparent={true}
+                  visible={frofileModalVisible}
+                  animationType="none"
+                  onRequestClose={closeProfileModal}>
+                  <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    style={{flex: 1}}>
+                    <ScrollView contentContainerStyle={{flexGrow: 1}}>
+                      {/* Close Modal when clicking outside */}
+                      <TouchableWithoutFeedback onPress={closeProfileModal}>
+                        <View style={styles.overlay}>
+                          <Animated.View
+                            style={[
+                              styles.modalContent,
+                              {transform: [{translateY: slideAnim}]},
+                            ]}>
+                            <View style={{width: '100%'}}>
+                              <Text style={styles.uploadHead}>
+                                Profile Photo
+                              </Text>
+                              <View style={styles.profileUpload}>
+                                <TouchableOpacity
+                                  onPress={takePhoto}
+                                  style={styles.iconButton}>
+                                  <Image
+                                    source={require('../assets/cameraImg.png')}
+                                    style={styles.uploadImg}
+                                  />
+                                  <Text>Camera</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                  onPress={selectImage}
+                                  style={styles.iconButton}>
+                                  <Image
+                                    source={require('../assets/galleryImg.png')}
+                                    style={styles.uploadImg}
+                                  />
+                                  <Text>Gallery</Text>
+                                </TouchableOpacity>
+                                {profileImage && (
+                                  <TouchableOpacity
+                                    onPress={deleteProfileImage}
+                                    style={styles.iconButton}>
+                                    <Image
+                                      source={require('../assets/delete.png')}
+                                      style={styles.uploadImg}
+                                    />
+                                    <Text>Delete</Text>
+                                  </TouchableOpacity>
+                                )}
+                              </View>
+                            </View>
+                          </Animated.View>
+                        </View>
+                      </TouchableWithoutFeedback>
+                    </ScrollView>
+                  </KeyboardAvoidingView>
+                </Modal>
+              </View>
+
+              <Text style={styles.name}>{loggedUser.name}</Text>
+              <View style={styles.imgdel}>
+                <Text style={styles.emailVisible}>{userEmail}</Text>
+                <TouchableOpacity
+                  activeOpacity={0.9}
+                  onPress={() => setModalVisible(true)}>
+                  <Image
+                    source={require('../assets/delete.png')}
+                    style={{width: 20, height: 20}}
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={styles.options}>
+              <TouchableOpacity
+                style={styles.buttonSection}
+                onPress={toMyprofile}>
+                <View style={styles.buttonArea}>
+                  <Text style={styles.buttonName}>My Profile</Text>
+                  <Image
+                    source={require('../assets/RightArrow.png')}
+                    style={styles.img}
+                  />
+                </View>
+              </TouchableOpacity>
+
+              {/* <TouchableOpacity
               style={styles.buttonSection}
               onPress={() => navigation.navigate('Notifications')}>
               <View style={styles.buttonArea}>
@@ -714,41 +719,41 @@ const Profile = ({navigation}) => {
               </View>
             </TouchableOpacity> */}
 
-            <TouchableOpacity
-              style={styles.buttonSection}
-              onPress={() => navigation.navigate('Feedback')}>
-              <View style={styles.buttonArea}>
-                <Text style={styles.buttonName}>Send Feedback</Text>
-                <Image
-                  source={require('../assets/RightArrow.png')}
-                  style={styles.img}
-                />
-              </View>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.buttonSection}
+                onPress={() => navigation.navigate('Feedback')}>
+                <View style={styles.buttonArea}>
+                  <Text style={styles.buttonName}>Send Feedback</Text>
+                  <Image
+                    source={require('../assets/RightArrow.png')}
+                    style={styles.img}
+                  />
+                </View>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.buttonSection}
-              onPress={handleLogoutModal}>
-              <View style={styles.buttonArea}>
-                <Text style={styles.buttonName}>Logout</Text>
-                <Image
-                  source={require('../assets/RightArrow.png')}
-                  style={styles.img}
-                />
-              </View>
-            </TouchableOpacity>
-            <Text
-              style={{
-                padding: 15,
-                paddingTop: 30,
-                marginStart: 10,
-                fontSize: 10,
-              }}>
-              Version 1.0 v17
-            </Text>
-          </View>
+              <TouchableOpacity
+                style={styles.buttonSection}
+                onPress={handleLogoutModal}>
+                <View style={styles.buttonArea}>
+                  <Text style={styles.buttonName}>Logout</Text>
+                  <Image
+                    source={require('../assets/RightArrow.png')}
+                    style={styles.img}
+                  />
+                </View>
+              </TouchableOpacity>
+              <Text
+                style={{
+                  padding: 15,
+                  paddingTop: 30,
+                  marginStart: 10,
+                  fontSize: 10,
+                }}>
+                Version 1.0 v19
+              </Text>
+            </View>
 
-          {/* <Modal
+            {/* <Modal
             animationType="slide"
             transparent={true}
             visible={modalVisible}
@@ -794,40 +799,40 @@ const Profile = ({navigation}) => {
             </View>
           </Modal> */}
 
-          <Modal
-            animationType="fade"
-            transparent={true}
-            visible={modalVisible}
-            onRequestClose={() => setModalVisible(!modalVisible)}>
-            <TouchableWithoutFeedback onPress={handleModal}>
-              <View style={styles.centeredView}>
-                <TouchableWithoutFeedback>
-                  <View style={OndeleteStyles.modalView}>
-                    {deleteLoading ? (
-                      <View
-                        style={{
-                          flex: 1,
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                        }}>
-                        <ActivityIndicator size="large" color="#B21E2B" />
-                        <Text>Deleting profile...</Text>
-                      </View>
-                    ) : (
-                      <>
-                        <Text style={styles.shareLinkAttention}>
-                          Attention!{' '}
-                        </Text>
-                        <Text
-                          style={[
-                            styles.shareLink,
-                            {fontSize: 15, fontWeight: '400'},
-                          ]}>
-                          You are about to delete your account permanently.
-                          Enter your password to confirm deletion.
-                        </Text>
+            <Modal
+              animationType="fade"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={() => setModalVisible(!modalVisible)}>
+              <TouchableWithoutFeedback onPress={handleModal}>
+                <View style={styles.centeredView}>
+                  <TouchableWithoutFeedback>
+                    <View style={OndeleteStyles.modalView}>
+                      {deleteLoading ? (
+                        <View
+                          style={{
+                            flex: 1,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                          }}>
+                          <ActivityIndicator size="large" color="#B21E2B" />
+                          <Text>Deleting profile...</Text>
+                        </View>
+                      ) : (
+                        <>
+                          <Text style={styles.shareLinkAttention}>
+                            Attention!{' '}
+                          </Text>
+                          <Text
+                            style={[
+                              styles.shareLink,
+                              {fontSize: 15, fontWeight: '400'},
+                            ]}>
+                            You are about to delete your account permanently.
+                            Enter your password to confirm deletion.
+                          </Text>
 
-                        {/* <Controller
+                          {/* <Controller
                         name="email"
                         control={control}
                         render={({field: {onChange, value}}) => (
@@ -853,113 +858,115 @@ const Profile = ({navigation}) => {
                         <Text style={styles.textError}>Enter valid email</Text>
                       )} */}
 
-                        <View
-                          style={[
-                            styles.passBorder,
-                            focusedInput === 'password' && styles.inputFocused,
-                          ]}>
-                          <Controller
-                            name="password"
-                            control={control}
-                            render={({
-                              field: {
-                                onChange,
-                                // value
-                              },
-                            }) => (
-                              <TextInput
-                                placeholder="Password"
-                                style={styles.inputBox}
-                                // value={value}
-                                selectionColor="#B21E2B"
-                                onFocus={() => setFocusedInput('password')}
-                                secureTextEntry={!showPassword}
-                                onChangeText={onChange}
-                              />
+                          <View
+                            style={[
+                              styles.passBorder,
+                              focusedInput === 'password' &&
+                                styles.inputFocused,
+                            ]}>
+                            <Controller
+                              name="password"
+                              control={control}
+                              render={({
+                                field: {
+                                  onChange,
+                                  // value
+                                },
+                              }) => (
+                                <TextInput
+                                  placeholder="Password"
+                                  style={styles.inputBox}
+                                  // value={value}
+                                  selectionColor="#B21E2B"
+                                  onFocus={() => setFocusedInput('password')}
+                                  secureTextEntry={!showPassword}
+                                  onChangeText={onChange}
+                                />
+                              )}
+                              rules={{
+                                required: true,
+                                // minLength: 8,
+                                // pattern:
+                                //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/,
+                              }}
+                            />
+                            {showPassword === false ? (
+                              <TouchableOpacity
+                                onPress={() => {
+                                  setShowPassword(!showPassword);
+                                }}>
+                                <Image
+                                  source={require('../assets/eyestrike.png')}
+                                  style={{width: 16, height: 16}}
+                                />
+                              </TouchableOpacity>
+                            ) : (
+                              <TouchableOpacity
+                                onPress={() => setShowPassword(!showPassword)}>
+                                <Image
+                                  source={require('../assets/eye.png')}
+                                  style={{width: 16, height: 16}}
+                                />
+                              </TouchableOpacity>
                             )}
-                            rules={{
-                              required: true,
-                              // minLength: 8,
-                              // pattern:
-                              //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/,
-                            }}
-                          />
-                          {showPassword === false ? (
-                            <TouchableOpacity
-                              onPress={() => {
-                                setShowPassword(!showPassword);
-                              }}>
-                              <Image
-                                source={require('../assets/eyestrike.png')}
-                                style={{width: 16, height: 16}}
-                              />
-                            </TouchableOpacity>
-                          ) : (
-                            <TouchableOpacity
-                              onPress={() => setShowPassword(!showPassword)}>
-                              <Image
-                                source={require('../assets/eye.png')}
-                                style={{width: 16, height: 16}}
-                              />
-                            </TouchableOpacity>
-                          )}
-                        </View>
+                          </View>
 
-                        {errors.password?.type === 'required' && (
-                          <Text style={styles.textError}>
-                            Password is required
-                          </Text>
-                        )}
-                        {/* {errors.password?.type === 'minLength' && (
+                          {errors.password?.type === 'required' && (
+                            <Text style={styles.textError}>
+                              Password is required
+                            </Text>
+                          )}
+                          {/* {errors.password?.type === 'minLength' && (
                         <Text style={styles.textError}>
                           Password must be 8 characters long
                         </Text>
                       )} */}
-                        {errors.password?.type === 'pattern' && (
-                          <Text style={styles.textError}>
-                            Password must contain at least a
-                            uppercase,lowercase, number and a special character
-                          </Text>
-                        )}
-
-                        <View
-                          style={{
-                            flexDirection: 'row',
-                          }}>
-                          <TouchableOpacity
-                            style={[
-                              styles.HomeButton,
-                              {backgroundColor: '#B21E2B'},
-                            ]}
-                            onPress={handleSubmit(onDelete)}>
-                            <Text style={[styles.wewe, styles.wewe1]}>
-                              Delete
+                          {errors.password?.type === 'pattern' && (
+                            <Text style={styles.textError}>
+                              Password must contain at least a
+                              uppercase,lowercase, number and a special
+                              character
                             </Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            style={[
-                              styles.HomeButton,
-                              {
-                                backgroundColor: '#fff',
-                                borderWidth: 2,
-                                borderColor: '#B21E2B',
-                              },
-                            ]}
-                            onPress={() => setModalVisible(!modalVisible)}>
-                            <Text style={[styles.wewe, styles.wewe2]}>
-                              Cancel
-                            </Text>
-                          </TouchableOpacity>
-                        </View>
-                      </>
-                    )}
-                  </View>
-                </TouchableWithoutFeedback>
-              </View>
-            </TouchableWithoutFeedback>
-          </Modal>
+                          )}
 
-          {/* <Modal
+                          <View
+                            style={{
+                              flexDirection: 'row',
+                            }}>
+                            <TouchableOpacity
+                              style={[
+                                styles.HomeButton,
+                                {backgroundColor: '#B21E2B'},
+                              ]}
+                              onPress={handleSubmit(onDelete)}>
+                              <Text style={[styles.wewe, styles.wewe1]}>
+                                Delete
+                              </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              style={[
+                                styles.HomeButton,
+                                {
+                                  backgroundColor: '#fff',
+                                  borderWidth: 2,
+                                  borderColor: '#B21E2B',
+                                },
+                              ]}
+                              onPress={() => setModalVisible(!modalVisible)}>
+                              <Text style={[styles.wewe, styles.wewe2]}>
+                                Cancel
+                              </Text>
+                            </TouchableOpacity>
+                          </View>
+                        </>
+                      )}
+                    </View>
+                  </TouchableWithoutFeedback>
+                </View>
+              </TouchableWithoutFeedback>
+            </Modal>
+
+            {/* <Modal
             animationType="fade"
             transparent={true}
             visible={logoutModalVisible}
@@ -995,95 +1002,105 @@ const Profile = ({navigation}) => {
             </TouchableWithoutFeedback>
           </Modal> */}
 
-          <Modal
-            animationType="fade"
-            transparent={true}
-            visible={logoutModalVisible}
-            onRequestClose={() => setLogoutModalVisible(!logoutModalVisible)}>
-            <TouchableWithoutFeedback onPress={handleLogoutModal}>
-              <View style={styles.centeredView}>
-                <TouchableWithoutFeedback>
-                  <View style={OndeleteStyles.modalView}>
-                    <Text style={styles.modalTitle}>Logout</Text>
-                    <Text
-                      style={[
-                        styles.shareLink,
-                        {fontWeight: '400', fontSize: 15, marginBottom: -30},
-                      ]}>
-                      Are you sure you want to logout? You'll need to login
-                      again to the app.
-                    </Text>
+            <Modal
+              animationType="fade"
+              transparent={true}
+              visible={logoutModalVisible}
+              onRequestClose={() => setLogoutModalVisible(!logoutModalVisible)}>
+              <TouchableWithoutFeedback onPress={handleLogoutModal}>
+                <View style={styles.centeredView}>
+                  <TouchableWithoutFeedback>
+                    <View style={OndeleteStyles.modalView}>
+                      <Text style={styles.modalTitle}>Logout</Text>
+                      <Text
+                        style={[
+                          styles.shareLink,
+                          {fontWeight: '400', fontSize: 15, marginBottom: -30},
+                        ]}>
+                        Are you sure you want to logout? You'll need to login
+                        again to the app.
+                      </Text>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          justifyContent: 'space-around',
+                          marginTop: 20,
+                        }}>
+                        <TouchableOpacity
+                          style={[
+                            styles.HomeButton,
+                            {backgroundColor: '#B21E2B'},
+                          ]}
+                          onPress={onLogout}>
+                          <Text style={[styles.wewe, styles.wewe1]}>
+                            Logout
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={[
+                            styles.HomeButton,
+                            {
+                              backgroundColor: '#fff',
+                              borderColor: '#B21E2B',
+                              borderWidth: 2,
+                            },
+                          ]}
+                          onPress={() =>
+                            setLogoutModalVisible(!logoutModalVisible)
+                          }>
+                          <Text style={[styles.wewe, styles.wewe2]}>
+                            Cancel
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </TouchableWithoutFeedback>
+                </View>
+              </TouchableWithoutFeedback>
+            </Modal>
+
+            <Modal
+              animationType="fade"
+              transparent={true}
+              visible={profileImageModalVisible}
+              onRequestClose={() =>
+                setProfileImageModalVisible(!profileImageModalVisible)
+              }>
+              <TouchableWithoutFeedback onPress={handleProfileModal}>
+                <View style={styles.centeredView}>
+                  <View style={styles.modalView}>
+                    <View style={styles.profileHead}>
+                      <Text style={styles.shareLink}>Profile Photo</Text>
+                      <Image source={require('../assets/delete.png')} />
+                    </View>
+
                     <View
                       style={{
                         flexDirection: 'row',
-                        justifyContent: 'space-around',
-                        marginTop: 20,
                       }}>
                       <TouchableOpacity
                         style={[
                           styles.HomeButton,
                           {backgroundColor: '#B21E2B'},
-                        ]}
-                        onPress={onLogout}>
-                        <Text style={[styles.wewe, styles.wewe1]}>Logout</Text>
+                        ]}>
+                        <Text style={[styles.wewe, styles.wewe1]}>Camera</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={[
                           styles.HomeButton,
-                          {
-                            backgroundColor: '#fff',
-                            borderColor: '#B21E2B',
-                            borderWidth: 2,
-                          },
-                        ]}
-                        onPress={() =>
-                          setLogoutModalVisible(!logoutModalVisible)
-                        }>
-                        <Text style={[styles.wewe, styles.wewe2]}>Cancel</Text>
+                          {backgroundColor: '#FFBE65'},
+                        ]}>
+                        <Text style={[styles.wewe, styles.wewe2]}>Gallery</Text>
                       </TouchableOpacity>
                     </View>
                   </View>
-                </TouchableWithoutFeedback>
-              </View>
-            </TouchableWithoutFeedback>
-          </Modal>
-
-          <Modal
-            animationType="fade"
-            transparent={true}
-            visible={profileImageModalVisible}
-            onRequestClose={() =>
-              setProfileImageModalVisible(!profileImageModalVisible)
-            }>
-            <TouchableWithoutFeedback onPress={handleProfileModal}>
-              <View style={styles.centeredView}>
-                <View style={styles.modalView}>
-                  <View style={styles.profileHead}>
-                    <Text style={styles.shareLink}>Profile Photo</Text>
-                    <Image source={require('../assets/delete.png')} />
-                  </View>
-
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                    }}>
-                    <TouchableOpacity
-                      style={[styles.HomeButton, {backgroundColor: '#B21E2B'}]}>
-                      <Text style={[styles.wewe, styles.wewe1]}>Camera</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[styles.HomeButton, {backgroundColor: '#FFBE65'}]}>
-                      <Text style={[styles.wewe, styles.wewe2]}>Gallery</Text>
-                    </TouchableOpacity>
-                  </View>
                 </View>
-              </View>
-            </TouchableWithoutFeedback>
-          </Modal>
-        </View>
-      )}
+              </TouchableWithoutFeedback>
+            </Modal>
+          </View>
+        )}
 
-      <Toast />
+        <Toast />
       </ScrollView>
     </SafeAreaView>
   );
