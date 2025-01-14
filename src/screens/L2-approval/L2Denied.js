@@ -96,7 +96,7 @@ const L2Denied = ({ navigation }) => {
 
   useFocusEffect(useCallback(() => {
     onRefresh();
-  }, [L2Denied]));
+  }, []));
 
   return (
     <><View style={{ flex: 1, paddingTop: 10, backgroundColor: '#FFF' }}>

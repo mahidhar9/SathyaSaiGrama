@@ -70,7 +70,7 @@ const Approved = ({ navigation }) => {
 
   useFocusEffect(useCallback(() => {
     onRefresh();
-  }, [Approved]));
+  }, []));
 
   useEffect(() => {
 
