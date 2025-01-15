@@ -104,7 +104,7 @@ const L2Pending = ({ navigation }) => {
 
   useFocusEffect(useCallback(() => {
     onRefresh();
-  }, [L2Pending]));
+  }, []));
 
 
   return (

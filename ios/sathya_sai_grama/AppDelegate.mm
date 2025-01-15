@@ -48,6 +48,7 @@ continueUserActivity:(NSUserActivity *)userActivity
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
   completionHandler(UIBackgroundFetchResultNoData);
+  // Handle the notification data here if needed
 }
 
 @end
