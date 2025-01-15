@@ -210,18 +210,6 @@ const Invite = ({navigation}) => {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            {/* <Image
-              style={{
-                alignSelf: 'center',
-                height: 211,
-                width: 244,
-                resizeMode: 'contain',
-                marginTop: 20,
-                marginBottom: 20,
-                marginLeft: 78,
-              }}
-              source={require('../../src/assets/welcomeimage.png')}
-            /> */}
             <View>
               <Text
                 style={{
@@ -239,20 +227,20 @@ const Invite = ({navigation}) => {
                 If you’re inviting someone to Sathya Sai Grama, you’ll need to
                 provide the details of the visitor(s) beforehand.
               </Text>
-              {/* <Text style={[styles.text2, styles.text]}>
-                Visitor can fill the form or you can fill it yourself.
-              </Text>
-              <Text style={[styles.text3, styles.text]}>
-                Please select one.
-              </Text> */}
             </View>
           </View>
-          <View style={{flexDirection: 'row', marginTop: 50}}>
+          <View
+            style={{
+              flexDirection: 'row',
+              marginTop: 30,
+              width: '100%',
+              justifyContent: 'center',
+            }}>
             <TouchableOpacity
               style={styles.buttonBox}
               onPress={() => navigation.navigate('FillByYourSelf')}>
               <Image
-                style={{alignSelf: 'center'}}
+                style={{alignSelf: 'center', width: 50, height: 50}}
                 source={require('../assets/fillbyyourselficon.png')}
               />
               <Text style={styles.buttonText}>
@@ -422,8 +410,8 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   buttonBox: {
-    width: 120,
-    height: 170,
+    width: '35%',
+    height: 'auto',
     // backgroundColor: '#752A26',
     paddingTop: 12,
     paddingBottom: 12,

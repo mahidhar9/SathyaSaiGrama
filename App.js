@@ -6,8 +6,6 @@ import NetInfo from '@react-native-community/netinfo';
 
 import {StyleSheet} from 'react-native';
 
-import {NativeModules} from 'react-native';
-
 import {
   DATABASE_ID,
   COLLECTION_ID,
@@ -37,8 +35,6 @@ const lightTheme = {
 const App = () => {
   const [isNetworkAvailable, setIsNetworkAvailable] = useState(true);
   const {user} = useContext(AuthContext);
-
-  console.log('NativeModules:', NativeModules);
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {

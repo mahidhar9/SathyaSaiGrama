@@ -210,7 +210,6 @@ const L2ApprovalStack = ({navigation}) => {
     useContext(UserContext);
   const {setUser} = useContext(AuthContext);
 
-
   return (
     <ApproveStack.Navigator>
       <ApproveStack.Screen
