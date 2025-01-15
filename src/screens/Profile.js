@@ -749,7 +749,7 @@ const Profile = ({navigation}) => {
                   marginStart: 10,
                   fontSize: 10,
                 }}>
-                Version 1.0 v19
+                Version 1.0 v20
               </Text>
             </View>
 
