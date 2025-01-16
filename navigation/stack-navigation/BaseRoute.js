@@ -136,7 +136,7 @@ const linking = {
 };
 
 // Handle background notifications
-messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+messaging().setBackgroundMessageHandler(async remoteMessage => {
   console.log('Background notification received:', remoteMessage);
   // You can process the notification data here if needed
   const url = buildDeepLinkFromNotificationData(remoteMessage.data);
@@ -199,7 +199,10 @@ const BaseRoute = () => {
               <Stack.Screen name="Login" component={Login} />
               <Stack.Screen name="Register" component={Register} />
               <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
-              <Stack.Screen name="VerificationNotice" component={VerificationNotice} />
+              <Stack.Screen
+                name="VerificationNotice"
+                component={VerificationNotice}
+              />
               <Stack.Screen name="ApprovalTab" component={ApprovalTab} />
               <Stack.Screen name="L2ApprovalTab" component={L2ApprovalTab} />
               <Stack.Screen name="FooterTab" component={FooterTab} />
