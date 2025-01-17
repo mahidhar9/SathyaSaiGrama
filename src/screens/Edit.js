@@ -93,7 +93,6 @@ const Edit = ({ route, navigation }) => {
     if(!loggedUser || loggedUser===null){
       if (!loggedUser) {
         settingLoggedUser();
-        settingLoggedUser();
       }
       }
     }, [])
