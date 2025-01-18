@@ -135,10 +135,10 @@ export const getL2Data = async (
 
     let url;
     if (Platform.OS === 'android') {
-      url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}?criteria=${criteria1}=${value1}%26%26${criteria2}="${value2}"%26%26${criteria3}="${value3}"%26%26${criteria4}!=${value4}%26%26Date_of_Visit>="${today}"`;
+      url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}?criteria=${criteria1}=[${value1}]%26%26${criteria2}="${value2}"%26%26${criteria3}="${value3}"%26%26${criteria4}!=${value4}%26%26Date_of_Visit>="${today}"`;
     } else {
       url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}?criteria=${encodeURIComponent(
-        `${criteria1}=${value1}&&${criteria2}="${value2}"&&${criteria3}="${value3}"&&${criteria4}!=${value4}&&Date_of_Visit>="${today}"`,
+        `${criteria1}=[${value1}]&&${criteria2}="${value2}"&&${criteria3}="${value3}"&&${criteria4}!=${value4}&&Date_of_Visit>="${today}"`,
       )}`;
     }
     console.log('url : ', url, 'Token - ', token);
