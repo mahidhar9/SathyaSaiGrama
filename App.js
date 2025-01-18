@@ -119,7 +119,6 @@ const App = () => {
         setProfileImage(existedUser.profilePhoto);
       }
     };
-
     checkUserExist();
   }, []);
 

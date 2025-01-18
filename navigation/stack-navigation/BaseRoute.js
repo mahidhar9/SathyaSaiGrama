@@ -189,7 +189,6 @@ const BaseRoute = () => {
     <SafeAreaView style={{flex: 1}}>
       <NavigationContainer
         linking={linking}
-        fallback={<Text>Loading...</Text>}
         ref={RootNavigation.navigationRef}>
         <Stack.Navigator screenOptions={{headerShown: false}}>
           {loggedUser ? (
