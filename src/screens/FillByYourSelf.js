@@ -614,35 +614,59 @@ const FillByYourSelf = ({navigation}) => {
   const [submitFlag, setSubmitFlag] = useState(false);
 
   const validatePhoneNumber = (phonenum) => {
-
     console.log("Phone number : ", phonenum); 
-
+    console.log('Phone number length : ', phonenum.length);
+    
     if (phonenum.length < 4) {
       setPhoneErr('Phone number is required');
       return false;
     }
-
-    setPhoneErr(null);
-    const regex = /^\+91[6-9][0-9]{9}$/;
-    if (!regex.test(phonenum)) {
-      setPhoneValidErr('Invalid phone number');
-      return false;
+  
+    if (phonenum.startsWith('+91')) {
+      setPhoneErr(null);
+      const regex = /^\+91[6-9][0-9]{9}$/;
+      if (!regex.test(phonenum)) {
+        setPhoneValidErr('Invalid phone number');
+        return false;
+      } else {
+        setPhoneValidErr(null);
+        return true;
+      }
     } else {
-      setPhoneValidErr(null);
-      return true;
+      setPhoneErr(null);
+      const parsedPhoneNumber = parsePhoneNumberFromString(phonenum);
+      if (!parsedPhoneNumber || !parsedPhoneNumber.isValid()) {
+        setPhoneValidErr('Invalid phone number');
+        return false;
+      } else {
+        setPhoneValidErr(null);
+        return true;
+      }
     }
   };
-
-
+  // useEffect(() => {
+  //     validatePhoneNumber();
+  // }, [formattedPhone]);
   const validateForm = () => {
 
     let valid = true;
-    if(!validatePhoneNumber(formattedPhone)){
+    if (!validatePhoneNumber(formattedPhone)) {
+      setPhoneErr('Phone number is required');
+      setPhoneValidErr(null);
+      console.log('inside !formattedPhone');
       valid = false;
-    }else{
-      valid = true;
+    } else {
+      setPhoneErr(null);
+      const parsedPhoneNumber = parsePhoneNumberFromString(formattedPhone);
+      if (!parsedPhoneNumber || !parsedPhoneNumber.isValid()) {
+        setPhoneValidErr('Invalid phone number');
+        console.log('invalid phone number');
+        valid = false;
+      } else {
+        setPhoneValidErr(null);
+        valid = true;
+      }
     }
-
     console.log('Home or office : ', selectedHO);
     menCount = men === '' ? '0' : men;
     womenCount = women === '' ? '0' : women;
@@ -1010,9 +1034,9 @@ const FillByYourSelf = ({navigation}) => {
                     }}
                     onChangeFormattedText={text => {
                       setFormattedPhone(text);
-                      if(submitFlag){
+                      // if(submitFlag){
                         validatePhoneNumber(text);
-                      }
+                      // }
                     }}
                     countryPickerProps={{withAlphaFilter: true}}
                     disabled={false}
