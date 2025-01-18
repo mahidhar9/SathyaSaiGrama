@@ -12,10 +12,10 @@ import {
   ImageBackground,
   Dimensions,
 } from 'react-native';
-import React, {useState, useContext, useEffect} from 'react';
-import {useForm, Controller} from 'react-hook-form';
-import {auth} from '../auth/firebaseConfig';
-import {signInWithEmailAndPassword, sendEmailVerification} from 'firebase/auth';
+import React, { useState, useContext, useEffect } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { auth } from '../auth/firebaseConfig';
+import { signInWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import {
   getDataWithInt,
   getDataWithString,
@@ -23,18 +23,18 @@ import {
 } from '../components/ApiRequest';
 import UserContext from '../../context/UserContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME} from '@env';
+import { BASE_APP_URL, APP_LINK_NAME, APP_OWNER_NAME } from '@env';
 import Dialog from 'react-native-dialog';
-import {encode} from 'base64-arraybuffer';
+import { encode } from 'base64-arraybuffer';
 import DotsBlinkingLoaderEllipsis from '../components/DotsBlinkingLoaderEllipsis';
-const Login = ({navigation}) => {
+const Login = ({ navigation }) => {
   const screenWidth = Dimensions.get('window').width;
   const [loading, setLoading] = useState(false);
-  const [dotsBlinkingLoaderEllipsis,setDotsBlinkingLoaderEllipsis] =useState(false);
+  const [dotsBlinkingLoaderEllipsis, setDotsBlinkingLoaderEllipsis] = useState(false);
   const {
     control,
     handleSubmit,
-    formState: {errors},
+    formState: { errors },
   } = useForm();
   const {
     userType,
@@ -69,6 +69,7 @@ const Login = ({navigation}) => {
     hasSpecialChar: false,
     isValidLength: false,
   });
+  const [isLoggedIntoAnotherDevice, setIsLoggedIntoAnotherDevice] = useState(false)
 
   // const validatePassword = (text) => {
   //   const hasNumber = /\d/.test(text);
@@ -309,27 +310,35 @@ const Login = ({navigation}) => {
       accessToken,
     );
     console.log('Whether user exis or not in login: ', res);
+    console.log("Device tokens - ", res.data[0].Device_Tokens)
+
     if (res.code === 3000) {
 
+      if(res.data[0].Device_Tokens && deviceToken !== res.data[0].Device_Tokens){
+        setLoading(false);
+        setIsLoggedIntoAnotherDevice(true)
+        return;
+      }
+
       setDotsBlinkingLoaderEllipsis(true);
-    
-    await isResident(res.data[0].ID);
-    await isEmployee(res.data[0].ID);
-    console.log(
-      'resident || employee boolean',
-      residentLocalVar,
-      employeeLocalVar,
-    );
-    await isTestResident(res.data[0].ID);
-    if (res && res.data && (residentLocalVar || employeeLocalVar)) {
-      try {
-        fetchDataFromOffice(res.data[0].ID);
-        const userCredential = await signInWithEmailAndPassword(
-          auth,
-          userCred.email.toLowerCase().trim(),
-          userCred.password,
-        );
-        const user = userCredential.user;
+
+      await isResident(res.data[0].ID);
+      await isEmployee(res.data[0].ID);
+      console.log(
+        'resident || employee boolean',
+        residentLocalVar,
+        employeeLocalVar,
+      );
+      await isTestResident(res.data[0].ID);
+      if (res && res.data && (residentLocalVar || employeeLocalVar)) {
+        try {
+          await fetchDataFromOffice(res.data[0].ID);
+          const userCredential = await signInWithEmailAndPassword(
+            auth,
+            userCred.email.toLowerCase().trim(),
+            userCred.password,
+          );
+          const user = userCredential.user;
 
           if (user.emailVerified) {
             setL1ID(res.data[0].ID);
@@ -354,22 +363,10 @@ const Login = ({navigation}) => {
                 profilePhoto: null,
               });
             }
-            const response = await findDeviceToken(res.data[0].ID);
-            console.log('response is: ', response);
-            let myDeviceToken;
-            console.log('present token is: ', response.data.Device_Tokens);
-            if (!response.data.Device_Tokens) {
-              console.log('first time');
-              myDeviceToken = '' + deviceToken + '||';
-            } else {
-              myDeviceToken = response.data.Device_Tokens + deviceToken + '||';
-              console.log('second time');
-            }
-            console.log('local device token is: ', myDeviceToken);
-            console.log('Response device token is : ', response);
+
             const updateData = {
               data: {
-                Device_Tokens: myDeviceToken,
+                Device_Tokens: deviceToken,
               },
             };
             const updateResponse = await updateDeviceToken(
@@ -380,7 +377,7 @@ const Login = ({navigation}) => {
           } else {
             await sendEmailVerification(auth.currentUser);
             setLoading(false);
-            navigation.navigate('VerificationNotice', {id: res.data[0].ID});
+            navigation.navigate('VerificationNotice', { id: res.data[0].ID });
           }
         } catch (error) {
           setLoading(false);
@@ -412,13 +409,13 @@ const Login = ({navigation}) => {
 
   return (
     <>
-      {loading ? dotsBlinkingLoaderEllipsis?(<DotsBlinkingLoaderEllipsis />): (
+      {loading ? dotsBlinkingLoaderEllipsis ? (<DotsBlinkingLoaderEllipsis />) : (
         <ActivityIndicator
           size="large"
           color="#752A26"
           style={styles.loadingContainer}
         />
-        
+
       ) : (
         <>
           <ScrollView>
@@ -443,7 +440,7 @@ const Login = ({navigation}) => {
                   <Controller
                     name="email"
                     control={control}
-                    render={({field: {onChange, value}}) => (
+                    render={({ field: { onChange, value } }) => (
                       <TextInput
                         placeholder="Email Address"
                         value={value}
@@ -456,7 +453,7 @@ const Login = ({navigation}) => {
                         style={styles.inputBox}
                       />
                     )}
-                    rules={{required: true, pattern: /^\S+@\S+$/i}}
+                    rules={{ required: true, pattern: /^\S+@\S+$/i }}
                   />
                 </View>
                 {errors.email?.type === 'required' && (
@@ -527,7 +524,7 @@ const Login = ({navigation}) => {
                   <Controller
                     name="password"
                     control={control}
-                    render={({field: {onChange, value}}) => (
+                    render={({ field: { onChange, value } }) => (
                       <TextInput
                         placeholder="Password"
                         style={styles.inputBox}
@@ -557,7 +554,7 @@ const Login = ({navigation}) => {
                       }}>
                       <Image
                         source={require('../assets/eyestrike.png')}
-                        style={{width: 16, height: 16}}
+                        style={{ width: 16, height: 16 }}
                       />
                     </TouchableOpacity>
                   ) : (
@@ -565,7 +562,7 @@ const Login = ({navigation}) => {
                       onPress={() => setShowPassword(!showPassword)}>
                       <Image
                         source={require('../assets/eye.png')}
-                        style={{width: 16, height: 16}}
+                        style={{ width: 16, height: 16 }}
                       />
                     </TouchableOpacity>
                   )}
@@ -631,23 +628,39 @@ const Login = ({navigation}) => {
           </ScrollView>
           <Dialog.Container
             visible={DialogVisible}
-            contentStyle={{borderRadius: 10}}>
+            contentStyle={{ borderRadius: 10 }}>
             <Dialog.Title style={styles.dialogTitle}>
               Unable to find user
             </Dialog.Title>
-            <Dialog.Description style={{color: '#2F3036'}}>
+            <Dialog.Description style={{ color: '#2F3036' }}>
               Please check your email or password and try again. Otherwise
               please register.
             </Dialog.Description>
             <Dialog.Button
-              style={{color: '#B21E2B'}}
+              style={{ color: '#B21E2B' }}
               label="Register"
               onPress={onPressRegister}
             />
             <Dialog.Button
-              style={{color: 'black'}}
+              style={{ color: 'black' }}
               label="Cancel"
               onPress={onPressOk}
+            />
+          </Dialog.Container>
+          <Dialog.Container
+            visible={isLoggedIntoAnotherDevice}
+            contentStyle={{ borderRadius: 10 }}>
+            <Dialog.Title style={styles.dialogTitle}>
+              Already logged in to another device
+            </Dialog.Title>
+            <Dialog.Description style={{ color: '#2F3036' }}>
+              You are already logged in to another device.
+              Please logout from the other device and try again.
+            </Dialog.Description>
+            <Dialog.Button
+              style={{ color: '#B21E2B' }}
+              label="Ok"
+              onPress={()=>setIsLoggedIntoAnotherDevice(false)}
             />
           </Dialog.Container>
         </>
