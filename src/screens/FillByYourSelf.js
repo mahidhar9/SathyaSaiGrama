@@ -61,7 +61,7 @@ const FillByYourSelf = ({navigation}) => {
   const [selectedSG, setSelectedSG] = useState('');
 
   const [value, setValue] = useState('');
-  const [formattedValue, setFormattedValue] = useState('');
+  const [formattedPhone, setFormattedPhone] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [image, setImage] = useState(null);
   const [imageUri, setImageUri] = useState(null);
@@ -108,14 +108,6 @@ const FillByYourSelf = ({navigation}) => {
     }
   }, []);
 
-  // if (loggedUser.resident === true && loggedUser.employee === true) {
-  //   selectedHomeOffice = '';
-  // } else if (loggedUser.resident === true && loggedUser.employee === false) {
-  //   selectedHomeOffice = 'Home';
-  // } else if (loggedUser.resident === false && loggedUser.employee === true) {
-  //   selectedHomeOffice = 'Office';
-  // }
-
   const [selectedHO, setSelectedHO] = useState('');
 
   useEffect(() => {
@@ -155,45 +147,14 @@ const FillByYourSelf = ({navigation}) => {
       console.log('Visiting month :', monthNumber);
     }
 
-    // const today = new Date();
-
-    // const startDate = getFormatedDate(
-    //   today.setDate(today.getDate()),
-    //   'YYYY/MM/DD',
-    // );
-    // const addDaysToDate = (dateString, daysToAdd) => {
-    //   // Convert the input string (YYYY/MM/DD) into a Date object
-    //   const [year, month, day] = dateString.split('/'); // Split the string by '/'
-    //   const date = new Date(year, month - 1, day); // Month is 0-indexed in JavaScript
-
-    //   // Add the specified number of days (60 days in this case)
-    //   date.setDate(date.getDate() + daysToAdd);
-
-    //   // Format the new date back to 'YYYY/MM/DD'
-    //   const newYear = date.getFullYear();
-    //   const newMonth = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed, so add 1
-    //   const newDay = String(date.getDate()).padStart(2, '0');
-
-    //   return `${newYear}/${newMonth}/${newDay}`;
-    // };
   };
-  // const endDate = addDaysToDate(startDate, 60);
-  // console.log('endDate', endDate);
+
   const approvalToVisitorID = useRef(null);
   const viewRef = useRef();
 
   const options = ['Male', 'Female'];
   const singleorgroup = ['Single', 'Group'];
   const homeoroffice = ['Home', 'Office'];
-
-  // const handleDateChange = selectedDate => {
-  //   const formatteddate = moment(selectedDate, 'YYYY-MM-DD').format(
-  //     'DD-MMM-YYYY',
-  //   );
-  //   setDate(formatteddate);
-  //   setShowModal(!showModal); //Date Picker
-  //   setDateOfVisitErr(null);
-  // };
 
   let pastScrollRange = 0;
   let futureScrollRange = 6;
@@ -268,7 +229,7 @@ const FillByYourSelf = ({navigation}) => {
         'Logged usename is generateQR in FillByYourSelf: ',
         loggedUser.name,
       );
-      const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${
+      const qrUrl = `https://oyster-app-7jt2c.ondigitalocean.app/generate-image?name=${
         loggedUser.name
       }&&passcode=${passcodeData}&&date=${convertDateFormat(
         date,
@@ -486,7 +447,7 @@ const FillByYourSelf = ({navigation}) => {
         Referrer_App_User_lookup: L1ID,
         Referrer_Approval: 'APPROVED',
         Department: DepartmentID,
-        Phone_Number: formattedValue,
+        Phone_Number: formattedPhone,
         Remarks: remarks,
         Priority: priority,
         Date_of_Visit: convertDateFormat(date),
@@ -552,7 +513,7 @@ const FillByYourSelf = ({navigation}) => {
           last_name: lastName,
           first_name: firstName,
         },
-        Phone_Number: formattedValue,
+        Phone_Number: formattedPhone,
         Gender: selectedGender,
         Added_by_App_user_lookup: L1ID,
       },
@@ -652,30 +613,60 @@ const FillByYourSelf = ({navigation}) => {
   const [phoneValidErr, setPhoneValidErr] = useState(null);
   const [submitFlag, setSubmitFlag] = useState(false);
 
-  const validatePhoneNumber = () => {
-    if (!formattedValue) {
+  const validatePhoneNumber = (phonenum) => {
+    console.log("Phone number : ", phonenum); 
+    console.log('Phone number length : ', phonenum.length);
+    
+    if (phonenum.length < 4) {
       setPhoneErr('Phone number is required');
-      setPhoneValidErr(null);
-    } else {
+      return false;
+    }
+  
+    if (phonenum.startsWith('+91')) {
       setPhoneErr(null);
-      const parsedPhoneNumber = parsePhoneNumberFromString(formattedValue);
-      if (!parsedPhoneNumber || !parsedPhoneNumber.isValid()) {
+      const regex = /^\+91[6-9][0-9]{9}$/;
+      if (!regex.test(phonenum)) {
         setPhoneValidErr('Invalid phone number');
+        return false;
       } else {
         setPhoneValidErr(null);
+        return true;
+      }
+    } else {
+      setPhoneErr(null);
+      const parsedPhoneNumber = parsePhoneNumberFromString(phonenum);
+      if (!parsedPhoneNumber || !parsedPhoneNumber.isValid()) {
+        setPhoneValidErr('Invalid phone number');
+        return false;
+      } else {
+        setPhoneValidErr(null);
+        return true;
       }
     }
   };
-
-  useEffect(() => {
-    if (submitFlag) {
-      validatePhoneNumber();
-    }
-  }, [formattedValue]);
-
+  // useEffect(() => {
+  //     validatePhoneNumber();
+  // }, [formattedPhone]);
   const validateForm = () => {
-    let valid = true;
 
+    let valid = true;
+    if (!validatePhoneNumber(formattedPhone)) {
+      setPhoneErr('Phone number is required');
+      setPhoneValidErr(null);
+      console.log('inside !formattedPhone');
+      valid = false;
+    } else {
+      setPhoneErr(null);
+      const parsedPhoneNumber = parsePhoneNumberFromString(formattedPhone);
+      if (!parsedPhoneNumber || !parsedPhoneNumber.isValid()) {
+        setPhoneValidErr('Invalid phone number');
+        console.log('invalid phone number');
+        valid = false;
+      } else {
+        setPhoneValidErr(null);
+        valid = true;
+      }
+    }
     console.log('Home or office : ', selectedHO);
     menCount = men === '' ? '0' : men;
     womenCount = women === '' ? '0' : women;
@@ -730,22 +721,6 @@ const FillByYourSelf = ({navigation}) => {
       //   valid = false;
       // }
       setDateOfVisitErr(null);
-    }
-
-    if (!formattedValue) {
-      setPhoneErr('Phone number is required');
-      console.log('inside !formattedValue');
-      valid = false;
-    } else {
-      setPhoneErr(null);
-      const parsedPhoneNumber = parsePhoneNumberFromString(formattedValue);
-      if (!parsedPhoneNumber || !parsedPhoneNumber.isValid()) {
-        setPhoneValidErr('Invalid phone number');
-        console.log('invalid phone number');
-        valid = false;
-      } else {
-        setPhoneValidErr(null);
-      }
     }
 
     if (!selectedSG) {
@@ -1056,13 +1031,12 @@ const FillByYourSelf = ({navigation}) => {
                     flagButtonStyle={styles.flagButton}
                     codeTextStyle={styles.codeText}
                     onChangeText={text => {
-                      setPhoneNumber(text);
-                      if (submitFlag) {
-                        validateForm();
-                      }
                     }}
                     onChangeFormattedText={text => {
-                      setFormattedValue(text);
+                      setFormattedPhone(text);
+                      // if(submitFlag){
+                        validatePhoneNumber(text);
+                      // }
                     }}
                     countryPickerProps={{withAlphaFilter: true}}
                     disabled={false}
@@ -1109,20 +1083,6 @@ const FillByYourSelf = ({navigation}) => {
                       />
                     </Pressable>
                   )}
-                  {/* <TouchableWithoutFeedback
-                    onPress={() => {
-                      console.log('clicked on date of visit field input');
-                      setShowModal(true);
-                    }}>
-                    <TextInput
-                      style={[
-                        styles.phoneInputContainer,
-                        {paddingLeft: 12, color: '#71727A'},
-                      ]}
-                      value={convertDateFormat(date)}
-                      editable={false}
-                    />
-                  </TouchableWithoutFeedback> */}
                   {dateOfVisitErr && (
                     <Text style={styles.errorText}>{dateOfVisitErr}</Text>
                   )}
@@ -1169,21 +1129,6 @@ const FillByYourSelf = ({navigation}) => {
                               }}
                               showScrollIndicator={true}
                             />
-                            {/* <DatePicker
-                          mode="calendar"
-                          minimumDate={startDate}
-                          maximumDate={endDate}
-                          onSelectedChange={handleDateChange}
-                          options={{
-                            backgroundColor: 'white',
-                            textHeaderColor: '#B21E2b',
-                            textDefaultColor: '#333',
-                            selectedTextColor: '#B21E2b',
-                            mainColor: 'white',
-                            textSecondaryColor: 'black',
-                            borderColor: '#B21E2B',
-                          }}
-                        /> */}
                           </View>
                         </TouchableWithoutFeedback>
                       </View>

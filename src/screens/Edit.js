@@ -49,7 +49,8 @@ const Edit = ({ route, navigation }) => {
   // phone related states
   const [isEditable, setIsEditable] = useState(false);
   const [phoneValidErr, setPhoneValidErr] = useState(null);
-  const [formattedValue, setFormattedValue] = useState('');
+  // const [formattedValue, setFormattedValue] = useState('');
+  const [formattedValue, setFormattedValue] = useState(userdata?.Phone_Number || '');
   const [phoneErr, setPhoneErr] = useState(null);
   const [submitFlag, setSubmitFlag] = useState(false);
 
@@ -90,9 +91,11 @@ const Edit = ({ route, navigation }) => {
     }
 
     if(!loggedUser || loggedUser===null){
-      settingLoggedUser();
-    }
-  }, [])
+      if (!loggedUser) {
+        settingLoggedUser();
+      }
+      }
+    }, [])
   
   const {
     control,
@@ -141,7 +144,8 @@ const Edit = ({ route, navigation }) => {
   const handleCancelPhone = () => {
     setPhoneErr(null);
     setPhoneValidErr(null);
-    setFormattedValue(userdata?.Phone_Number);
+    // setFormattedValue(userdata?.Phone_Number);
+    setFormattedValue(userdata?.Phone_Number || '');
     setIsEditable(false);
   };
 
@@ -198,7 +202,8 @@ const Edit = ({ route, navigation }) => {
     } else {
       updateddata = {
         Name_field: basicInfo.name,
-        Phone_Number: formattedValue,
+        // Phone_Number: formattedValue,
+        Phone_Number: formattedValue || userdata?.Phone_Number,
         Secondary_Phon: basicInfo.secondary_phone,
         Gender: basicInfo.gender,
       };

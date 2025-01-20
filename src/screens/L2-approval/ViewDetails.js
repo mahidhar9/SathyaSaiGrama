@@ -146,11 +146,12 @@ const ViewDetails = ({navigation, route}) => {
 
   const generateQR = async (passcodeData, status) => {
     try {
-      const qrUrl = `https://qr-code-invitation-to-visitor.onrender.com/generate-image?name=${user.Referrer_App_User_lookup.Name_field}&&passcode=${passcodeData}&&date=${user.Date_of_Visit}&&key=${SECRET_KEY}`;
+      console.log("generateQR function called at : ", new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+      const qrUrl = `https://oyster-app-7jt2c.ondigitalocean.app/generate-image?name=${user.Referrer_App_User_lookup.Name_field}&&passcode=${passcodeData}&&date=${user.Date_of_Visit}&&key=${SECRET_KEY}`;
       const res = await fetch(qrUrl);
       console.log('URL - ', qrUrl);
       console.log('res from fetch img : ', res);
-
+      console.log("after generateQR function called at : ", new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
       if (!res.ok) {
         console.error('Error fetching image:', res.statusText);
         return;
@@ -191,7 +192,7 @@ const ViewDetails = ({navigation, route}) => {
           Generated_Passcode: passcodeData,
         },
       };
-
+      console.log("Before first PATCH request to Zoho to upload passcode: ", new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
       const url1 = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}`;
       console.log(url1);
       const response1 = await fetch(url1, {
@@ -203,6 +204,7 @@ const ViewDetails = ({navigation, route}) => {
         },
       });
 
+      console.log("After first PATCH request to Zoho to upload passcode: ", new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
       const updateRes = await response1.json();
       if (response1.ok) {
         if (updateRes.data && updateRes.code === 3000) {
@@ -213,6 +215,7 @@ const ViewDetails = ({navigation, route}) => {
             setL2DeniedDataFetched(false);
             setL2ApproveDataFetched(false);
           }
+          console.log("Before second PATCH request to Zoho to upload Approval to visitor: ", new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
           const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/Approval_to_Visitor_Report/${user.ID}/Generated_QR_Code/upload`;
           const response = await fetch(url, {
             method: 'POST',
@@ -225,6 +228,7 @@ const ViewDetails = ({navigation, route}) => {
               'Content-Type': 'multipart/form-data',
             },
           });
+          console.log("After second PATCH request to Zoho to upload Approval to visitor: ", new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
           if (response.ok) {
             console.log('Image uploaded successfully to Zoho.', response);
             return;

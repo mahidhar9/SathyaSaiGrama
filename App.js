@@ -6,8 +6,6 @@ import NetInfo from '@react-native-community/netinfo';
 
 import {StyleSheet} from 'react-native';
 
-import {NativeModules} from 'react-native';
-
 import {
   DATABASE_ID,
   COLLECTION_ID,
@@ -37,8 +35,6 @@ const lightTheme = {
 const App = () => {
   const [isNetworkAvailable, setIsNetworkAvailable] = useState(true);
   const {user} = useContext(AuthContext);
-
-  console.log('NativeModules:', NativeModules);
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
@@ -123,7 +119,6 @@ const App = () => {
         setProfileImage(existedUser.profilePhoto);
       }
     };
-
     checkUserExist();
   }, []);
 
@@ -206,7 +201,7 @@ const App = () => {
     };
 
     setLoggedUser(data);
-    console.log('Data to be set in AsyncStorage: ', data); // Log the data before setting
+    //console.log('Data to be set in AsyncStorage: ', data); // Log the data before setting
 
     await AsyncStorage.setItem('existedUser', JSON.stringify(data));
 
