@@ -71,29 +71,6 @@ const Login = ({ navigation }) => {
   });
   const [isLoggedIntoAnotherDevice, setIsLoggedIntoAnotherDevice] = useState(false)
 
-  // const validatePassword = (text) => {
-  //   const hasNumber = /\d/.test(text);
-  //   const hasUpperCase = /[A-Z]/.test(text);
-  //   const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(text);
-  //   const isValidLength = text.length >= 8 && text.length <= 20;
-
-  //   setValidation({
-  //     hasNumber,
-  //     hasUpperCase,
-  //     hasSpecialChar,
-  //     isValidLength,
-  //   });
-
-  //   setPassword(text);
-  // };
-  // const isValidPassword = () => {
-  //   return (
-  //     validation.hasNumber &&
-  //     validation.hasUpperCase &&
-  //     validation.hasSpecialChar &&
-  //     validation.isValidLength
-  //   );
-  // };
   const onPressOk = () => {
     setDialogVisible(false);
   };
@@ -247,30 +224,6 @@ const Login = ({ navigation }) => {
     }
   };
 
-  const findDeviceToken = async id => {
-    try {
-      const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${id}`;
-      console.log(url);
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          Authorization: `Zoho-oauthtoken ${accessToken}`,
-        },
-      });
-      return await response.json();
-    } catch (err) {
-      if (err.message === 'Network request failed')
-        Alert.alert(
-          'Network Error',
-          'Failed to fetch data. Please check your network connection and try again.',
-        );
-      else {
-        Alert.alert('Error: ', err);
-        console.log(err);
-      }
-    }
-  };
-
   const getProfileImage = async url => {
     console.log('url in getProfileImage', url);
     const cacheBuster = new Date().getTime();
@@ -301,8 +254,13 @@ const Login = ({ navigation }) => {
     }
   };
 
+  const [isOk, setIsOk] = useState(true)
+  const [userData, setUserData] = useState({})
+
   const handleLoginForm = async userCred => {
     setLoading(true);
+    console.log("Login user data", userCred)
+    setUserData(userCred)
     const res = await getDataWithString(
       'All_App_Users',
       'Email',
@@ -314,10 +272,12 @@ const Login = ({ navigation }) => {
 
     if (res.code === 3000) {
 
-      if(res.data[0].Device_Tokens && deviceToken !== res.data[0].Device_Tokens){
-        setLoading(false);
-        setIsLoggedIntoAnotherDevice(true)
-        return;
+      if(!userCred.forceLogin){
+        if(res.data[0].Device_Tokens && deviceToken !== res.data[0].Device_Tokens){
+          setLoading(false);
+          setIsLoggedIntoAnotherDevice(true)
+          return;
+        }
       }
 
       setDotsBlinkingLoaderEllipsis(true);
@@ -591,13 +551,10 @@ const Login = ({ navigation }) => {
                 <View style={styles.redirect}>
                   <Text
                     style={{
-                      width: 154,
                       color: '#71727A',
-                      textAlign: 'right',
-                      marginEnd: 4,
+                      marginEnd: 6,
                       fontFamily: 'Inter',
                       fontSize: 12,
-                      flexShrink: 0,
                       fontStyle: 'normal',
                       fontWeight: '600',
                       letterSpacing: 0.12,
@@ -655,12 +612,23 @@ const Login = ({ navigation }) => {
             </Dialog.Title>
             <Dialog.Description style={{ color: '#2F3036' }}>
               You are already logged in to another device.
-              Please logout from the other device and try again.
+              By logging here you will be automatically logged out from the other device.
             </Dialog.Description>
             <Dialog.Button
               style={{ color: '#B21E2B' }}
-              label="Ok"
-              onPress={()=>setIsLoggedIntoAnotherDevice(false)}
+              label="Cancel"
+              onPress={()=>{
+                setIsLoggedIntoAnotherDevice(false)
+              }}
+            />
+            <Dialog.Button
+              style={{ color: '#B21E2B' }}
+              label="Login Here"
+              onPress={()=>{
+                setIsOk(false)
+                setIsLoggedIntoAnotherDevice(false)
+                handleLoginForm({...userData, forceLogin: true});
+              }}
             />
           </Dialog.Container>
         </>
@@ -692,6 +660,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 10,
     justifyContent: 'center',
+    paddingLeft: "11%"
   },
   inputBox: {
     color: '#1F2024',
@@ -754,8 +723,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontFamily: 'Inter',
     fontStyle: 'normal',
-    width: 33,
-    height: 15,
+    width: "100%",
+    height: "100%",
+    textAlign: "center"
   },
   login: {
     color: '#000',
@@ -764,8 +734,8 @@ const styles = StyleSheet.create({
     fontStyle: 'normal',
     fontWeight: '900',
     letterSpacing: 0.24,
-    width: 124,
-    height: 29,
+    width: "85%",
+    height: "8%",
     marginBottom: 24,
   },
   textError: {

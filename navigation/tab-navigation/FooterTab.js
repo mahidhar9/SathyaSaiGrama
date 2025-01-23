@@ -219,7 +219,7 @@ const L2ApprovalStack = ({navigation}) => {
           header: () => (
             <View
               style={{
-                height: 56,
+                height: 60,
                 padding: 19.5,
                 justifyContent: 'center',
                 alignItems: 'center',

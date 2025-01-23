@@ -66,7 +66,7 @@ const ApprovalComponent = ({ navigation, user }) => {
                     user?.Referrer_Approval === "APPROVED" ? (
                         <View style={styles.status}>
                             <View style={[styles.statusview, { backgroundColor: statusColor }]}>
-                                <Text style={{ color: statusTxtColor }}>{status}</Text>
+                                <Text style={{ color: statusTxtColor, fontSize: 12 }}>{status}</Text>
                             </View >
                         </View>
                     ) : null
@@ -94,11 +94,13 @@ const styles = StyleSheet.create({
     },
     txt1: {
         marginLeft: 20,
-        marginTop: 5
+        marginTop: 5,
+        fontSize: 12
     },
     txt2: {
         marginRight: 27,
-        marginTop: 5
+        marginTop: 5,
+        fontSize: 12
     },
     nametxt: {
         color: "#1F2024",

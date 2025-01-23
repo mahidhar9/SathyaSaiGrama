@@ -18,6 +18,8 @@ import {AuthContext} from '../auth/AuthProvider';
 import {BASE_APP_URL, APP_OWNER_NAME, APP_LINK_NAME, YOURLS_KEY} from '@env';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Dialog from 'react-native-dialog';
+import RNRestart from 'react-native-restart';
 
 const Invite = ({navigation}) => {
   const {user} = useContext(AuthContext);
@@ -29,6 +31,8 @@ const Invite = ({navigation}) => {
     setLoggedUser,
     employee,
     resident,
+    deviceToken,
+    zohoDeviceToken,
   } = useContext(UserContext);
 
   useEffect(() => {
@@ -198,6 +202,11 @@ const Invite = ({navigation}) => {
     }
   };
 
+  const performLogout = async() =>{
+    await AsyncStorage.removeItem('existedUser');
+    RNRestart.Restart();
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
@@ -326,6 +335,21 @@ const Invite = ({navigation}) => {
                 Visitor {'\n'}to complete {'\n'}the form
               </Text>
             </TouchableOpacity>
+            <Dialog.Container
+              visible={zohoDeviceToken && deviceToken!==zohoDeviceToken}
+              contentStyle={{borderRadius: 10}}>
+              <Dialog.Title style={{color: "black"}}>
+                Logged in to another device
+              </Dialog.Title>
+              <Dialog.Description style={{color: '#2F3036'}}>
+                You are already logged in to another device.
+              </Dialog.Description>
+              <Dialog.Button
+                style={{color: '#B21E2B'}}
+                label="Ok"
+                onPress={performLogout}
+              />
+            </Dialog.Container>
           </View>
         </View>
       </ScrollView>
@@ -477,7 +501,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontStyle: 'normal',
     fontWeight: '900',
-
     letterSpacing: 0.08,
     height: 41,
     alignSelf: 'stretch',
@@ -489,8 +512,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontStyle: 'normal',
     fontWeight: '600',
-    lineHeight: 25,
-    height: 48,
   },
   HomeButton: {
     height: 50,

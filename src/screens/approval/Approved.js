@@ -52,7 +52,6 @@ const Approved = ({ navigation }) => {
   const onRefresh = async () => {
     setRefreshing(true);
     const result = await getDataWithIntAndString('Approval_to_Visitor_Report', 'Referrer_App_User_lookup', L1ID, "Referrer_Approval", "APPROVED", getAccessToken());
-    const all_approveds = result.data;
     if (result.data === undefined) {
       setApproveds(null);
       setApprovedsData(null)
@@ -60,8 +59,7 @@ const Approved = ({ navigation }) => {
       setLoading(false);
     }
     else {
-
-      const sortedData = defaultSort(all_approveds)
+      const sortedData = defaultSort(result.data)
       setApproveds(sortedData);
       setApprovedsData(sortedData)
       setRefreshing(false);
@@ -87,13 +85,9 @@ const Approved = ({ navigation }) => {
     <><View style={{ flex: 1, paddingTop: 10, backgroundColor: "#FFFF" }}>
       {loading ? (
         <View style={styles.loadingContainer}>
-          {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
-          {/* <RequestSkeletonScreen/> */}
           <DotsBlinkingLoaderEllipsis />
         </View>
       ) : ((refreshing ? (<View style={styles.loadingContainer}>
-        {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
-        {/* <RequestSkeletonScreen/> */}
         <DotsBlinkingLoaderEllipsis />
       </View>) : (
         <>

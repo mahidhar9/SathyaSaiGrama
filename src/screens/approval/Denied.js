@@ -62,7 +62,6 @@ const Denied = ({ navigation }) => {
   const onRefresh = async () => {
     setRefreshing(true);
     const result = await getDataWithIntAndString('Approval_to_Visitor_Report', 'Referrer_App_User_lookup', L1ID, "Referrer_Approval", "DENIED", getAccessToken());
-    const all_denieds = result.data;
     if (result.data === undefined) {
       setDenieds(null);
       setDeniedsData(null)
@@ -71,7 +70,7 @@ const Denied = ({ navigation }) => {
 
 
     } else {
-      const sortedData = defaultSort(all_denieds)
+      const sortedData = defaultSort(all_deresult.datanieds)
       setDenieds(sortedData);
       setDeniedsData(sortedData);
       setRefreshing(false);

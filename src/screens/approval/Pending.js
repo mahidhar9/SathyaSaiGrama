@@ -36,32 +36,33 @@ const Pending = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [pendingsData, setPendingsData] = useState([]);
 
-  const fetchData = async () => {
-    setLoading(true);
-    const result = await getDataWithIntAndString(
-      'Approval_to_Visitor_Report',
-      'Referrer_App_User_lookup',
-      L1ID,
-      'Referrer_Approval',
-      'PENDING APPROVAL',
-      getAccessToken(),
-    );
-    const all_pendings = result.data;
-    if (result.data === undefined) {
-      setPendings(null);
-      setPendingsData(null);
-      //setPendingDataFetched(false);
-      setLoading(false);
-    }
-    // sorting the pendings data by date
-    else {
-      const sortedData = defaultSort(all_pendings)
-      setPendings(sortedData);
-      setPendingsData(sortedData);
-      setPendingDataFetched(true);
-      setLoading(false);
-    }
-  };
+  // const fetchData = async () => {
+  //   setLoading(true);
+  //   const result = await getDataWithIntAndString(
+  //     'Approval_to_Visitor_Report',
+  //     'Referrer_App_User_lookup',
+  //     L1ID,
+  //     'Referrer_Approval',
+  //     'PENDING APPROVAL',
+  //     getAccessToken(),
+  //   );
+  //   const all_pendings = result.data;
+    
+  //   if (result.data === undefined) {
+  //     setPendings(null);
+  //     setPendingsData(null);
+  //     //setPendingDataFetched(false);
+  //     setLoading(false);
+  //   }
+  //   // sorting the pendings data by date
+  //   else {
+  //     const sortedData = defaultSort(all_pendings)
+  //     setPendings(sortedData);
+  //     setPendingsData(sortedData);
+  //     setPendingDataFetched(true);
+  //     setLoading(false);
+  //   }
+  // };
 
 
   useEffect(() => {
@@ -84,23 +85,13 @@ const Pending = ({ navigation }) => {
       'PENDING APPROVAL',
       getAccessToken(),
     );
-    const all_pendings = result.data;
-    // sorting the pendings data by date
     if (result.data === undefined) {
       setPendings(null);
       setPendingsData(null);
       setRefreshing(false);
       setLoading(false);
     } else {
-      // all_pendings.sort((a, b) => {
-      //   // Parse the date strings into Date objects
-      //   const dateA = new parseDate(a.Date_of_Visit);
-      //   const dateB = new parseDate(b.Date_of_Visit);
-      //   // Compare the Date objects
-      //   return dateB - dateA;
-      // });
-
-      const sortedData = defaultSort(all_pendings)
+      const sortedData = defaultSort(result.data)
       setPendings(sortedData);
       setPendingsData(sortedData);
       setRefreshing(false);
@@ -115,7 +106,7 @@ const Pending = ({ navigation }) => {
   );
 
   return (
-    <View style={{ flex: 1 }}>
+    <>
       <View style={{ flex: 1, paddingTop: 10, backgroundColor: '#FFFF' }}>
         {loading ? (
           <View style={styles.loadingContainer}>
@@ -123,7 +114,7 @@ const Pending = ({ navigation }) => {
             {/* <RequestSkeletonScreen /> */}
             <DotsBlinkingLoaderEllipsis />
           </View>
-        ) : refreshing ? (
+        ) : (refreshing ? (
           <View style={styles.loadingContainer}>
             {/* <ActivityIndicator size="large" color="#B21E2B" /> */}
             <DotsBlinkingLoaderEllipsis />
@@ -149,9 +140,9 @@ const Pending = ({ navigation }) => {
               }
             />
           </>
-        )}
+        ))}
       </View>
-      {pendingsData?.length < 1 && pendings?.length > 0 && (
+      {pendingsData?.length < 1 && pendings?.length > 0 && !loading && (
         <View style={styles.noPendingTextView}>
           <Text style={{ flex: 10 }}>No Visitors found</Text>
         </View>
@@ -161,7 +152,7 @@ const Pending = ({ navigation }) => {
           <Text style={{ flex: 10 }}>No Pending visitors</Text>
         </View>
       )}
-    </View>
+    </>
   );
 };
 

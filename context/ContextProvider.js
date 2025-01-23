@@ -20,6 +20,8 @@ function ContextProvider({children}) {
   const [employee, setEmployee] = useState(false);
   const [testResident, setTestResident] = useState(false);
 
+  const [zohoDeviceToken, setZohoDeviceToken] = useState(null);
+
   const [departmentIds, setDepartmentIds] = useState([]);
 
   // const resident = false;
@@ -86,7 +88,9 @@ function ContextProvider({children}) {
         profileImage,
         setProfileImage,
         departmentIds,
-        setDepartmentIds
+        setDepartmentIds,
+        zohoDeviceToken,
+        setZohoDeviceToken,
       }}>
       {children}
     </UserContext.Provider>

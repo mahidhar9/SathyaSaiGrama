@@ -97,7 +97,9 @@ export const getDataWithIntAndString = async (
         'Content-Type': 'application/json',
       },
     });
+
     const res = await response.json();
+    console.log("Response is@@@@@", res);
     return res;
   } catch (err) {
     if (err.message === 'Network request failed')

@@ -203,7 +203,7 @@ const VerificationNotice = ({route, navigation}) => {
       />
       <Text
         style={{
-          width: 256,
+          width: '100%',
           height: 38,
           color: '#1F2024',
           textAlign: 'center',
@@ -237,10 +237,9 @@ const VerificationNotice = ({route, navigation}) => {
       <View style={styles.redirect}>
         <Text
           style={{
-            width: 154,
+            width: "50%",
             color: '#71727A',
             textAlign: 'center',
-            marginEnd: 1,
             fontFamily: 'Inter',
             fontSize: 12,
             flexShrink: 0,
@@ -254,10 +253,8 @@ const VerificationNotice = ({route, navigation}) => {
           <Text
             style={{
               color: '#B21E2B',
-              width: 124,
               fontFamily: 'Inter',
               fontSize: 12,
-              flexShrink: 0,
               fontStyle: 'normal',
               fontWeight: '600',
               letterSpacing: 0.12,
@@ -298,7 +295,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 10,
     justifyContent: 'center',
-    paddingLeft: 40,
+    width: "100%",
   },
   register1: {
     backgroundColor: '#B21E2B',
