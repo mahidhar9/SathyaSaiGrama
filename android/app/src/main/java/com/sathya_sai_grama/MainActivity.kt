@@ -1,5 +1,4 @@
 package com.sathya_sai_grama
-
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.ContentResolver
@@ -27,13 +26,34 @@ class MainActivity : ReactActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val manager = getSystemService(NotificationManager::class.java)
 
-            // Channel for "WeGotAVisitor"
-            val weGotAVisitorChannel = NotificationChannel(
-                "spot_sound_channel",
-                "Visitor Notifications",
+            // Channel for Pre-Approved Registration Notifications
+            val preApprovedChannel = NotificationChannel(
+                "pre_approved_sound_channel", // Channel ID
+                "Pre-Approved Visitor Notifications", // Channel Name
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
-                description = "Channel for visitor notifications"
+                description = "Notifications for visitors with pre-approved registration"
+                setShowBadge(true)
+                val audioAttributes = AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                    .build()
+                setSound(
+                    Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + packageName + "/raw/pre_approved_sound"),
+                    audioAttributes
+                )
+                enableVibration(true)
+                vibrationPattern = longArrayOf(400, 400)
+                lockscreenVisibility = NotificationCompat.VISIBILITY_PUBLIC
+            }
+
+            // Channel for Spot Registration Notifications
+            val spotRegistrationChannel = NotificationChannel(
+                "spot_sound_channel", // Channel ID
+                "Spot Registration Notifications", // Channel Name
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Notifications for visitors with spot registration"
                 setShowBadge(true)
                 val audioAttributes = AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_NOTIFICATION)
@@ -47,14 +67,12 @@ class MainActivity : ReactActivity() {
                 vibrationPattern = longArrayOf(400, 400)
                 lockscreenVisibility = NotificationCompat.VISIBILITY_PUBLIC
             }
+
             // Register channels with the NotificationManager
-            manager?.createNotificationChannel(weGotAVisitorChannel)
+            manager?.createNotificationChannel(preApprovedChannel)
+            manager?.createNotificationChannel(spotRegistrationChannel)
         } else {
             println("Running on pre-Oreo device; fallback to 'hello.wav' sound.")
         }
     }
 }
-
-
-
-

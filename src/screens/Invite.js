@@ -342,7 +342,7 @@ const Invite = ({navigation}) => {
                 Logged in to another device
               </Dialog.Title>
               <Dialog.Description style={{color: '#2F3036'}}>
-                You are already logged in to another device.
+                You are already logged into another device.
               </Dialog.Description>
               <Dialog.Button
                 style={{color: '#B21E2B'}}

@@ -111,7 +111,7 @@ const Approved = ({ navigation }) => {
       {
         approvedsData?.length < 1 && approveds?.length > 0 && !loading && <View style={styles.noApprovedTextView}><Text style={{ flex: 10 }}>No Visitors found</Text></View>
       }
-      {!refreshing && approveds === null && !loading && <View style={styles.noApprovedTextView}><Text style={{ flex: 10 }}>No Approved visitors</Text></View>}</>
+      {!refreshing && approveds === null && !loading && <View style={styles.noApprovedTextView}><Text style={{ flex: 10 }}>No Confirmed visitors</Text></View>}</>
   );
 };
 

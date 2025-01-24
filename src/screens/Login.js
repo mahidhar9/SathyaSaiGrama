@@ -254,7 +254,6 @@ const Login = ({ navigation }) => {
     }
   };
 
-  const [isOk, setIsOk] = useState(true)
   const [userData, setUserData] = useState({})
 
   const handleLoginForm = async userCred => {
@@ -272,7 +271,7 @@ const Login = ({ navigation }) => {
 
     if (res.code === 3000) {
 
-      if(!userCred.forceLogin){
+      if(!userCred.duplicateLogin){
         if(res.data[0].Device_Tokens && deviceToken !== res.data[0].Device_Tokens){
           setLoading(false);
           setIsLoggedIntoAnotherDevice(true)
@@ -608,10 +607,10 @@ const Login = ({ navigation }) => {
             visible={isLoggedIntoAnotherDevice}
             contentStyle={{ borderRadius: 10 }}>
             <Dialog.Title style={styles.dialogTitle}>
-              Already logged in to another device
+              Already logged into another device
             </Dialog.Title>
             <Dialog.Description style={{ color: '#2F3036' }}>
-              You are already logged in to another device.
+              You are already logged into another device.
               By logging here you will be automatically logged out from the other device.
             </Dialog.Description>
             <Dialog.Button
@@ -625,9 +624,8 @@ const Login = ({ navigation }) => {
               style={{ color: '#B21E2B' }}
               label="Login Here"
               onPress={()=>{
-                setIsOk(false)
                 setIsLoggedIntoAnotherDevice(false)
-                handleLoginForm({...userData, forceLogin: true});
+                handleLoginForm({...userData, duplicateLogin: true});
               }}
             />
           </Dialog.Container>
