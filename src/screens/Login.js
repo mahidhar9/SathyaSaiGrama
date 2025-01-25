@@ -180,12 +180,11 @@ const Login = ({ navigation }) => {
             resident: residentLocalVar,
             employee: employeeLocalVar,
             testResident: testResidentLocalVar,
+            Email_Notifications: currentUser.Email_Notifications,
           }),
         );
-        console.log('login data saved into local storage');
         let existedUser = await AsyncStorage.getItem('existedUser');
         existedUser = JSON.parse(existedUser);
-        console.log('Existed user in Login useEffect:', existedUser);
         setLoggedUser(existedUser);
         setLoading(false);
         navigation.navigate('FooterTab');
@@ -193,9 +192,7 @@ const Login = ({ navigation }) => {
     };
 
     if (userType && departmentIds) {
-      console.log('Before store data called in useEffect in Login');
       storeData();
-      console.log('After store data called in useEffect in Login');
     }
   }, [currentUser]);
 
@@ -225,7 +222,6 @@ const Login = ({ navigation }) => {
   };
 
   const getProfileImage = async url => {
-    console.log('url in getProfileImage', url);
     const cacheBuster = new Date().getTime();
     const requestUrl = `${url}?cb=${cacheBuster}`;
     try {
@@ -312,6 +308,7 @@ const Login = ({ navigation }) => {
                 email: userCred.email.toLowerCase().trim(),
                 name: res.data[0].Name_field,
                 profilePhoto: profileImgUrl,
+                Email_Notifications: res.data[0].Email_Notifications,
               });
             } else {
               setProfileImage(null);
@@ -320,6 +317,7 @@ const Login = ({ navigation }) => {
                 email: userCred.email.toLowerCase().trim(),
                 name: res.data[0].Name_field,
                 profilePhoto: null,
+                Email_Notifications: res.data[0].Email_Notifications,
               });
             }
 

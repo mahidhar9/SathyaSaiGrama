@@ -41,6 +41,7 @@ import Toast from 'react-native-toast-message';
 import {launchImageLibrary, launchCamera} from 'react-native-image-picker';
 import {PERMISSIONS, request} from 'react-native-permissions';
 import MyProfileSkeletonLoader from '../components/MyProfileSkeletonScreen';
+import Notifications from './Notifications';
 const Profile = ({navigation}) => {
   const {
     getAccessToken,
@@ -718,6 +719,17 @@ const Profile = ({navigation}) => {
                   />
                 </View>
               </TouchableOpacity>
+              {/* <TouchableOpacity
+                style={styles.buttonSection}
+                onPress={() => navigation.navigate('Notifications')}>
+                <View style={styles.buttonArea}>
+                  <Text style={styles.buttonName}>Manage Notifications</Text>
+                  <Image
+                    source={require('../assets/RightArrow.png')}
+                    style={styles.img}
+                  />
+                </View>
+              </TouchableOpacity> */}
 
               <TouchableOpacity
                 style={styles.buttonSection}
@@ -730,6 +742,9 @@ const Profile = ({navigation}) => {
                   />
                 </View>
               </TouchableOpacity>
+              <View style={[styles.buttonSection, {width: '100%'}]}>
+              <Notifications />
+              </View>
               <Text
                 style={{
                   padding: 15,

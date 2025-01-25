@@ -129,28 +129,27 @@ const VerificationNotice = ({route, navigation}) => {
                 resident: residentLocalVar,
                 employee: employeeLocalVar,
                 testResident: testResidentLocalVar,
+                Email_Notifications: true,
               }),
             );
             let existedUser = await AsyncStorage.getItem('existedUser');
             existedUser = JSON.parse(existedUser);
             console.log('Existed user in Base route useEffect:', existedUser);
             setLoggedUser(existedUser);
-            const response = await findDeviceToken(id);
-            console.log('response is: ', response);
-            let myDeviceToken;
-            console.log('present token is: ', response.data.Device_Tokens);
-            if (!response.data.Device_Tokens) {
-              console.log('first time');
-              myDeviceToken = '' + deviceToken + '||';
-            } else {
-              myDeviceToken = response.data.Device_Tokens + deviceToken + '||';
-              console.log('second time');
-            }
-            console.log('local device token is: ', myDeviceToken);
-            console.log('Response device token is : ', response);
+            //const response = await findDeviceToken(id);
+            //console.log('response is: ', response);
+            //let myDeviceToken;
+            //console.log('present token is: ', response.data.Device_Tokens);
+            // if (!response.data.Device_Tokens) {
+            //   console.log('first time');
+            //   myDeviceToken = '' + deviceToken + '||';
+            // } else {
+            //   myDeviceToken = response.data.Device_Tokens + deviceToken + '||';
+            //   console.log('second time');
+            // }
             const updateData = {
               data: {
-                Device_Tokens: myDeviceToken,
+                Device_Tokens: deviceToken,
               },
             };
             const updateResponse = await updateDeviceToken(updateData, id);

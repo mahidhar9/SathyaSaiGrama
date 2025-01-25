@@ -114,8 +114,8 @@ const App = () => {
     const checkUserExist = async () => {
       let existedUser = await AsyncStorage.getItem('existedUser');
       existedUser = JSON.parse(existedUser);
-      // console.log("Existed user in App.js : ", existedUser)
       if (existedUser) {
+        console.log("notification email in app.js ",existedUser.Email_Notifications);
         setLoggedUser(existedUser);
         setUserType(existedUser.role);
         setL1ID(existedUser.userId);
@@ -202,6 +202,7 @@ const App = () => {
       resident: resident,
       employee: employee,
       testResident: testResident,
+      Email_Notifications: loggedUser.Email_Notifications,
     };
 
     setLoggedUser(data);

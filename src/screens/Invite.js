@@ -173,10 +173,11 @@ const Invite = ({navigation}) => {
     const selectedOpttion = selected;
 
     if (id) {
-      const shareURL = `https://creatorapp.zohopublic.com/${APP_OWNER_NAME}/${APP_LINK_NAME}/form-perma/Visitor_Information/t253nXrNhjgOHEpBs8EmZMTmpfP1UQejdGPB07QXDWt9NV2SjENZJmXwHJUuPbwFmXpT2Wsm72zAnyXwtZdy8Y4YgBdGyb6mOKee?L1_lookup=${L1ID}&LinkIDLookup=${id}&Home_Office=${selectedOpttion}`;
+      const longUrl = `https://sathyasaigrama.github.io/visitor-invitation/#/?L1_lookup=${L1ID}&LinkIDLookup=${id}&Home_Office=${selectedOpttion}`
+      //const shareURL = `https://creatorapp.zohopublic.com/${APP_OWNER_NAME}/${APP_LINK_NAME}/form-perma/Visitor_Information/t253nXrNhjgOHEpBs8EmZMTmpfP1UQejdGPB07QXDWt9NV2SjENZJmXwHJUuPbwFmXpT2Wsm72zAnyXwtZdy8Y4YgBdGyb6mOKee?L1_lookup=${L1ID}&LinkIDLookup=${id}&Home_Office=${selectedOpttion}`;
       console.log('L1ID:', L1ID, ' id:', id, 'selected:', selected);
 
-      veryshortUrl = await shortUrl(shareURL);
+      veryshortUrl = await shortUrl(longUrl);
     }
   };
 
