@@ -340,7 +340,7 @@ const Invite = ({navigation}) => {
               visible={zohoDeviceToken && deviceToken!==zohoDeviceToken}
               contentStyle={{borderRadius: 10}}>
               <Dialog.Title style={{color: "black"}}>
-                Logged in to another device
+                Logged into another device
               </Dialog.Title>
               <Dialog.Description style={{color: '#2F3036'}}>
                 You are already logged into another device.

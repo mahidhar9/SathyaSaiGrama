@@ -567,7 +567,12 @@ const Profile = ({navigation}) => {
           </View>
         ) : isLogOutIndicator ? (
           <View
-            style={{flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 100}}>
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginTop: 100,
+            }}>
             <TouchableOpacity>
               {profileImage != null ? (
                 <Image source={{uri: profileImage}} style={styles.propic} />
@@ -731,6 +736,10 @@ const Profile = ({navigation}) => {
                 </View>
               </TouchableOpacity> */}
 
+              <View style={[styles.buttonSection, {width: '100%'}]}>
+                <Notifications />
+              </View>
+
               <TouchableOpacity
                 style={styles.buttonSection}
                 onPress={handleLogoutModal}>
@@ -742,9 +751,7 @@ const Profile = ({navigation}) => {
                   />
                 </View>
               </TouchableOpacity>
-              <View style={[styles.buttonSection, {width: '100%'}]}>
-              <Notifications />
-              </View>
+
               <Text
                 style={{
                   padding: 15,
@@ -888,7 +895,7 @@ const Profile = ({navigation}) => {
                 </View>
               </TouchableWithoutFeedback>
             </Modal>
-            
+
             <Modal
               animationType="fade"
               transparent={true}

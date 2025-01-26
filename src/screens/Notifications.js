@@ -17,8 +17,8 @@ const Notifications = () => {
 
   const toggleSwitch = async () => {
     const newNotificationState = !isEnabled;
-    await toggleEmailNotificationChange(newNotificationState);
     setIsEnabled(newNotificationState);
+    await toggleEmailNotificationChange(newNotificationState);
   };
 
   const toggleEmailNotificationChange = async (isNotification) => {
@@ -59,13 +59,13 @@ const Notifications = () => {
       {/* Mail Notifications Section */}
       <View style={styles.toggleSection}>
         <Text
-          style={[styles.toggleText, { color: isEnabled ? '#B21E2B' : 'black' }]}
+          style={[styles.toggleText]}
         >
           Mail Notifications
         </Text>
         <Switch
           trackColor={{ false: '#767577', true: '#FFCDD2' }}
-          thumbColor={isEnabled ? '#F44336' : '#f4f3f4'}
+          thumbColor={isEnabled ? '#B21E2B' : '#f4f3f4'}
           ios_backgroundColor="#3e3e3e"
           onValueChange={toggleSwitch}
           value={isEnabled}
@@ -80,7 +80,7 @@ export default Notifications;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingRight: 10,
+    paddingRight: 5,
   },
   toggleSection: {
     flexDirection: 'row',
@@ -88,7 +88,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   toggleText: {
+    color: '#1F2024',
+    fontFamily: 'Inter',
     fontSize: 14,
-    fontWeight: '500',
+    fontStyle: 'normal',
+    fontWeight: '400',
   },
 });
