@@ -41,6 +41,7 @@ import Toast from 'react-native-toast-message';
 import {launchImageLibrary, launchCamera} from 'react-native-image-picker';
 import {PERMISSIONS, request} from 'react-native-permissions';
 import MyProfileSkeletonLoader from '../components/MyProfileSkeletonScreen';
+import EmailNotifications from './EmailNotifications';
 const Profile = ({navigation}) => {
   const {
     getAccessToken,
@@ -167,6 +168,7 @@ const Profile = ({navigation}) => {
     console.log(userCred);
     await handleDeleteAccount(userCred.name, userCred.password);
   };
+
   const onLogout = () => {
     setIsLogOutIndicator(true);
     signOut(auth)
@@ -176,8 +178,7 @@ const Profile = ({navigation}) => {
 
         const respon = await findDeviceToken(loggedUser.userId);
         console.log('findDeviceToken response is: ', respon);
-        const replaceToken = deviceToken + '||';
-        let myDeviceToken = respon.data.Device_Tokens.replace(replaceToken, '');
+        let myDeviceToken = respon.data.Device_Tokens.replace(deviceToken, '');
 
         console.log('local device token is: ', myDeviceToken);
         console.log('Response device token is : ', respon);
@@ -566,7 +567,12 @@ const Profile = ({navigation}) => {
           </View>
         ) : isLogOutIndicator ? (
           <View
-            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginTop: 100,
+            }}>
             <TouchableOpacity>
               {profileImage != null ? (
                 <Image source={{uri: profileImage}} style={styles.propic} />
@@ -707,18 +713,6 @@ const Profile = ({navigation}) => {
                 </View>
               </TouchableOpacity>
 
-              {/* <TouchableOpacity
-              style={styles.buttonSection}
-              onPress={() => navigation.navigate('Notifications')}>
-              <View style={styles.buttonArea}>
-                <Text style={styles.buttonName}>Notifications</Text>
-                <Image
-                  source={require('../assets/RightArrow.png')}
-                  style={styles.img}
-                />
-              </View>
-            </TouchableOpacity> */}
-
               <TouchableOpacity
                 style={styles.buttonSection}
                 onPress={() => navigation.navigate('Feedback')}>
@@ -730,6 +724,21 @@ const Profile = ({navigation}) => {
                   />
                 </View>
               </TouchableOpacity>
+              {/* <TouchableOpacity
+                style={styles.buttonSection}
+                onPress={() => navigation.navigate('Notifications')}>
+                <View style={styles.buttonArea}>
+                  <Text style={styles.buttonName}>Manage Notifications</Text>
+                  <Image
+                    source={require('../assets/RightArrow.png')}
+                    style={styles.img}
+                  />
+                </View>
+              </TouchableOpacity> */}
+
+              <View style={[styles.buttonSection, {width: '100%'}]}>
+                <EmailNotifications />
+              </View>
 
               <TouchableOpacity
                 style={styles.buttonSection}
@@ -742,6 +751,7 @@ const Profile = ({navigation}) => {
                   />
                 </View>
               </TouchableOpacity>
+
               <Text
                 style={{
                   padding: 15,
@@ -752,52 +762,6 @@ const Profile = ({navigation}) => {
                 Version 1.0 v21.
               </Text>
             </View>
-
-            {/* <Modal
-            animationType="slide"
-            transparent={true}
-            visible={modalVisible}
-            onRequestClose={() => {
-              setModalVisible(!modalVisible);
-            }}>
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
-                <Text style={styles.modalText}>
-                  Enter your credentials to delete your account permanently
-                </Text>
-                <TextInput
-                  placeholder="Email"
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  style={styles.input}
-                />
-                <TextInput
-                  placeholder="Password"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                  style={styles.input}
-                />
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity
-                    style={[styles.button, styles.buttonDelete]}
-                    onPress={async () => {
-                      setModalVisible(!modalVisible);
-                      await handleDeleteAccount();
-                    }}>
-                    <Text style={styles.textStyle}>Delete</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.button, styles.buttonClose]}
-                    onPress={() => setModalVisible(!modalVisible)}>
-                    <Text style={styles.textStyle}>Cancel</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
-          </Modal> */}
 
             <Modal
               animationType="fade"
@@ -832,32 +796,6 @@ const Profile = ({navigation}) => {
                             Enter your password to confirm deletion.
                           </Text>
 
-                          {/* <Controller
-                        name="email"
-                        control={control}
-                        render={({field: {onChange, value}}) => (
-                          <TextInput
-                            placeholder="Email Address"
-                            value={value}
-                            style={[
-                              styles.email,
-                              focusedInput === 'email' && styles.inputFocused,
-                            ]}
-                            selectionColor="#B21E2B"
-                            onFocus={() => setFocusedInput('email')}
-                            onChangeText={onChange}
-                            autoCapitalize="none"
-                          />
-                        )}
-                        rules={{required: true, pattern: /^\S+@\S+$/i}}
-                      />
-                      {errors.email?.type === 'required' && (
-                        <Text style={styles.textError}>Email is required</Text>
-                      )}
-                      {errors.email?.type === 'pattern' && (
-                        <Text style={styles.textError}>Enter valid email</Text>
-                      )} */}
-
                           <View
                             style={[
                               styles.passBorder,
@@ -885,9 +823,6 @@ const Profile = ({navigation}) => {
                               )}
                               rules={{
                                 required: true,
-                                // minLength: 8,
-                                // pattern:
-                                //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/,
                               }}
                             />
                             {showPassword === false ? (
@@ -916,11 +851,6 @@ const Profile = ({navigation}) => {
                               Password is required
                             </Text>
                           )}
-                          {/* {errors.password?.type === 'minLength' && (
-                        <Text style={styles.textError}>
-                          Password must be 8 characters long
-                        </Text>
-                      )} */}
                           {errors.password?.type === 'pattern' && (
                             <Text style={styles.textError}>
                               Password must contain at least a
@@ -966,42 +896,6 @@ const Profile = ({navigation}) => {
               </TouchableWithoutFeedback>
             </Modal>
 
-            {/* <Modal
-            animationType="fade"
-            transparent={true}
-            visible={logoutModalVisible}
-            onRequestClose={() => setModalVisible(!logoutModalVisible)}>
-            <TouchableWithoutFeedback onPress={handleLogoutModal}>
-              <View style={styles.centeredView}>
-              <TouchableWithoutFeedback>
-                <View style={OndeleteStyles.modalView}>
-                <Text>LogOut</Text>
-                  <Text style={styles.shareLink}>
-                    Are you sure want to logout? You'll need to login again to the app
-                  </Text>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                    }}>
-                    <TouchableOpacity
-                      style={[styles.HomeButton, {backgroundColor: '#B21E2B'}]}
-                      onPress={onLogout}>
-                      <Text style={[styles.wewe, styles.wewe1]}>Logout</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[styles.HomeButton, {backgroundColor: '#fff',borderColor:'#B21E2B',borderWidth:2}]}
-                      onPress={() =>
-                        setLogoutModalVisible(!logoutModalVisible)
-                      }>
-                      <Text style={[styles.wewe, styles.wewe2]}>cancle</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-                </TouchableWithoutFeedback>
-              </View>
-            </TouchableWithoutFeedback>
-          </Modal> */}
-
             <Modal
               animationType="fade"
               transparent={true}
@@ -1015,7 +909,7 @@ const Profile = ({navigation}) => {
                       <Text
                         style={[
                           styles.shareLink,
-                          {fontWeight: '400', fontSize: 15, marginBottom: -30},
+                          {fontWeight: '400', fontSize: 14, marginBottom: -10},
                         ]}>
                         Are you sure you want to logout? You'll need to login
                         again to the app.
@@ -1387,7 +1281,7 @@ const styles = StyleSheet.create({
     fontStyle: 'normal',
     fontWeight: '900',
     letterSpacing: 0.08,
-    height: 41,
+    height: 50,
     alignSelf: 'stretch',
   },
   shareLinkAttention: {

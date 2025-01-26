@@ -680,7 +680,7 @@ const VerifyDetails = ({navigation, route}) => {
                           heightStyles.ActivityIndicatorText,
                           {color: 'white'},
                         ]}>
-                        Approving
+                        Confirming
                       </Text>
                       <ActivityIndicator
                         size="large"
@@ -692,7 +692,7 @@ const VerifyDetails = ({navigation, route}) => {
                   {deniedLoading ? (
                     <View style={heightStyles.RejectActivityIndicatorContainer}>
                       <Text style={heightStyles.ActivityIndicatorText}>
-                        Rejecting
+                        Denying
                       </Text>
                       <ActivityIndicator
                         size="large"
@@ -708,14 +708,14 @@ const VerifyDetails = ({navigation, route}) => {
                     <TouchableOpacity
                       style={[styles.btnAccept, heightStyles.apprejBtnPosition]}
                       onPress={onApprove}>
-                      <Text style={styles.btntxt}>Approve</Text>
+                      <Text style={styles.btntxt}>Confirm</Text>
                     </TouchableOpacity>
                   </View>
                   <View style={styles.right}>
                     <TouchableOpacity
                       style={styles.btnReject}
                       onPress={onReject}>
-                      <Text style={styles.rejectBtnTxt}>Reject</Text>
+                      <Text style={styles.rejectBtnTxt}>Deny</Text>
                     </TouchableOpacity>
                   </View>
                 </>
@@ -726,7 +726,7 @@ const VerifyDetails = ({navigation, route}) => {
               {deniedLoading ? (
                 <View style={heightStyles.RejectActivityIndicatorContainer}>
                   <Text style={heightStyles.ActivityIndicatorText}>
-                    Rejecting
+                    Denying
                   </Text>
                   <ActivityIndicator
                     size="large"
@@ -739,7 +739,7 @@ const VerifyDetails = ({navigation, route}) => {
                   <TouchableOpacity
                     style={[styles.btnReject]}
                     onPress={onReject}>
-                    <Text style={[styles.rejectBtnTxt]}>Reject</Text>
+                    <Text style={[styles.rejectBtnTxt]}>Deny</Text>
                   </TouchableOpacity>
                 </View>
               )}
@@ -753,7 +753,7 @@ const VerifyDetails = ({navigation, route}) => {
                       heightStyles.ActivityIndicatorText,
                       {color: 'white'},
                     ]}>
-                    Approving
+                    Confirming
                   </Text>
                   <ActivityIndicator
                     size="large"
@@ -766,7 +766,7 @@ const VerifyDetails = ({navigation, route}) => {
                   <TouchableOpacity
                     style={styles.btnAccept}
                     onPress={onApprove}>
-                    <Text style={styles.btntxt}>Approve</Text>
+                    <Text style={styles.btntxt}>Confirm</Text>
                   </TouchableOpacity>
                 </View>
               )}

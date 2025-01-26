@@ -11,6 +11,9 @@ import {
   COLLECTION_ID,
   APPWRITE_FUNCTION_PROJECT_ID,
   APPWRITE_API_KEY,
+  BASE_APP_URL,
+  APP_OWNER_NAME,
+  APP_LINK_NAME
 } from '@env';
 
 import {ActivityIndicator, Alert} from 'react-native';
@@ -59,6 +62,7 @@ const App = () => {
     setResident,
     setEmployee,
     setTestResident,
+    setZohoDeviceToken
   } = useContext(UserContext);
   const [loading, setLoading] = useState(true);
 
@@ -110,8 +114,8 @@ const App = () => {
     const checkUserExist = async () => {
       let existedUser = await AsyncStorage.getItem('existedUser');
       existedUser = JSON.parse(existedUser);
-      // console.log("Existed user in App.js : ", existedUser)
       if (existedUser) {
+        console.log("notification email in app.js ",existedUser.Email_Notifications);
         setLoggedUser(existedUser);
         setUserType(existedUser.role);
         setL1ID(existedUser.userId);
@@ -198,6 +202,7 @@ const App = () => {
       resident: resident,
       employee: employee,
       testResident: testResident,
+      Email_Notifications: loggedUser.Email_Notifications,
     };
 
     setLoggedUser(data);
@@ -221,6 +226,37 @@ const App = () => {
     // console.log("loggedUser after setting: ", loggedUser)
   };
 
+  //get device token from zoho
+  const findDeviceToken = async () => {
+    try {
+      let existedUser = await AsyncStorage.getItem('existedUser');
+      existedUser = JSON.parse(existedUser);
+      if (!existedUser) {
+        return;
+      }
+      const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${existedUser.userId}`;
+      console.log(url);
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Authorization: `Zoho-oauthtoken ${accessToken}`,
+        },
+      });
+      const res = await response.json();
+      setZohoDeviceToken(res.data.Device_Tokens);
+    } catch (err) {
+      if (err.message === 'Network request failed')
+        Alert.alert(
+          'Network Error',
+          'Failed to fetch data. Please check your network connection and try again.',
+        );
+      else {
+        Alert.alert('Error: ', err);
+        console.log(err);
+      }
+    }
+  };
+
   useEffect(() => {
     if (isTokenFetched && loggedUser && isNetworkAvailable) {
       runChecks();
@@ -230,8 +266,8 @@ const App = () => {
   useEffect(() => {
     if (accessToken) {
       console.log('Access token found, stopping loading', accessToken);
-
       setLoading(false);
+      findDeviceToken();
     } else {
       console.log('Access token missing, still loading');
     }

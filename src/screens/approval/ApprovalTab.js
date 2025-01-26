@@ -36,11 +36,12 @@ function ApprovalTab() {
                         {
                             tabBarActiveTintColor: '#008000',
                             tabBarInactiveTintColor: 'gray',
+                            title: "Confirmed",
                         }
                     }
                 />
                 <Tab.Screen name="Denied" component={Denied} options={{
-                    title: "Rejected", tabBarActiveTintColor: '#B21E2B',
+                    title: "Denied", tabBarActiveTintColor: '#B21E2B',
                     tabBarInactiveTintColor: 'gray',
                 }} />
             </Tab.Navigator>

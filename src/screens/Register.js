@@ -481,10 +481,9 @@ const Register = ({navigation}) => {
             <View style={styles.redirect}>
               <Text
                 style={{
-                  width: 154,
                   color: '#71727A',
                   textAlign: 'center',
-                  marginEnd: 2,
+                  marginEnd: 6,
                   fontFamily: 'Inter',
                   fontSize: 12,
                   flexShrink: 0,
@@ -645,8 +644,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontFamily: 'Inter',
     fontStyle: 'normal',
-    width: 50,
-    height: 15,
+    width: "100%",
+    height: "100%",
+    textAlign:"center"
   },
   signup: {
     width: 327,

@@ -224,3 +224,49 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
+
+
+// This code will be used in the future for custom sound notification
+
+// subscribe(listener) {
+  //   const onReceiveURL = ({url}) => listener(url);
+  //   //playCustomSound();
+  //   // Listen to incoming links from deep linking
+  //   const linkingSubscription = Linking.addEventListener('url', onReceiveURL);
+
+  //   //onNotificationOpenedApp: When the application is running, but in the background.
+  //   const unsubscribe = messaging().onNotificationOpenedApp(remoteMessage => {
+  //     if (remoteMessage) {
+  //       //playCustomSound(); // Play sound for the notification
+  //       const url = buildDeepLinkFromNotificationData(remoteMessage.data);
+  //       if (typeof url === 'string') {
+  //         listener(url);
+  //       }
+  //     }
+  //   });
+  //    const backgroundSound = messaging().setBackgroundMessageHandler(async remoteMessage => {
+  //     console.log('Message handled in the background!', remoteMessage);
+  //     playCustomSound();
+  //   });
+
+  //   return () => {
+  //     linkingSubscription.remove();
+  //     unsubscribe();
+  //     backgroundSound();
+  //   };
+  // },
+  // const playCustomSound = () => {
+  //   const sound = new Sound('hello.wav', Sound.MAIN_BUNDLE, error => {
+  //     if (error) {
+  //       console.log('Failed to load the sound', error);
+  //       return;
+  //     }
+  //     sound.play(success => {
+  //       if (success) {
+  //         console.log('Sound played successfully');
+  //       } else {
+  //         console.log('Sound playback failed');
+  //       }
+  //     });
+  //   });
+  // };

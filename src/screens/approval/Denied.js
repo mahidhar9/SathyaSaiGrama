@@ -29,24 +29,24 @@ const Denied = ({ navigation }) => {
   //const [dataFetched, setDataFetched] = useState(false);
   const [deniedsData, setDeniedsData] = useState([])
 
-  const fetchData = async () => {
-    setLoading(true);
-    const result = await getDataWithIntAndString('Approval_to_Visitor_Report', 'Referrer_App_User_lookup', L1ID, "Referrer_Approval", "DENIED", getAccessToken());
-    const all_denieds = result.data;
-    if (result.data === undefined) {
-      setDenieds(null);
-      setDeniedsData(null);
-      //setDeniedDataFetched(false);
-      setLoading(false);
-    }
-    else {
-      const sortedData = defaultSort(all_denieds)
-      setDenieds(sortedData);
-      setDeniedsData(sortedData);
-      setLoading(false);
-      //setDeniedDataFetched(true);
-    }
-  };
+  // const fetchData = async () => {
+  //   setLoading(true);
+  //   const result = await getDataWithIntAndString('Approval_to_Visitor_Report', 'Referrer_App_User_lookup', L1ID, "Referrer_Approval", "DENIED", getAccessToken());
+  //   const all_denieds = result.data;
+  //   if (result.data === undefined) {
+  //     setDenieds(null);
+  //     setDeniedsData(null);
+  //     //setDeniedDataFetched(false);
+  //     setLoading(false);
+  //   }
+  //   else {
+  //     const sortedData = defaultSort(all_denieds)
+  //     setDenieds(sortedData);
+  //     setDeniedsData(sortedData);
+  //     setLoading(false);
+  //     //setDeniedDataFetched(true);
+  //   }
+  // };
 
 
   useEffect(() => {
@@ -61,17 +61,17 @@ const Denied = ({ navigation }) => {
 
   const onRefresh = async () => {
     setRefreshing(true);
+    //console.log("Refreshing Denied")
     const result = await getDataWithIntAndString('Approval_to_Visitor_Report', 'Referrer_App_User_lookup', L1ID, "Referrer_Approval", "DENIED", getAccessToken());
-    const all_denieds = result.data;
     if (result.data === undefined) {
+      //console.log("No Denieds")
       setDenieds(null);
       setDeniedsData(null)
       setRefreshing(false);
       setLoading(false);
-
-
     } else {
-      const sortedData = defaultSort(all_denieds)
+      //console.log("Denieds Found")
+      const sortedData = defaultSort(result.data)
       setDenieds(sortedData);
       setDeniedsData(sortedData);
       setRefreshing(false);

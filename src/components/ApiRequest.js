@@ -97,7 +97,9 @@ export const getDataWithIntAndString = async (
         'Content-Type': 'application/json',
       },
     });
+
     const res = await response.json();
+    console.log("Response is@@@@@", res);
     return res;
   } catch (err) {
     if (err.message === 'Network request failed')
@@ -324,7 +326,7 @@ export const postDataWithInt = async (reportName, user_data, token) => {
 export const patchDataWithInt = async (reportName, modified_data, token) => {
   try {
     const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}`;
-    console.log(url);
+    console.log("url in patch ", url);
     const response = await fetch(url, {
       method: 'PATCH',
       headers: {
@@ -345,6 +347,7 @@ export const patchDataWithInt = async (reportName, modified_data, token) => {
     }
   }
 };
+
 export const deleteDataWithID = async (reportName, id, token) => {
   try {
     const url = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/${reportName}/${id}`;

@@ -10,7 +10,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 // import VisitorFills from '../../src/screens/VisitorFills';
 import FillByYourSelf from '../../src/screens/FillByYourSelf';
 import MyProfile from '../../src/screens/MyProfile';
-import Notifications from '../../src/screens/Notifications';
+import EmailNotifications from '../../src/screens/EmailNotifications';
 import Settings from '../../src/screens/Settings';
 import VerifyDetails from '../../src/screens/approval/VerifyDetails';
 import EditVerifyDetails from '../../src/screens/approval/EditVerifydetails';
@@ -100,7 +100,7 @@ function ProfileStackScreen({navigation}) {
         component={MyProfile}
         options={{headerTitle: 'My Profile'}}
       />
-      <ProfileStack.Screen name="Notifications" component={Notifications} />
+      <ProfileStack.Screen name="EmailNotifications" component={EmailNotifications} />
       <ProfileStack.Screen name="Settings" component={Settings} />
       <ProfileStack.Screen name="Edit" component={Edit} />
       <ProfileStack.Screen name="AddData" component={AddData} />
@@ -219,7 +219,7 @@ const L2ApprovalStack = ({navigation}) => {
           header: () => (
             <View
               style={{
-                height: 56,
+                height: 60,
                 padding: 19.5,
                 justifyContent: 'center',
                 alignItems: 'center',

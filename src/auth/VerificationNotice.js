@@ -129,28 +129,27 @@ const VerificationNotice = ({route, navigation}) => {
                 resident: residentLocalVar,
                 employee: employeeLocalVar,
                 testResident: testResidentLocalVar,
+                Email_Notifications: true,
               }),
             );
             let existedUser = await AsyncStorage.getItem('existedUser');
             existedUser = JSON.parse(existedUser);
             console.log('Existed user in Base route useEffect:', existedUser);
             setLoggedUser(existedUser);
-            const response = await findDeviceToken(id);
-            console.log('response is: ', response);
-            let myDeviceToken;
-            console.log('present token is: ', response.data.Device_Tokens);
-            if (!response.data.Device_Tokens) {
-              console.log('first time');
-              myDeviceToken = '' + deviceToken + '||';
-            } else {
-              myDeviceToken = response.data.Device_Tokens + deviceToken + '||';
-              console.log('second time');
-            }
-            console.log('local device token is: ', myDeviceToken);
-            console.log('Response device token is : ', response);
+            //const response = await findDeviceToken(id);
+            //console.log('response is: ', response);
+            //let myDeviceToken;
+            //console.log('present token is: ', response.data.Device_Tokens);
+            // if (!response.data.Device_Tokens) {
+            //   console.log('first time');
+            //   myDeviceToken = '' + deviceToken + '||';
+            // } else {
+            //   myDeviceToken = response.data.Device_Tokens + deviceToken + '||';
+            //   console.log('second time');
+            // }
             const updateData = {
               data: {
-                Device_Tokens: myDeviceToken,
+                Device_Tokens: deviceToken,
               },
             };
             const updateResponse = await updateDeviceToken(updateData, id);
@@ -203,7 +202,7 @@ const VerificationNotice = ({route, navigation}) => {
       />
       <Text
         style={{
-          width: 256,
+          width: '100%',
           height: 38,
           color: '#1F2024',
           textAlign: 'center',
@@ -237,10 +236,9 @@ const VerificationNotice = ({route, navigation}) => {
       <View style={styles.redirect}>
         <Text
           style={{
-            width: 154,
+            width: "50%",
             color: '#71727A',
             textAlign: 'center',
-            marginEnd: 1,
             fontFamily: 'Inter',
             fontSize: 12,
             flexShrink: 0,
@@ -254,10 +252,8 @@ const VerificationNotice = ({route, navigation}) => {
           <Text
             style={{
               color: '#B21E2B',
-              width: 124,
               fontFamily: 'Inter',
               fontSize: 12,
-              flexShrink: 0,
               fontStyle: 'normal',
               fontWeight: '600',
               letterSpacing: 0.12,
@@ -298,7 +294,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 10,
     justifyContent: 'center',
-    paddingLeft: 40,
+    width: "100%",
   },
   register1: {
     backgroundColor: '#B21E2B',
