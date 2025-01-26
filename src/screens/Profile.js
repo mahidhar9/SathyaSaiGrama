@@ -41,7 +41,7 @@ import Toast from 'react-native-toast-message';
 import {launchImageLibrary, launchCamera} from 'react-native-image-picker';
 import {PERMISSIONS, request} from 'react-native-permissions';
 import MyProfileSkeletonLoader from '../components/MyProfileSkeletonScreen';
-import Notifications from './Notifications';
+import EmailNotifications from './EmailNotifications';
 const Profile = ({navigation}) => {
   const {
     getAccessToken,
@@ -737,7 +737,7 @@ const Profile = ({navigation}) => {
               </TouchableOpacity> */}
 
               <View style={[styles.buttonSection, {width: '100%'}]}>
-                <Notifications />
+                <EmailNotifications />
               </View>
 
               <TouchableOpacity
