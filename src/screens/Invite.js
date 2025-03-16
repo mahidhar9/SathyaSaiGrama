@@ -12,6 +12,7 @@ import {
   TouchableWithoutFeedback,
   ActivityIndicator,
 } from 'react-native';
+
 import UserContext from '../../context/UserContext';
 import {useContext, useEffect, useState} from 'react';
 import {AuthContext} from '../auth/AuthProvider';
@@ -267,12 +268,12 @@ const Invite = ({navigation}) => {
                   <View style={styles.centeredView}>
                     <View style={styles.modalView}>
                       <View>
-                        <Text style={styles.shareLink}>
+                        <Text style={styles.shareLink}  allowFontScaling={false}>
                           Share link with the visitor
                         </Text>
                       </View>
                       <View>
-                        <Text style={styles.HomeorOffice}>
+                        <Text style={styles.HomeorOffice}  allowFontScaling={false}>
                           {loggedUser.resident && loggedUser.employee
                             ? 'Are you inviting your visitor to your Home or Office?'
                             : 'Click the button below to share link with the visitor'}
@@ -481,10 +482,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.75)',
   },
   modalView: {
+    maxHeight: '55%',
     margin: 20,
+    minHeight:'20%',
     backgroundColor: 'white',
     borderRadius: 20,
-    padding: 35,
+    padding: 40,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
@@ -495,15 +498,17 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 30,
   },
+  
   shareLink: {
     color: '#1F2024',
     textAlign: 'center',
     fontFamily: 'Inter',
-    fontSize: 16,
+    fontSize: 18,
     fontStyle: 'normal',
     fontWeight: '900',
     letterSpacing: 0.08,
-    height: 41,
+    marginBottom: 15,
+    paddingLeft: 10,
     alignSelf: 'stretch',
   },
   HomeorOffice: {
@@ -516,11 +521,13 @@ const styles = StyleSheet.create({
   },
   HomeButton: {
     height: 50,
-    width: 120,
+    width:  120,
     backgroundColor: '#752A26',
     paddingTop: 12,
     paddingBottom: 12,
     borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginTop: 20,
     marginLeft: 4,
     marginRight: 4,
