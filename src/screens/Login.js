@@ -262,19 +262,10 @@ const Login = ({ navigation }) => {
       userCred.email.toLowerCase().trim(),
       accessToken,
     );
-    console.log('Whether user exis or not in login: ', res);
-    console.log("Device tokens - ", res.data[0].Device_Tokens)
+    console.log('Whether user exis or not in login:---- ', res);
 
     if (res.code === 3000) {
-
-      if(!userCred.duplicateLogin){
-        if(res.data[0].Device_Tokens && deviceToken !== res.data[0].Device_Tokens){
-          setLoading(false);
-          setIsLoggedIntoAnotherDevice(true)
-          return;
-        }
-      }
-
+      console.log("Device tokens - ", res.data[0].Device_Tokens)
       setDotsBlinkingLoaderEllipsis(true);
 
       await isResident(res.data[0].ID);
@@ -298,6 +289,13 @@ const Login = ({ navigation }) => {
           if (user.emailVerified) {
             setL1ID(res.data[0].ID);
             setUserEmail(userCred.email.toLowerCase().trim());
+            if(!userCred.duplicateLogin){
+              if(res.data[0].Device_Tokens && deviceToken !== res.data[0].Device_Tokens){
+                setLoading(false);
+                setIsLoggedIntoAnotherDevice(true)
+                return;
+              }
+            }
 
             const reqUrl = `${BASE_APP_URL}/${APP_OWNER_NAME}/${APP_LINK_NAME}/report/All_App_Users/${res.data[0].ID}/Profile_Photo/download`;
             const profileImgUrl = await getProfileImage(reqUrl);
@@ -354,7 +352,7 @@ const Login = ({ navigation }) => {
         setLoading(false);
         setDialogVisible(true);
       }
-    } else if (res.code === 9280) {
+    } else if (res.code =="9280") {
       setLoading(false);
       setDialogVisible(true);
       console.log('inside whether error');
@@ -584,20 +582,21 @@ const Login = ({ navigation }) => {
             visible={DialogVisible}
             contentStyle={{ borderRadius: 10 }}>
             <Dialog.Title style={styles.dialogTitle}>
-              Unable to find user
+              Incorrect email or password.
+              Please try again!
             </Dialog.Title>
-            <Dialog.Description style={{ color: '#2F3036' }}>
+            {/* <Dialog.Description style={{ color: '#2F3036' }}>
               Please check your email or password and try again. Otherwise
               please register.
-            </Dialog.Description>
-            <Dialog.Button
+            </Dialog.Description> */}
+            {/* <Dialog.Button
               style={{ color: '#B21E2B' }}
               label="Register"
               onPress={onPressRegister}
-            />
+            /> */}
             <Dialog.Button
               style={{ color: 'black' }}
-              label="Cancel"
+              label="OK"
               onPress={onPressOk}
             />
           </Dialog.Container>
